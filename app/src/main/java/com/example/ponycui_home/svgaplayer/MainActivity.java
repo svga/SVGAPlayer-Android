@@ -18,7 +18,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 //        setContentView(R.layout.activity_main);
 
-        SVGAPlayer player = new SVGAPlayer(this, 300);
+        SVGAPlayer player = new SVGAPlayer(this);
+        player.setVideoWidth((int)(getResources().getDisplayMetrics().widthPixels / getResources().getDisplayMetrics().scaledDensity));
         player.loops = 0;
         player.clearsAfterStop = true;
         setContentView(player);

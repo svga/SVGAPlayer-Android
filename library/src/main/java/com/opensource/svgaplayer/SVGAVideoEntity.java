@@ -20,21 +20,21 @@ import java.util.Iterator;
  * Created by PonyCui_Home on 16/6/18.
  */
 public class SVGAVideoEntity {
-    Rect videoSize;
+    CGRect videoSize;
     int FPS;
     HashMap<String, BitmapDrawable> images;
     public HashMap<String, Bitmap> bitmapCache = new HashMap<>();
     ArrayList<SVGAVideoSpriteEntity> sprites;
 
     SVGAVideoEntity(JSONObject obj) {
-        videoSize = new Rect(0, 0, 100, 100);
+        videoSize = new CGRect(0, 0, 100, 100);
         FPS = 20;
         images = new HashMap<>();
         sprites = new ArrayList<>();
         try {
             int width = obj.getJSONObject("viewBox").getInt("width");
             int height = obj.getJSONObject("viewBox").getInt("height");
-            videoSize = new Rect(0, 0, width, height);
+            videoSize = new CGRect(0, 0, width, height);
         } catch (Exception e) {}
         try {
             FPS = obj.getInt("FPS");

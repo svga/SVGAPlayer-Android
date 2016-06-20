@@ -5,6 +5,7 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
@@ -19,18 +20,22 @@ import java.util.Date;
 public class SVGAPlayer extends View implements Choreographer.FrameCallback {
 
     private SVGAVideoEntity videoItem;
-    private int maxWidth;
+    private int videoWidth = 375;
     public int loops = 0;
     public boolean clearsAfterStop = true;
 
 
-    public SVGAPlayer(Context context, int maxWidth) {
+    public SVGAPlayer(Context context) {
         super(context);
-        this.maxWidth = maxWidth;
     }
 
     public void setVideoItem(SVGAVideoEntity videoItem) {
         this.videoItem = videoItem;
+        this.invalidate();
+    }
+
+    public void setVideoWidth(int videoWidth) {
+        this.videoWidth = videoWidth;
         this.invalidate();
     }
 
@@ -87,6 +92,9 @@ public class SVGAPlayer extends View implements Choreographer.FrameCallback {
             return;
         }
         if (null != videoItem) {
+            Matrix drawTransform = new Matrix();
+            drawTransform.setTranslate((float)((this.videoWidth - videoItem.videoSize.width / 2.0) / 2.0), 0);
+            drawTransform.setScale((float)(this.videoWidth / (videoItem.videoSize.width / 2.0)), (float)(this.videoWidth / (videoItem.videoSize.width / 2.0)));
             for (int i = 0; i < videoItem.sprites.size(); i++) {
                 SVGAVideoSpriteEntity sprite = videoItem.sprites.get(i);
                 SVGAVideoSpriteFrameEntity frame = sprite.frames.get(currentFrame);
@@ -97,7 +105,9 @@ public class SVGAPlayer extends View implements Choreographer.FrameCallback {
                         if (null != bitmap) {
                             Paint paint = new Paint();
                             paint.setAlpha((int) (frame.alpha * 255));
-                            canvas.drawBitmap(bitmap, frame.transform, paint);
+                            Matrix concatTransform = new Matrix();
+                            concatTransform.setConcat(drawTransform, frame.transform);
+                            canvas.drawBitmap(bitmap, concatTransform, paint);
                         }
                     }
                 }
