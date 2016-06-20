@@ -1,7 +1,5 @@
 package com.opensource.svgaplayer;
 
-import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -12,7 +10,11 @@ import android.os.Build;
 import android.view.Choreographer;
 import android.view.View;
 
-import java.util.Date;
+interface SVGAPlayerDelegate {
+
+    void svgaPlayerDidFinishedAnimation(SVGAPlayer player);
+
+}
 
 /**
  * Created by PonyCui_Home on 16/6/19.
@@ -21,6 +23,7 @@ public class SVGAPlayer extends View implements Choreographer.FrameCallback {
 
     private SVGAVideoEntity videoItem;
     private int videoWidth = 375;
+    public SVGAPlayerDelegate delegate;
     public int loops = 0;
     public boolean clearsAfterStop = true;
 
@@ -80,6 +83,9 @@ public class SVGAPlayer extends View implements Choreographer.FrameCallback {
             loopCount++;
             if (loops > 0 && loopCount >= loops) {
                 stopAnimation();
+                if (null != delegate) {
+                    delegate.svgaPlayerDidFinishedAnimation(this);
+                }
             }
         }
         this.invalidate();
