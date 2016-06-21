@@ -125,16 +125,21 @@ public class SVGAPlayer extends View implements Choreographer.FrameCallback {
     private Bitmap bitmap(String bitmapKey, BitmapDrawable bitmapDrawable, CGRect layout) {
         double imageWidth = bitmapDrawable.getIntrinsicWidth() * getResources().getDisplayMetrics().scaledDensity;
         double imageHeight = bitmapDrawable.getIntrinsicHeight() * getResources().getDisplayMetrics().scaledDensity;
+        String bitmapCacheKey = bitmapKey + "." + String.valueOf((int)layout.width) + "." + String.valueOf((int)layout.height);
         if (layout.width == imageWidth && layout.height == imageHeight) {
-            Bitmap bitmap = videoItem.bitmapCache.get(bitmapKey);
+            Bitmap bitmap = videoItem.bitmapCache.get(bitmapCacheKey);
             if (null == bitmap) {
                 bitmap = bitmapDrawable.getBitmap();
-                videoItem.bitmapCache.put(bitmapKey, bitmap);
+                videoItem.bitmapCache.put(bitmapCacheKey, bitmap);
             }
             return bitmap;
         }
         if (layout.width > 0 && layout.height > 0 && imageWidth > 0 && imageHeight > 0) {
-            Bitmap bitmap = Bitmap.createBitmap((int)layout.width, (int)layout.height, Bitmap.Config.ARGB_8888);
+            Bitmap bitmap = videoItem.bitmapCache.get(bitmapCacheKey);
+            if (null != bitmap) {
+                return bitmap;
+            }
+            bitmap = Bitmap.createBitmap((int)layout.width, (int)layout.height, Bitmap.Config.ARGB_8888);
             Canvas canvas = new Canvas(bitmap);
             if (layout.width / layout.height < imageWidth / imageHeight) {
                 // width > height
@@ -150,6 +155,7 @@ public class SVGAPlayer extends View implements Choreographer.FrameCallback {
                 bitmapDrawable.setBounds((int)left, 0, (int)(layout.width - left), (int)layout.height);
                 bitmapDrawable.draw(canvas);
             }
+            videoItem.bitmapCache.put(bitmapCacheKey, bitmap);
             return bitmap;
         }
         else {

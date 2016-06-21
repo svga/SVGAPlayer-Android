@@ -1,5 +1,6 @@
 package com.example.ponycui_home.svgaplayer;
 
+import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -22,10 +23,11 @@ public class MainActivity extends AppCompatActivity {
         player.setVideoWidth((int)(getResources().getDisplayMetrics().widthPixels / getResources().getDisplayMetrics().scaledDensity));
         player.loops = 0;
         player.clearsAfterStop = true;
+        player.setBackgroundColor(Color.BLACK);
         setContentView(player);
 
         try {
-            InputStream inputStream = this.getAssets().open("test.svga");
+            InputStream inputStream = this.getAssets().open("test2.svga");
             SVGAParser parser = new SVGAParser();
             try {
                 player.setVideoItem(parser.parse(inputStream));
