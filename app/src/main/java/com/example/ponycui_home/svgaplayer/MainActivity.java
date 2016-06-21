@@ -20,7 +20,6 @@ public class MainActivity extends AppCompatActivity {
 //        setContentView(R.layout.activity_main);
 
         SVGAPlayer player = new SVGAPlayer(this);
-        player.setVideoWidth((int)(getResources().getDisplayMetrics().widthPixels / getResources().getDisplayMetrics().scaledDensity));
         player.loops = 0;
         player.clearsAfterStop = true;
         player.setBackgroundColor(Color.BLACK);
@@ -40,6 +39,8 @@ public class MainActivity extends AppCompatActivity {
         }
 
     }
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

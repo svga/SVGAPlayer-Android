@@ -32,13 +32,14 @@ public class SVGAPlayer extends View implements Choreographer.FrameCallback {
         super(context);
     }
 
-    public void setVideoItem(SVGAVideoEntity videoItem) {
-        this.videoItem = videoItem;
-        this.invalidate();
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+        setVideoWidth((int) (getWidth() / getResources().getDisplayMetrics().scaledDensity));
     }
 
-    public void setVideoWidth(int videoWidth) {
-        this.videoWidth = videoWidth;
+    public void setVideoItem(SVGAVideoEntity videoItem) {
+        this.videoItem = videoItem;
         this.invalidate();
     }
 
@@ -71,6 +72,11 @@ public class SVGAPlayer extends View implements Choreographer.FrameCallback {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             Choreographer.getInstance().postFrameCallback(this);
         }
+    }
+
+    private void setVideoWidth(int videoWidth) {
+        this.videoWidth = videoWidth;
+        this.invalidate();
     }
 
     private void next() {
