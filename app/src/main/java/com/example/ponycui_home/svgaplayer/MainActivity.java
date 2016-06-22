@@ -1,6 +1,8 @@
 package com.example.ponycui_home.svgaplayer;
 
 import android.graphics.Color;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -8,35 +10,58 @@ import android.view.MenuItem;
 
 import com.opensource.svgaplayer.SVGAParser;
 import com.opensource.svgaplayer.SVGAPlayer;
+import com.opensource.svgaplayer.SVGAVideoEntity;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 
 public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        setContentView(R.layout.activity_main);
 
-        SVGAPlayer player = new SVGAPlayer(this);
+        final SVGAPlayer player = new SVGAPlayer(this);
         player.loops = 0;
         player.clearsAfterStop = true;
         player.setBackgroundColor(Color.BLACK);
         setContentView(player);
 
-        try {
-            InputStream inputStream = this.getAssets().open("test2.svga");
-            SVGAParser parser = new SVGAParser();
-            try {
-                player.setVideoItem(parser.parse(inputStream));
-                player.startAnimation();
-            } catch (Exception e) {
-                e.printStackTrace();
+//        try {
+//            InputStream inputStream = this.getAssets().open("angel.svga");
+//            SVGAParser parser = new SVGAParser(this);
+//            try {
+//                SVGAVideoEntity videoItem = parser.parse(inputStream, "angel");
+//                player.setVideoItem(videoItem);
+//                player.startAnimation();
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+
+        final Handler handler = new Handler();
+        final SVGAParser parser = new SVGAParser(this);
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    final SVGAVideoEntity videoItem = parser.parse(new URL("http://uedfe.yypm.com/assets/svga-samples/angel.svga"));
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            player.setVideoItem(videoItem);
+                            player.startAnimation();
+                        }
+                    });
+                } catch (Exception e) {
+                    System.out.println(e);
+                }
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        });
+        thread.start();
 
     }
 

@@ -3,15 +3,11 @@ package com.opensource.svgaplayer;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
-import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
-import android.util.Base64;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -20,24 +16,31 @@ import java.util.Iterator;
  * Created by PonyCui_Home on 16/6/18.
  */
 public class SVGAVideoEntity {
+
     CGRect videoSize;
     int FPS;
+    int frames;
     HashMap<String, BitmapDrawable> images;
-    public HashMap<String, Bitmap> bitmapCache = new HashMap<>();
+    HashMap<String, Bitmap> bitmapCache = new HashMap<>();
     ArrayList<SVGAVideoSpriteEntity> sprites;
+    File cacheDir;
 
-    SVGAVideoEntity(JSONObject obj) {
+    SVGAVideoEntity(JSONObject obj, File cacheDir) {
+        this.cacheDir = cacheDir;
         videoSize = new CGRect(0, 0, 100, 100);
         FPS = 20;
         images = new HashMap<>();
         sprites = new ArrayList<>();
         try {
-            int width = obj.getJSONObject("viewBox").getInt("width");
-            int height = obj.getJSONObject("viewBox").getInt("height");
+            int width = obj.getJSONObject("movie").getJSONObject("viewBox").getInt("width");
+            int height = obj.getJSONObject("movie").getJSONObject("viewBox").getInt("height");
             videoSize = new CGRect(0, 0, width, height);
         } catch (Exception e) {}
         try {
-            FPS = obj.getInt("FPS");
+            FPS = obj.getJSONObject("movie").getInt("fps");
+        } catch (Exception e) {}
+        try {
+            frames = obj.getJSONObject("movie").getInt("frames");
         } catch (Exception e) {}
     }
 
@@ -48,10 +51,7 @@ public class SVGAVideoEntity {
             while (keys.hasNext()) {
                 String key = (String)keys.next();
                 try {
-                    String value = imgObjects.getString(key);
-                    byte[] decodeValue = Base64.decode(value, 0);
-                    ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(decodeValue);
-                    BitmapDrawable bitmapDrawable = new BitmapDrawable(Resources.getSystem(), byteArrayInputStream);
+                    BitmapDrawable bitmapDrawable = new BitmapDrawable(Resources.getSystem(), this.cacheDir.getAbsolutePath() + "/" + imgObjects.getString(key) + ".png");
                     images.put(key, bitmapDrawable);
                 } catch (Exception e) {}
             }
@@ -74,12 +74,12 @@ public class SVGAVideoEntity {
 
 class SVGAVideoSpriteEntity {
 
-    String sKey;
+    String imageKey;
     ArrayList<SVGAVideoSpriteFrameEntity> frames;
 
     SVGAVideoSpriteEntity(JSONObject obj) throws JSONException {
         try {
-            sKey = obj.getString("sKey");
+            imageKey = obj.getString("imageKey");
             frames = new ArrayList<>();
             JSONArray jsonFrames = obj.getJSONArray("frames");
             for (int i = 0; i < jsonFrames.length(); i++) {

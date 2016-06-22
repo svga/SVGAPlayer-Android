@@ -84,7 +84,7 @@ public class SVGAPlayer extends View implements Choreographer.FrameCallback {
             return;
         }
         this.currentFrame++;
-        if (this.currentFrame >= this.videoItem.sprites.get(0).frames.size()) {
+        if (this.currentFrame >= this.videoItem.frames) {
             this.currentFrame = 0;
             loopCount++;
             if (loops > 0 && loopCount >= loops) {
@@ -105,15 +105,14 @@ public class SVGAPlayer extends View implements Choreographer.FrameCallback {
         }
         if (null != videoItem) {
             Matrix drawTransform = new Matrix();
-            drawTransform.setTranslate((float)((this.videoWidth - videoItem.videoSize.width / 2.0) / 2.0), 0);
-            drawTransform.setScale((float)(this.videoWidth / (videoItem.videoSize.width / 2.0)), (float)(this.videoWidth / (videoItem.videoSize.width / 2.0)));
+            drawTransform.setScale((float) (this.videoWidth / (videoItem.videoSize.width / getResources().getDisplayMetrics().scaledDensity)), (float) (this.videoWidth / (videoItem.videoSize.width / getResources().getDisplayMetrics().scaledDensity)));
             for (int i = 0; i < videoItem.sprites.size(); i++) {
                 SVGAVideoSpriteEntity sprite = videoItem.sprites.get(i);
                 SVGAVideoSpriteFrameEntity frame = sprite.frames.get(currentFrame);
                 if (null != frame && frame.alpha > 0.0) {
-                    BitmapDrawable bitmapDrawable = videoItem.images.get(sprite.sKey);
+                    BitmapDrawable bitmapDrawable = videoItem.images.get(sprite.imageKey);
                     if (null != bitmapDrawable) {
-                        Bitmap bitmap = bitmap(sprite.sKey, bitmapDrawable, frame.layout);
+                        Bitmap bitmap = bitmap(sprite.imageKey, bitmapDrawable, frame.layout);
                         if (null != bitmap) {
                             Paint paint = new Paint();
                             paint.setAlpha((int) (frame.alpha * 255));
