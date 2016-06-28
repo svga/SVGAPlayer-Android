@@ -48,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 try {
-                    final SVGAVideoEntity videoItem = parser.parse(new URL("http://uedfe.yypm.com/assets/svga-samples/angel.svga"));
+                    final SVGAVideoEntity videoItem = parser.parse(new URL("http://uedfe.yypm.com/assets/svga-samples/posche.svga"));
                     handler.post(new Runnable() {
                         @Override
                         public void run() {

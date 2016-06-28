@@ -3,6 +3,7 @@ package com.opensource.svgaplayer;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
+import android.graphics.Path;
 import android.graphics.drawable.BitmapDrawable;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -114,6 +115,7 @@ class SVGAVideoSpriteFrameEntity {
     double alpha;
     Matrix transform;
     CGRect layout;
+    Path maskPath;
 
     SVGAVideoSpriteFrameEntity(JSONObject obj) {
         alpha = 0.0;
@@ -147,6 +149,12 @@ class SVGAVideoSpriteFrameEntity {
             double width = obj.getJSONObject("layout").getDouble("width");
             double height = obj.getJSONObject("layout").getDouble("height");
             layout = new CGRect(x, y, width, height);
+        } catch (Exception e) {}
+        try {
+            String clipPath = obj.getString("clipPath");
+            SVGAPath path = new SVGAPath();
+            path.setValues(clipPath);
+            maskPath = path;
         } catch (Exception e) {}
     }
 

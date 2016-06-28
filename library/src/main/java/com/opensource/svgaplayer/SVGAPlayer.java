@@ -2,9 +2,18 @@ package com.opensource.svgaplayer;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapShader;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.MaskFilter;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.Path;
+import android.graphics.PathDashPathEffect;
+import android.graphics.PathEffect;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.view.Choreographer;
@@ -116,6 +125,9 @@ public class SVGAPlayer extends View implements Choreographer.FrameCallback {
                         if (null != bitmap) {
                             Paint paint = new Paint();
                             paint.setAlpha((int) (frame.alpha * 255));
+                            if (null != frame.maskPath) {
+                                bitmap = bitmap(bitmap, frame.maskPath);
+                            }
                             Matrix concatTransform = new Matrix();
                             concatTransform.setConcat(drawTransform, frame.transform);
                             canvas.drawBitmap(bitmap, concatTransform, paint);
@@ -125,6 +137,19 @@ public class SVGAPlayer extends View implements Choreographer.FrameCallback {
 
             }
         }
+    }
+
+    private Bitmap bitmap(Bitmap imageBitmap, Path maskPath) {
+        return imageBitmap; // todo: // add mask, but GPU usage comes much higher.
+//        Bitmap outBitmap = Bitmap.createBitmap(imageBitmap.getWidth(), imageBitmap.getHeight(), Bitmap.Config.ARGB_8888);
+//        Canvas canvas = new Canvas(outBitmap);
+//        Paint maskPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+//        maskPaint.setColor(Color.WHITE);
+//        Paint imagePaint = new Paint();
+//        imagePaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+////        canvas.drawPath(maskPath, maskPaint);
+////        canvas.drawBitmap(imageBitmap, 0, 0, imagePaint);
+//        return outBitmap;
     }
 
     private Bitmap bitmap(String bitmapKey, BitmapDrawable bitmapDrawable, CGRect layout) {
