@@ -140,16 +140,15 @@ public class SVGAPlayer extends View implements Choreographer.FrameCallback {
     }
 
     private Bitmap bitmap(Bitmap imageBitmap, Path maskPath) {
-        return imageBitmap; // todo: // add mask, but GPU usage comes much higher.
-//        Bitmap outBitmap = Bitmap.createBitmap(imageBitmap.getWidth(), imageBitmap.getHeight(), Bitmap.Config.ARGB_8888);
-//        Canvas canvas = new Canvas(outBitmap);
-//        Paint maskPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-//        maskPaint.setColor(Color.WHITE);
-//        Paint imagePaint = new Paint();
-//        imagePaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
-////        canvas.drawPath(maskPath, maskPaint);
-////        canvas.drawBitmap(imageBitmap, 0, 0, imagePaint);
-//        return outBitmap;
+        Bitmap outBitmap = Bitmap.createBitmap(imageBitmap.getWidth(), imageBitmap.getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(outBitmap);
+        Paint maskPaint = new Paint();
+        maskPaint.setColor(Color.WHITE);
+        Paint imagePaint = new Paint();
+        imagePaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+        canvas.drawPath(maskPath, maskPaint);
+        canvas.drawBitmap(imageBitmap, 0, 0, imagePaint);
+        return outBitmap;
     }
 
     private Bitmap bitmap(String bitmapKey, BitmapDrawable bitmapDrawable, CGRect layout) {
