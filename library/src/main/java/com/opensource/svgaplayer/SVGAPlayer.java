@@ -8,6 +8,7 @@ import android.graphics.Color;
 import android.graphics.MaskFilter;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.PaintFlagsDrawFilter;
 import android.graphics.Path;
 import android.graphics.PathDashPathEffect;
 import android.graphics.PathEffect;
@@ -109,6 +110,7 @@ public class SVGAPlayer extends View implements Choreographer.FrameCallback {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+        canvas.setDrawFilter(new PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG));
         if (clearsAfterStop && !animating) {
             return;
         }
