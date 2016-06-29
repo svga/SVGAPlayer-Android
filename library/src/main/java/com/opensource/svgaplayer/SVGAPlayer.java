@@ -143,11 +143,9 @@ public class SVGAPlayer extends View implements Choreographer.FrameCallback {
         Bitmap outBitmap = Bitmap.createBitmap(imageBitmap.getWidth(), imageBitmap.getHeight(), Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(outBitmap);
         Paint maskPaint = new Paint();
-        maskPaint.setColor(Color.WHITE);
-        Paint imagePaint = new Paint();
-        imagePaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+        BitmapShader bitmapShader = new BitmapShader(imageBitmap, Shader.TileMode.REPEAT, Shader.TileMode.REPEAT);
+        maskPaint.setShader(bitmapShader);
         canvas.drawPath(maskPath, maskPaint);
-        canvas.drawBitmap(imageBitmap, 0, 0, imagePaint);
         return outBitmap;
     }
 
