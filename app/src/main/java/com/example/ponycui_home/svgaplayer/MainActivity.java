@@ -25,7 +25,6 @@ public class MainActivity extends AppCompatActivity {
         final SVGAPlayer player = new SVGAPlayer(this);
         player.loops = 0;
         player.clearsAfterStop = true;
-        player.setBackgroundColor(Color.BLACK);
         setContentView(player);
 
 //        try {
@@ -48,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 try {
-                    final SVGAVideoEntity videoItem = parser.parse(new URL("http://uedfe.yypm.com/assets/svga-samples/posche.svga"));
+                    final SVGAVideoEntity videoItem = parser.parse(new URL("http://uedfe.yypm.com/assets/svga-me/rose.svga"));
                     handler.post(new Runnable() {
                         @Override
                         public void run() {

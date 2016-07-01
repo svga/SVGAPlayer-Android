@@ -5,20 +5,16 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.MaskFilter;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.PaintFlagsDrawFilter;
 import android.graphics.Path;
-import android.graphics.PathDashPathEffect;
-import android.graphics.PathEffect;
 import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
 import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
-import android.os.Build;
-import android.view.Choreographer;
-import android.view.View;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
+
+import java.util.Date;
 
 interface SVGAPlayerDelegate {
 
@@ -29,67 +25,121 @@ interface SVGAPlayerDelegate {
 /**
  * Created by PonyCui_Home on 16/6/19.
  */
-public class SVGAPlayer extends View implements Choreographer.FrameCallback {
+public class SVGAPlayer extends SurfaceView implements SurfaceHolder.Callback {
 
-    private SVGAVideoEntity videoItem;
-    private int videoWidth = 375;
     public SVGAPlayerDelegate delegate;
     public int loops = 0;
     public boolean clearsAfterStop = true;
 
+    private SVGADrawer drawer = new SVGADrawer();
 
     public SVGAPlayer(Context context) {
         super(context);
+        this.drawer.playerInstance = this;
+        this.drawer.holder = this.getHolder();
+        this.drawer.holder.addCallback(this);
     }
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
-        setVideoWidth((int) (getWidth() / getResources().getDisplayMetrics().scaledDensity));
+        this.drawer.videoWidth = (int) (getWidth() / getResources().getDisplayMetrics().scaledDensity);
+        this.drawer.scaledDensity = getResources().getDisplayMetrics().scaledDensity;
     }
 
     public void setVideoItem(SVGAVideoEntity videoItem) {
-        this.videoItem = videoItem;
-        this.invalidate();
+        this.drawer.videoItem = videoItem;
     }
 
     public void startAnimation() {
-        animating = true;
-        loopCount = 0;
-        doFrame(0);
+        this.drawer.startAnimating();
     }
 
     public void stopAnimation() {
-        animating = false;
-        this.invalidate();
+        this.drawer.stopAnimating();
     }
+
+    @Override
+    public void surfaceCreated(SurfaceHolder holder) {
+        if (this.drawer.isAnimating()) {
+            this.drawer.startAnimating();
+        }
+    }
+
+    @Override
+    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {}
+
+    @Override
+    public void surfaceDestroyed(SurfaceHolder holder) {
+        this.drawer.stopAnimating();
+    }
+
+}
+
+class SVGADrawer extends Thread {
+
+    SVGAPlayer playerInstance;
+    SVGAVideoEntity videoItem;
+    SurfaceHolder holder;
+    int videoWidth;
+    float scaledDensity;
 
     private boolean animating = false;
     private int loopCount = 0;
     private int currentFrame = 0;
-    private int skipCount = 0;
+    private long nextTimestamp = 0;
+
+    public boolean isAnimating() {
+        return animating;
+    }
+
+    public void startAnimating() {
+        animating = true;
+        start();
+    }
+
+    public void stopAnimating() {
+        animating = false;
+        if (playerInstance.clearsAfterStop) {
+            Canvas canvas = holder.lockCanvas();
+            canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+            holder.unlockCanvasAndPost(canvas);
+        }
+    }
 
     @Override
-    public void doFrame(long frameTimeNanos) {
-        if (!animating) {
+    public void run() {
+        if (null == videoItem) {
             return;
         }
-        this.skipCount++;
-        if (this.skipCount >= 60 / this.videoItem.FPS) {
-            this.skipCount = 0;
-            this.next();
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            Choreographer.getInstance().postFrameCallback(this);
+        Canvas canvas = null;
+        boolean waiting = false;
+        while (animating) {
+            if (waiting) {
+                if ((new Date().getTime()) < nextTimestamp) {
+                    try {
+                        this.sleep((long) 1);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    continue;
+                }
+                if (null != canvas) {
+                    holder.unlockCanvasAndPost(canvas);
+                }
+                waiting = false;
+                stepFrame();
+            }
+            else {
+                nextTimestamp = new Date().getTime() + (1000 / videoItem.FPS);
+                canvas = holder.lockCanvas();
+                drawFrame(canvas);
+                waiting = true;
+            }
         }
     }
 
-    private void setVideoWidth(int videoWidth) {
-        this.videoWidth = videoWidth;
-        this.invalidate();
-    }
-
-    private void next() {
+    private void stepFrame() {
         if (this.videoItem.sprites.size() == 0) {
             return;
         }
@@ -97,26 +147,20 @@ public class SVGAPlayer extends View implements Choreographer.FrameCallback {
         if (this.currentFrame >= this.videoItem.frames) {
             this.currentFrame = 0;
             loopCount++;
-            if (loops > 0 && loopCount >= loops) {
-                stopAnimation();
-                if (null != delegate) {
-                    delegate.svgaPlayerDidFinishedAnimation(this);
+            if (playerInstance.loops > 0 && loopCount >= playerInstance.loops) {
+                stopAnimating();
+                if (null != playerInstance.delegate) {
+                    playerInstance.delegate.svgaPlayerDidFinishedAnimation(playerInstance);
                 }
             }
         }
-        this.invalidate();
     }
 
-    @Override
-    protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
-        canvas.setDrawFilter(new PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG));
-        if (clearsAfterStop && !animating) {
-            return;
-        }
+    private void drawFrame(Canvas canvas) {
+        canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
         if (null != videoItem) {
             Matrix drawTransform = new Matrix();
-            drawTransform.setScale((float) (this.videoWidth / (videoItem.videoSize.width / getResources().getDisplayMetrics().scaledDensity)), (float) (this.videoWidth / (videoItem.videoSize.width / getResources().getDisplayMetrics().scaledDensity)));
+            drawTransform.setScale((float) (this.videoWidth / (videoItem.videoSize.width / scaledDensity)), (float) (this.videoWidth / (videoItem.videoSize.width / scaledDensity)));
             for (int i = 0; i < videoItem.sprites.size(); i++) {
                 SVGAVideoSpriteEntity sprite = videoItem.sprites.get(i);
                 SVGAVideoSpriteFrameEntity frame = sprite.frames.get(currentFrame);
@@ -152,8 +196,8 @@ public class SVGAPlayer extends View implements Choreographer.FrameCallback {
     }
 
     private Bitmap bitmap(String bitmapKey, BitmapDrawable bitmapDrawable, CGRect layout) {
-        double imageWidth = bitmapDrawable.getIntrinsicWidth() * getResources().getDisplayMetrics().scaledDensity;
-        double imageHeight = bitmapDrawable.getIntrinsicHeight() * getResources().getDisplayMetrics().scaledDensity;
+        double imageWidth = bitmapDrawable.getIntrinsicWidth() * scaledDensity;
+        double imageHeight = bitmapDrawable.getIntrinsicHeight() * scaledDensity;
         String bitmapCacheKey = bitmapKey + "." + String.valueOf((int)layout.width) + "." + String.valueOf((int)layout.height);
         if (layout.width == imageWidth && layout.height == imageHeight) {
             Bitmap bitmap = videoItem.bitmapCache.get(bitmapCacheKey);
