@@ -15,6 +15,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 import java.util.Date;
+import java.util.HashMap;
 
 interface SVGAPlayerDelegate {
 
@@ -30,6 +31,7 @@ public class SVGAPlayer extends SurfaceView implements SurfaceHolder.Callback {
     public SVGAPlayerDelegate delegate;
     public int loops = 0;
     public boolean clearsAfterStop = true;
+    public boolean keepRate = true;
 
     private SVGADrawer drawer = new SVGADrawer();
 
@@ -88,6 +90,7 @@ class SVGADrawer extends Thread {
     private int loopCount = 0;
     private int currentFrame = 0;
     private long nextTimestamp = 0;
+    private int frameRate = 1;
 
     public boolean isAnimating() {
         return animating;
@@ -115,26 +118,36 @@ class SVGADrawer extends Thread {
         Canvas canvas = null;
         boolean waiting = false;
         while (animating) {
-            if (waiting) {
-                if ((new Date().getTime()) < nextTimestamp) {
-                    try {
-                        this.sleep((long) 1);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+            synchronized (holder) {
+                if (waiting) {
+                    if ((System.currentTimeMillis()) < nextTimestamp) {
+                        try {
+                            this.sleep((long) 1);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        continue;
                     }
-                    continue;
+                    if (null != canvas) {
+                        holder.unlockCanvasAndPost(canvas);
+                    }
+                    waiting = false;
+                    for (int i = 0; i < frameRate; i++) {
+                        stepFrame();
+                    }
                 }
-                if (null != canvas) {
-                    holder.unlockCanvasAndPost(canvas);
+                else {
+                    int FPS = videoItem.FPS;
+                    FPS = FPS / frameRate;
+                    nextTimestamp = System.currentTimeMillis() + (1000 / FPS);
+                    canvas = holder.lockCanvas();
+                    drawFrame(canvas);
+                    waiting = true;
+                    if (!playerInstance.keepRate && System.currentTimeMillis() > nextTimestamp) {
+                        frameRate = frameRate + 1;
+                        System.out.println("SVGA frameRate = " + frameRate);
+                    }
                 }
-                waiting = false;
-                stepFrame();
-            }
-            else {
-                nextTimestamp = new Date().getTime() + (1000 / videoItem.FPS);
-                canvas = holder.lockCanvas();
-                drawFrame(canvas);
-                waiting = true;
             }
         }
     }
