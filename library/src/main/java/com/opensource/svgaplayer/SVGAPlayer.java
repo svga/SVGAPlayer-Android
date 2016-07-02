@@ -105,8 +105,10 @@ class SVGADrawer extends Thread {
         animating = false;
         if (playerInstance.clearsAfterStop) {
             Canvas canvas = holder.lockCanvas();
-            canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
-            holder.unlockCanvasAndPost(canvas);
+            if(canvas != null) {
+                canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+                holder.unlockCanvasAndPost(canvas);
+            }
         }
     }
 
@@ -168,11 +170,13 @@ class SVGADrawer extends Thread {
             }
         }
     }
+    Matrix drawTransform = new Matrix();
+    Paint paint = new Paint();
+    Matrix concatTransform = new Matrix();
 
     private void drawFrame(Canvas canvas) {
         canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
         if (null != videoItem) {
-            Matrix drawTransform = new Matrix();
             drawTransform.setScale((float) (this.videoWidth / (videoItem.videoSize.width / scaledDensity)), (float) (this.videoWidth / (videoItem.videoSize.width / scaledDensity)));
             for (int i = 0; i < videoItem.sprites.size(); i++) {
                 SVGAVideoSpriteEntity sprite = videoItem.sprites.get(i);
@@ -182,12 +186,10 @@ class SVGADrawer extends Thread {
                     if (null != bitmapDrawable) {
                         Bitmap bitmap = bitmap(sprite.imageKey, bitmapDrawable, frame.layout);
                         if (null != bitmap) {
-                            Paint paint = new Paint();
                             paint.setAlpha((int) (frame.alpha * 255));
                             if (null != frame.maskPath) {
                                 bitmap = bitmap(bitmap, frame.maskPath);
                             }
-                            Matrix concatTransform = new Matrix();
                             concatTransform.setConcat(drawTransform, frame.transform);
                             canvas.drawBitmap(bitmap, concatTransform, paint);
                         }
