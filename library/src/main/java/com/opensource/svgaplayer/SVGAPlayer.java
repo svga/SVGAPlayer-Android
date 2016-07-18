@@ -14,9 +14,6 @@ import android.graphics.drawable.BitmapDrawable;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
-import java.util.Date;
-import java.util.HashMap;
-
 interface SVGAPlayerDelegate {
 
     void svgaPlayerDidFinishedAnimation(SVGAPlayer player);
@@ -27,7 +24,7 @@ interface SVGAPlayerDelegate {
  * Created by PonyCui_Home on 16/6/19.
  */
 public class SVGAPlayer extends SurfaceView implements SurfaceHolder.Callback {
-
+    private static final String TAG = "SVGAPlayer";
     public SVGAPlayerDelegate delegate;
     public int loops = 0;
     public boolean clearsAfterStop = true;
@@ -45,8 +42,10 @@ public class SVGAPlayer extends SurfaceView implements SurfaceHolder.Callback {
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
-        this.drawer.videoWidth = (int) (getWidth() / getResources().getDisplayMetrics().scaledDensity);
-        this.drawer.scaledDensity = getResources().getDisplayMetrics().scaledDensity;
+        if (changed) {
+            this.drawer.videoWidth = (int) (getWidth() / getResources().getDisplayMetrics().scaledDensity);
+            this.drawer.scaledDensity = getResources().getDisplayMetrics().scaledDensity;
+        }
     }
 
     public void setVideoItem(SVGAVideoEntity videoItem) {
@@ -69,7 +68,8 @@ public class SVGAPlayer extends SurfaceView implements SurfaceHolder.Callback {
     }
 
     @Override
-    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {}
+    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+    }
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
@@ -105,8 +105,10 @@ class SVGADrawer extends Thread {
         animating = false;
         if (playerInstance.clearsAfterStop) {
             Canvas canvas = holder.lockCanvas();
-            canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
-            holder.unlockCanvasAndPost(canvas);
+            if (canvas != null) {
+                canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+                holder.unlockCanvasAndPost(canvas);
+            }
         }
     }
 
@@ -122,7 +124,7 @@ class SVGADrawer extends Thread {
                 if (waiting) {
                     if ((System.currentTimeMillis()) < nextTimestamp) {
                         try {
-                            this.sleep((long) 1);
+                            sleep((long) 1);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
@@ -135,13 +137,14 @@ class SVGADrawer extends Thread {
                     for (int i = 0; i < frameRate; i++) {
                         stepFrame();
                     }
-                }
-                else {
+                } else {
                     int FPS = videoItem.FPS;
                     FPS = FPS / frameRate;
                     nextTimestamp = System.currentTimeMillis() + (1000 / FPS);
                     canvas = holder.lockCanvas();
-                    drawFrame(canvas);
+                    if (canvas != null) {
+                        drawFrame(canvas);
+                    }
                     waiting = true;
                     if (!playerInstance.keepRate && System.currentTimeMillis() > nextTimestamp) {
                         frameRate = frameRate + 1;
@@ -169,11 +172,17 @@ class SVGADrawer extends Thread {
         }
     }
 
+    Matrix drawTransform = new Matrix();
+    Paint paint = new Paint();
+    Matrix concatTransform = new Matrix();
+
     private void drawFrame(Canvas canvas) {
         canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
         if (null != videoItem) {
-            Matrix drawTransform = new Matrix();
-            drawTransform.setScale((float) (this.videoWidth / (videoItem.videoSize.width / scaledDensity)), (float) (this.videoWidth / (videoItem.videoSize.width / scaledDensity)));
+            drawTransform.setScale(
+                    (float) (this.videoWidth / (videoItem.videoSize.width / scaledDensity)),
+                    (float) (this.videoWidth / (videoItem.videoSize.width / scaledDensity)));
+
             for (int i = 0; i < videoItem.sprites.size(); i++) {
                 SVGAVideoSpriteEntity sprite = videoItem.sprites.get(i);
                 SVGAVideoSpriteFrameEntity frame = sprite.frames.get(currentFrame);
@@ -182,14 +191,15 @@ class SVGADrawer extends Thread {
                     if (null != bitmapDrawable) {
                         Bitmap bitmap = bitmap(sprite.imageKey, bitmapDrawable, frame.layout);
                         if (null != bitmap) {
-                            Paint paint = new Paint();
                             paint.setAlpha((int) (frame.alpha * 255));
-                            if (null != frame.maskPath) {
-                                bitmap = bitmap(bitmap, frame.maskPath);
-                            }
-                            Matrix concatTransform = new Matrix();
                             concatTransform.setConcat(drawTransform, frame.transform);
-                            canvas.drawBitmap(bitmap, concatTransform, paint);
+
+                            if (null != frame.maskPath) {
+                                bitmap(canvas, bitmap, frame.maskPath, concatTransform);
+                            } else {
+                                canvas.drawBitmap(bitmap, concatTransform, paint);
+                            }
+
                         }
                     }
                 }
@@ -198,20 +208,32 @@ class SVGADrawer extends Thread {
         }
     }
 
-    private Bitmap bitmap(Bitmap imageBitmap, Path maskPath) {
-        Bitmap outBitmap = Bitmap.createBitmap(imageBitmap.getWidth(), imageBitmap.getHeight(), Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(outBitmap);
+    private static final String TAG = "SVGADrawer";
+
+    private Paint maskPaint = new Paint();
+
+    private void bitmap(Canvas canvas, Bitmap imageBitmap, Path maskPath, Matrix matrix) {
+//        Bitmap outBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+//        Canvas canvas = new Canvas(outBitmap);
+
+        canvas.save();
+        canvas.setMatrix(matrix);
+        canvas.clipRect(0, 0, imageBitmap.getWidth(), imageBitmap.getHeight());
         Paint maskPaint = new Paint();
         BitmapShader bitmapShader = new BitmapShader(imageBitmap, Shader.TileMode.REPEAT, Shader.TileMode.REPEAT);
         maskPaint.setShader(bitmapShader);
+
         canvas.drawPath(maskPath, maskPaint);
-        return outBitmap;
+        canvas.restore();
+//        return outBitmap;
     }
 
     private Bitmap bitmap(String bitmapKey, BitmapDrawable bitmapDrawable, CGRect layout) {
         double imageWidth = bitmapDrawable.getIntrinsicWidth() * scaledDensity;
         double imageHeight = bitmapDrawable.getIntrinsicHeight() * scaledDensity;
-        String bitmapCacheKey = bitmapKey + "." + String.valueOf((int)layout.width) + "." + String.valueOf((int)layout.height);
+
+        BitmapCacheKey bitmapCacheKey = new BitmapCacheKey(bitmapKey, (int) layout.width, (int) layout.height);
+
         if (layout.width == imageWidth && layout.height == imageHeight) {
             Bitmap bitmap = videoItem.bitmapCache.get(bitmapCacheKey);
             if (null == bitmap) {
@@ -225,26 +247,24 @@ class SVGADrawer extends Thread {
             if (null != bitmap) {
                 return bitmap;
             }
-            bitmap = Bitmap.createBitmap((int)layout.width, (int)layout.height, Bitmap.Config.ARGB_8888);
+            bitmap = Bitmap.createBitmap((int) layout.width, (int) layout.height, Bitmap.Config.ARGB_8888);
             Canvas canvas = new Canvas(bitmap);
             if (layout.width / layout.height < imageWidth / imageHeight) {
                 // width > height
                 double ratio = layout.width / imageWidth;
                 double top = (layout.height - imageHeight * ratio) / 2.0;
-                bitmapDrawable.setBounds(0, (int)top, (int)layout.width, (int)(layout.height - top));
+                bitmapDrawable.setBounds(0, (int) top, (int) layout.width, (int) (layout.height - top));
                 bitmapDrawable.draw(canvas);
-            }
-            else {
+            } else {
                 // height > width
                 double ratio = layout.height / imageHeight;
                 double left = (layout.width - imageWidth * ratio) / 2.0;
-                bitmapDrawable.setBounds((int)left, 0, (int)(layout.width - left), (int)layout.height);
+                bitmapDrawable.setBounds((int) left, 0, (int) (layout.width - left), (int) layout.height);
                 bitmapDrawable.draw(canvas);
             }
             videoItem.bitmapCache.put(bitmapCacheKey, bitmap);
             return bitmap;
-        }
-        else {
+        } else {
             return bitmapDrawable.getBitmap();
         }
     }

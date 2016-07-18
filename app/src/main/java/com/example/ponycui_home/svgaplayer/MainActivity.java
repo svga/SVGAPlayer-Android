@@ -1,10 +1,8 @@
 package com.example.ponycui_home.svgaplayer;
 
-import android.graphics.Color;
-import android.os.Handler;
-import android.os.Message;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.os.Handler;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -12,8 +10,6 @@ import com.opensource.svgaplayer.SVGAParser;
 import com.opensource.svgaplayer.SVGAPlayer;
 import com.opensource.svgaplayer.SVGAVideoEntity;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 
 public class MainActivity extends AppCompatActivity {
@@ -47,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 try {
-                    final SVGAVideoEntity videoItem = parser.parse(new URL("http://uedfe.yypm.com/assets/svga-me/angel.svga"));
+                    final SVGAVideoEntity videoItem = parser.parse(new URL("http://uedfe.yypm.com/assets/svga-me/rose.svga"));
                     handler.post(new Runnable() {
                         @Override
                         public void run() {
