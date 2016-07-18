@@ -26,7 +26,7 @@ public class SVGAVideoEntity {
     int FPS;
     int frames;
     HashMap<String, BitmapDrawable> images;
-    HashMap<String, Bitmap> bitmapCache = new HashMap<>();
+    HashMap<BitmapCacheKey, Bitmap> bitmapCache = new HashMap<>();
     ArrayList<SVGAVideoSpriteEntity> sprites;
     File cacheDir;
 
