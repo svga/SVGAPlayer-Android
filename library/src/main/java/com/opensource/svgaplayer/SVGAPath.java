@@ -2,6 +2,7 @@ package com.opensource.svgaplayer;
 
 import android.graphics.Path;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -11,7 +12,7 @@ import java.util.List;
  * Created by cuiminghui on 16/6/28.
  */
 
-class SVGAPoint {
+class SVGAPoint implements Serializable {
 
     float x;
     float y;
@@ -28,7 +29,23 @@ class SVGAPoint {
 
 }
 
-class SVGAPath extends Path {
+class SVGAPath implements Serializable {
+
+    private transient final Path mPath = new Path();
+
+    private transient boolean mPathBuilt = false;
+
+    public SVGAPath() {
+    }
+
+    String[] items;
+
+    public Path getPath() {
+        if (!mPathBuilt) {
+            buildPath();
+        }
+        return mPath;
+    }
 
     final static List<String> VALID_METHODS = Collections.unmodifiableList(
             Arrays.asList(
@@ -43,7 +60,10 @@ class SVGAPath extends Path {
 
     void setValues(final String values) {
 //        values = values.replace(",", " ");
-        String[] items = values.split("[,\\s+]");
+        items = values.split("[,\\s+]");
+    }
+
+    void buildPath() {
         String currentMethod = "";
         ArrayList<SVGAPoint> args = new ArrayList<>();
         String argLast = null;
@@ -60,9 +80,7 @@ class SVGAPath extends Path {
                     }
                 }
                 this.operate(currentMethod, args);
-                currentMethod = "";
                 args.clear();
-                argLast = null;
                 currentMethod = firstLetter;
                 argLast = item.substring(1);
             } else {
@@ -80,45 +98,45 @@ class SVGAPath extends Path {
         this.operate(currentMethod, args);
     }
 
-    SVGAPoint currentPoint = new SVGAPoint(0, 0);
-
     private void operate(final String method, final List<SVGAPoint> args) {
+        SVGAPoint currentPoint = new SVGAPoint(0, 0);
+
         if (method.equals("M") && args.size() == 1) {
-            moveTo(args.get(0).x, args.get(0).y);
+            mPath.moveTo(args.get(0).x, args.get(0).y);
             currentPoint = new SVGAPoint(args.get(0).x, args.get(0).y);
         } else if (method.equals("m") && args.size() == 1) {
-            rMoveTo(args.get(0).x, args.get(0).y);
+            mPath.rMoveTo(args.get(0).x, args.get(0).y);
             currentPoint = new SVGAPoint(currentPoint.x + args.get(0).x, currentPoint.y + args.get(0).y);
         }
         if (method.equals("L") && args.size() == 1) {
-            lineTo(args.get(0).x, args.get(0).y);
+            mPath.lineTo(args.get(0).x, args.get(0).y);
         } else if (method.equals("l") && args.size() == 1) {
-            rLineTo(args.get(0).x, args.get(0).y);
+            mPath.rLineTo(args.get(0).x, args.get(0).y);
         }
         if (method.equals("C") && args.size() == 3) {
-            cubicTo(args.get(0).x, args.get(0).y, args.get(1).x, args.get(1).y, args.get(2).x, args.get(2).y);
+            mPath.cubicTo(args.get(0).x, args.get(0).y, args.get(1).x, args.get(1).y, args.get(2).x, args.get(2).y);
         } else if (method.equals("c") && args.size() == 3) {
-            rCubicTo(args.get(0).x, args.get(0).y, args.get(1).x, args.get(1).y, args.get(2).x, args.get(2).y);
+            mPath.rCubicTo(args.get(0).x, args.get(0).y, args.get(1).x, args.get(1).y, args.get(2).x, args.get(2).y);
         }
         if (method.equals("Q") && args.size() == 2) {
-            quadTo(args.get(0).x, args.get(0).y, args.get(1).x, args.get(1).y);
+            mPath.quadTo(args.get(0).x, args.get(0).y, args.get(1).x, args.get(1).y);
         } else if (method.equals("q") && args.size() == 2) {
-            rQuadTo(args.get(0).x, args.get(0).y, args.get(1).x, args.get(1).y);
+            mPath.rQuadTo(args.get(0).x, args.get(0).y, args.get(1).x, args.get(1).y);
         }
         if (method.equals("H") && args.size() == 1) {
-            lineTo(args.get(0).val, currentPoint.y);
+            mPath.lineTo(args.get(0).val, currentPoint.y);
         } else if (method.equals("h") && args.size() == 1) {
-            rLineTo(args.get(0).val, 0);
+            mPath.rLineTo(args.get(0).val, 0);
         }
         if (method.equals("V") && args.size() == 1) {
-            lineTo(currentPoint.x, args.get(0).val);
+            mPath.lineTo(currentPoint.x, args.get(0).val);
         } else if (method.equals("v") && args.size() == 1) {
-            rLineTo(0, args.get(0).val);
+            mPath.rLineTo(0, args.get(0).val);
         }
         if (method.equals("Z") && args.size() == 1) {
-            close();
+            mPath.close();
         } else if (method.equals("z") && args.size() == 1) {
-            close();
+            mPath.close();
         }
     }
 
