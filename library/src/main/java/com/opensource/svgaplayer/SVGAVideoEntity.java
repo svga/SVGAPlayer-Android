@@ -13,28 +13,36 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by PonyCui_Home on 16/6/18.
  */
-public class SVGAVideoEntity {
+public class SVGAVideoEntity implements Serializable {
     private static final String TAG = "SVGAVideoEntity";
     CGRect videoSize;
     int FPS;
     int frames;
-    HashMap<String, BitmapDrawable> images;
-    HashMap<BitmapCacheKey, Bitmap> bitmapCache = new HashMap<>();
+
+    HashMap<String, String> imagePathMap;
     ArrayList<SVGAVideoSpriteEntity> sprites;
     File cacheDir;
+
+    transient final HashMap<String, BitmapDrawable> images = new HashMap<>();
+    transient final HashMap<BitmapCacheKey, Bitmap> bitmapCache = new HashMap<>();
+
+    public SVGAVideoEntity() {
+    }
 
     public SVGAVideoEntity(JSONObject obj, File cacheDir) throws JSONException {
         this.cacheDir = cacheDir;
         videoSize = new CGRect(0, 0, 100, 100);
         FPS = 20;
-        images = new HashMap<>();
         sprites = new ArrayList<>();
         final JSONObject movie = obj.getJSONObject("movie");
 
@@ -48,15 +56,34 @@ public class SVGAVideoEntity {
         frames = movie.getInt("frames");
     }
 
+    void resetImages() {
+        if (imagePathMap != null) {
+            Set<Map.Entry<String, String>> set = imagePathMap.entrySet();
+
+            for (Map.Entry<String, String> e : set) {
+                BitmapDrawable bitmapDrawable = new BitmapDrawable(
+                        Resources.getSystem(),
+                        e.getValue());
+                images.put(e.getKey(), bitmapDrawable);
+            }
+
+        }
+    }
+
     void resetImages(JSONObject obj) {
         try {
             JSONObject imgObjects = obj.getJSONObject("images");
             Iterator<?> keys = imgObjects.keys();
+            imagePathMap = new HashMap<>();
             while (keys.hasNext()) {
                 String key = (String) keys.next();
                 try {
-                    BitmapDrawable bitmapDrawable = new BitmapDrawable(Resources.getSystem(), this.cacheDir.getAbsolutePath() + "/" + imgObjects.getString(key) + ".png");
+                    final String path = this.cacheDir.getAbsolutePath() + "/" + imgObjects.getString(key) + ".png";
+                    BitmapDrawable bitmapDrawable = new BitmapDrawable(
+                            Resources.getSystem(),
+                            path);
                     images.put(key, bitmapDrawable);
+                    imagePathMap.put(key, path);
                 } catch (Exception e) {
                 }
             }
@@ -82,10 +109,13 @@ public class SVGAVideoEntity {
 
 }
 
-class SVGAVideoSpriteEntity {
+class SVGAVideoSpriteEntity implements Serializable {
 
     String imageKey;
     ArrayList<SVGAVideoSpriteFrameEntity> frames;
+
+    public SVGAVideoSpriteEntity() {
+    }
 
     SVGAVideoSpriteEntity(JSONObject obj) throws JSONException {
         imageKey = obj.getString("imageKey");
@@ -99,12 +129,15 @@ class SVGAVideoSpriteEntity {
 
 }
 
-class CGRect {
+class CGRect implements Serializable {
 
     double x = 0;
     double y = 0;
     double width = 0;
     double height = 0;
+
+    public CGRect() {
+    }
 
     CGRect(double x, double y, double width, double height) {
         this.x = x;
@@ -115,16 +148,37 @@ class CGRect {
 
 }
 
-class SVGAVideoSpriteFrameEntity {
+class SVGAVideoSpriteFrameEntity implements Serializable {
 
     double alpha;
-    Matrix transform;
     CGRect layout;
-    Path maskPath;
+    final float[] arr = new float[9];
+    private SVGAPath path;
+
+    private transient final Matrix transform = new Matrix();
+    private transient Path maskPath;
+
+    public Matrix getTransform() {
+        transform.setValues(arr);
+
+        return transform;
+    }
+
+    public Path getMaskPath() {
+        if (maskPath != null) {
+            return maskPath;
+        }
+        if (path != null) {
+            maskPath = path.getPath();
+        }
+        return maskPath;
+    }
+
+    public SVGAVideoSpriteFrameEntity() {
+
+    }
 
     SVGAVideoSpriteFrameEntity(JSONObject obj) throws JSONException {
-        transform = new Matrix();
-
         alpha = obj.optDouble("alpha", 0);
         final JSONObject transformJO = obj.optJSONObject("transform");
         if (transformJO != null) {
@@ -134,7 +188,6 @@ class SVGAVideoSpriteFrameEntity {
             double d = transformJO.getDouble("d");
             double tx = transformJO.getDouble("tx");
             double ty = transformJO.getDouble("ty");
-            float[] arr = new float[9];
             arr[0] = (float) a; // a
             arr[1] = (float) c; // c
             arr[2] = (float) tx; // tx
@@ -144,7 +197,6 @@ class SVGAVideoSpriteFrameEntity {
             arr[6] = (float) 0.0;
             arr[7] = (float) 0.0;
             arr[8] = (float) 1.0;
-            transform.setValues(arr);
         }
 
         final JSONObject layoutJO = obj.optJSONObject("layout");
@@ -158,9 +210,9 @@ class SVGAVideoSpriteFrameEntity {
 
         String clipPath = obj.optString("clipPath");
         if (!TextUtils.isEmpty(clipPath)) {
-            SVGAPath path = new SVGAPath();
+            path = new SVGAPath();
             path.setValues(clipPath);
-            maskPath = path;
+            maskPath = path.getPath();
         }
     }
 }

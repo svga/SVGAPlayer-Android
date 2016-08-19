@@ -192,10 +192,10 @@ class SVGADrawer extends Thread {
                         Bitmap bitmap = bitmap(sprite.imageKey, bitmapDrawable, frame.layout);
                         if (null != bitmap) {
                             paint.setAlpha((int) (frame.alpha * 255));
-                            concatTransform.setConcat(drawTransform, frame.transform);
+                            concatTransform.setConcat(drawTransform, frame.getTransform());
 
-                            if (null != frame.maskPath) {
-                                bitmap(canvas, bitmap, frame.maskPath, concatTransform);
+                            if (null != frame.getMaskPath()) {
+                                bitmap(canvas, bitmap, frame.getMaskPath(), concatTransform);
                             } else {
                                 canvas.drawBitmap(bitmap, concatTransform, paint);
                             }
@@ -218,8 +218,8 @@ class SVGADrawer extends Thread {
 
         canvas.save();
         canvas.setMatrix(matrix);
+
         canvas.clipRect(0, 0, imageBitmap.getWidth(), imageBitmap.getHeight());
-        Paint maskPaint = new Paint();
         BitmapShader bitmapShader = new BitmapShader(imageBitmap, Shader.TileMode.REPEAT, Shader.TileMode.REPEAT);
         maskPaint.setShader(bitmapShader);
 
