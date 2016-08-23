@@ -1,10 +1,14 @@
 package com.example.ponycui_home.svgaplayer;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
 
 import com.opensource.svgaplayer.SVGAParser;
 import com.opensource.svgaplayer.SVGAPlayer;
@@ -14,29 +18,30 @@ import java.net.URL;
 
 public class MainActivity extends AppCompatActivity {
 
+    View backgroundView;
+    SVGAPlayer player;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        configureBackgroundView();
+        configurePlayer();
+        addContentView(backgroundView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+//        FrameLayout frameLayout = new FrameLayout(this);
+//        frameLayout.addView(player, 400, 400);
+//        frameLayout.setBackgroundColor(Color.TRANSPARENT);
+        addContentView(player, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+    }
 
-        final SVGAPlayer player = new SVGAPlayer(this);
+    void configureBackgroundView() {
+        backgroundView = new View(this);
+        backgroundView.setBackgroundColor(Color.GRAY);
+    }
+
+    void configurePlayer() {
+        player = new SVGAPlayer(this);
         player.loops = 0;
         player.clearsAfterStop = true;
-        setContentView(player);
-
-//        try {
-//            InputStream inputStream = this.getAssets().open("angel.svga");
-//            SVGAParser parser = new SVGAParser(this);
-//            try {
-//                SVGAVideoEntity videoItem = parser.parse(inputStream, "angel");
-//                player.setVideoItem(videoItem);
-//                player.startAnimation();
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-
         final Handler handler = new Handler();
         final SVGAParser parser = new SVGAParser(this);
         Thread thread = new Thread(new Runnable() {
@@ -57,30 +62,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         thread.start();
-
     }
 
 
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
 }

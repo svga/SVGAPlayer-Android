@@ -10,9 +10,11 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PorterDuff;
 import android.graphics.Shader;
+import android.graphics.SurfaceTexture;
 import android.graphics.drawable.BitmapDrawable;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.TextureView;
 
 interface SVGAPlayerDelegate {
 
@@ -23,7 +25,7 @@ interface SVGAPlayerDelegate {
 /**
  * Created by PonyCui_Home on 16/6/19.
  */
-public class SVGAPlayer extends SurfaceView implements SurfaceHolder.Callback {
+public class SVGAPlayer extends TextureView implements TextureView.SurfaceTextureListener {
     private static final String TAG = "SVGAPlayer";
     public SVGAPlayerDelegate delegate;
     public int loops = 0;
@@ -35,8 +37,10 @@ public class SVGAPlayer extends SurfaceView implements SurfaceHolder.Callback {
     public SVGAPlayer(Context context) {
         super(context);
         this.drawer.playerInstance = this;
-        this.drawer.holder = this.getHolder();
-        this.drawer.holder.addCallback(this);
+        this.drawer.textureView = this;
+        this.setSurfaceTextureListener(this);
+        this.setBackgroundColor(Color.TRANSPARENT);
+        this.setOpaque(false);
     }
 
     @Override
@@ -61,28 +65,37 @@ public class SVGAPlayer extends SurfaceView implements SurfaceHolder.Callback {
     }
 
     @Override
-    public void surfaceCreated(SurfaceHolder holder) {
+    public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
+        this.drawer.videoWidth = (int) (getWidth() / getResources().getDisplayMetrics().scaledDensity);
+        this.drawer.scaledDensity = getResources().getDisplayMetrics().scaledDensity;
         if (this.drawer.isAnimating()) {
             this.drawer.startAnimating();
         }
     }
 
     @Override
-    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+    public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
+        this.drawer.videoWidth = (int) (getWidth() / getResources().getDisplayMetrics().scaledDensity);
+        this.drawer.scaledDensity = getResources().getDisplayMetrics().scaledDensity;
     }
 
     @Override
-    public void surfaceDestroyed(SurfaceHolder holder) {
+    public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
         this.drawer.stopAnimating();
+        return false;
     }
 
+    @Override
+    public void onSurfaceTextureUpdated(SurfaceTexture surface) {
+
+    }
 }
 
 class SVGADrawer extends Thread {
 
     SVGAPlayer playerInstance;
     SVGAVideoEntity videoItem;
-    SurfaceHolder holder;
+    TextureView textureView;
     int videoWidth;
     float scaledDensity;
 
@@ -104,10 +117,10 @@ class SVGADrawer extends Thread {
     public void stopAnimating() {
         animating = false;
         if (playerInstance.clearsAfterStop) {
-            Canvas canvas = holder.lockCanvas();
+            Canvas canvas = textureView.lockCanvas();
             if (canvas != null) {
                 canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
-                holder.unlockCanvasAndPost(canvas);
+                textureView.unlockCanvasAndPost(canvas);
             }
         }
     }
@@ -120,7 +133,7 @@ class SVGADrawer extends Thread {
         Canvas canvas = null;
         boolean waiting = false;
         while (animating) {
-            synchronized (holder) {
+            synchronized (textureView) {
                 if (waiting) {
                     if ((System.currentTimeMillis()) < nextTimestamp) {
                         try {
@@ -131,7 +144,7 @@ class SVGADrawer extends Thread {
                         continue;
                     }
                     if (null != canvas) {
-                        holder.unlockCanvasAndPost(canvas);
+                        textureView.unlockCanvasAndPost(canvas);
                     }
                     waiting = false;
                     for (int i = 0; i < frameRate; i++) {
@@ -141,7 +154,7 @@ class SVGADrawer extends Thread {
                     int FPS = videoItem.FPS;
                     FPS = FPS / frameRate;
                     nextTimestamp = System.currentTimeMillis() + (1000 / FPS);
-                    canvas = holder.lockCanvas();
+                    canvas = textureView.lockCanvas();
                     if (canvas != null) {
                         drawFrame(canvas);
                     }
@@ -213,19 +226,13 @@ class SVGADrawer extends Thread {
     private Paint maskPaint = new Paint();
 
     private void bitmap(Canvas canvas, Bitmap imageBitmap, Path maskPath, Matrix matrix) {
-//        Bitmap outBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
-//        Canvas canvas = new Canvas(outBitmap);
-
         canvas.save();
         canvas.setMatrix(matrix);
-
         canvas.clipRect(0, 0, imageBitmap.getWidth(), imageBitmap.getHeight());
         BitmapShader bitmapShader = new BitmapShader(imageBitmap, Shader.TileMode.REPEAT, Shader.TileMode.REPEAT);
         maskPaint.setShader(bitmapShader);
-
         canvas.drawPath(maskPath, maskPaint);
         canvas.restore();
-//        return outBitmap;
     }
 
     private Bitmap bitmap(String bitmapKey, BitmapDrawable bitmapDrawable, CGRect layout) {
