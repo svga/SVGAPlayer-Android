@@ -12,6 +12,7 @@ import android.graphics.PorterDuff;
 import android.graphics.Shader;
 import android.graphics.SurfaceTexture;
 import android.graphics.drawable.BitmapDrawable;
+import android.util.AttributeSet;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.TextureView;
@@ -36,6 +37,20 @@ public class SVGAPlayer extends TextureView implements TextureView.SurfaceTextur
 
     public SVGAPlayer(Context context) {
         super(context);
+        init();
+    }
+
+    public SVGAPlayer(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        init();
+    }
+
+    public SVGAPlayer(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+        init();
+    }
+
+    private void init() {
         this.drawer.playerInstance = this;
         this.drawer.textureView = this;
         this.setSurfaceTextureListener(this);
