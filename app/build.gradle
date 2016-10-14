@@ -32,4 +32,5 @@ dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     compile 'com.android.support:appcompat-v7:23.0.0'
     compile project(':library')
+    compile 'com.squareup.okhttp3:okhttp:3.4.1'
 }

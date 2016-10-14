@@ -17,6 +17,8 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.TextureView;
 
+import java.util.HashMap;
+
 interface SVGAPlayerDelegate {
 
     void svgaPlayerDidFinishedAnimation(SVGAPlayer player);
@@ -27,7 +29,9 @@ interface SVGAPlayerDelegate {
  * Created by PonyCui_Home on 16/6/19.
  */
 public class SVGAPlayer extends TextureView implements TextureView.SurfaceTextureListener {
+
     private static final String TAG = "SVGAPlayer";
+    public HashMap<String, BitmapDrawable> dynamicImages = new HashMap<>();
     public SVGAPlayerDelegate delegate;
     public int loops = 0;
     public boolean clearsAfterStop = true;
@@ -77,6 +81,14 @@ public class SVGAPlayer extends TextureView implements TextureView.SurfaceTextur
 
     public void stopAnimation() {
         this.drawer.stopAnimating();
+    }
+
+    public void setDynamicImage(BitmapDrawable drawable, String forKey) {
+        this.dynamicImages.put(forKey, drawable);
+    }
+
+    public void clearDynamicObjects() {
+        this.dynamicImages.clear();
     }
 
     @Override
@@ -216,6 +228,9 @@ class SVGADrawer extends Thread {
                 SVGAVideoSpriteFrameEntity frame = sprite.frames.get(currentFrame);
                 if (null != frame && frame.alpha > 0.0) {
                     BitmapDrawable bitmapDrawable = videoItem.images.get(sprite.imageKey);
+                    if (this.playerInstance.dynamicImages.containsKey(sprite.imageKey)) {
+                        bitmapDrawable = this.playerInstance.dynamicImages.get(sprite.imageKey);
+                    }
                     if (null != bitmapDrawable) {
                         Bitmap bitmap = bitmap(sprite.imageKey, bitmapDrawable, frame.layout);
                         if (null != bitmap) {

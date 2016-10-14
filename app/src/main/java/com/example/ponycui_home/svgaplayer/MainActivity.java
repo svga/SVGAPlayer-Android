@@ -1,6 +1,14 @@
 package com.example.ponycui_home.svgaplayer;
 
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
+import android.graphics.RectF;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
@@ -16,16 +24,26 @@ import com.opensource.svgaplayer.SVGAVideoEntity;
 
 import java.net.URL;
 
+import java.io.IOException;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+
 public class MainActivity extends AppCompatActivity {
 
     View backgroundView;
     SVGAPlayer player;
+    OkHttpClient client = new OkHttpClient();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         configureBackgroundView();
-        configurePlayer();
+//        configurePlayer();
+        configureDynamicPlayer();
         addContentView(backgroundView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 //        FrameLayout frameLayout = new FrameLayout(this);
 //        frameLayout.addView(player, 400, 400);
@@ -64,6 +82,69 @@ public class MainActivity extends AppCompatActivity {
         thread.start();
     }
 
+    void configureDynamicPlayer() {
+        player = new SVGAPlayer(this);
+        player.loops = 0;
+        player.clearsAfterStop = true;
+        final Handler handler = new Handler();
+        final SVGAParser parser = new SVGAParser(this);
+        final Request request = new Request.Builder().url("http://img.hb.aicdn.com/80cc8e001ccdc54febd448dc45119b4bd7924ea5530b-RllWp3_sq320").build();
+        Call call = client.newCall(request);
+        call.enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {}
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                BitmapDrawable bitmapDrawable = new BitmapDrawable(response.body().byteStream());
+                bitmapDrawable = new BitmapDrawable(MainActivity.getRoundedCornerBitmap(bitmapDrawable.getBitmap(), 168));
+                if (null != bitmapDrawable) {
+                    player.setDynamicImage(bitmapDrawable, "99");
+                    Thread thread = new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                final SVGAVideoEntity videoItem = parser.parse(new URL("http://uedfe.yypm.com/assets/svga-me/kingset_dyn.svga"));
+                                handler.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        player.setVideoItem(videoItem);
+                                        player.startAnimation();
+                                    }
+                                });
+                            } catch (Exception e) {
+                                System.out.println(e);
+                            }
+                        }
+                    });
+                    thread.start();
+                }
+            }
+        });
+
+    }
+
+    // 你需要自行将 Image 处理成最终要展现的 Image，比如，添加圆角、添加边框等等。
+    public static Bitmap getRoundedCornerBitmap(Bitmap bitmap, int pixels) {
+        Bitmap output = Bitmap.createBitmap(bitmap.getWidth(), bitmap
+                .getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(output);
+
+        final int color = 0xff424242;
+        final Paint paint = new Paint();
+        final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
+        final RectF rectF = new RectF(rect);
+        final float roundPx = pixels;
+
+        paint.setAntiAlias(true);
+        canvas.drawARGB(0, 0, 0, 0);
+        paint.setColor(color);
+        canvas.drawRoundRect(rectF, roundPx, roundPx, paint);
+
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+        canvas.drawBitmap(bitmap, rect, rect, paint);
+
+        return output;
+    }
 
 
 }
