@@ -12,6 +12,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextPaint;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -99,6 +100,12 @@ public class MainActivity extends AppCompatActivity {
                 bitmapDrawable = new BitmapDrawable(MainActivity.getRoundedCornerBitmap(bitmapDrawable.getBitmap(), 168));
                 if (null != bitmapDrawable) {
                     player.setDynamicImage(bitmapDrawable, "99");
+                    TextPaint textPaint = new TextPaint();
+                    textPaint.setTextSize(30);
+                    textPaint.setFakeBoldText(true);
+                    textPaint.setARGB(0xff, 0xff, 0xe0, 0xa4);
+                    textPaint.setShadowLayer((float)1.0, (float)0.0, (float)1.0, Color.BLACK);
+                    player.setDynamicText("崔小姐不吃鱼 送了魔法奇缘", textPaint, "banner");
                     Thread thread = new Thread(new Runnable() {
                         @Override
                         public void run() {

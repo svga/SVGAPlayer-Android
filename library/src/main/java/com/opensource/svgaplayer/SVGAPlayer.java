@@ -9,9 +9,11 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PorterDuff;
+import android.graphics.Rect;
 import android.graphics.Shader;
 import android.graphics.SurfaceTexture;
 import android.graphics.drawable.BitmapDrawable;
+import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -32,6 +34,8 @@ public class SVGAPlayer extends TextureView implements TextureView.SurfaceTextur
 
     private static final String TAG = "SVGAPlayer";
     public HashMap<String, BitmapDrawable> dynamicImages = new HashMap<>();
+    public HashMap<String, String> dynamicTexts = new HashMap<>();
+    public HashMap<String, TextPaint> dynamicTextPaints = new HashMap<>();
     public SVGAPlayerDelegate delegate;
     public int loops = 0;
     public boolean clearsAfterStop = true;
@@ -84,11 +88,24 @@ public class SVGAPlayer extends TextureView implements TextureView.SurfaceTextur
     }
 
     public void setDynamicImage(BitmapDrawable drawable, String forKey) {
-        this.dynamicImages.put(forKey, drawable);
+        if (null != drawable) {
+            this.dynamicImages.put(forKey, drawable);
+        }
+    }
+
+    public void setDynamicText(String text, TextPaint textPaint, String forKey) {
+        if (null != text) {
+            this.dynamicTexts.put(forKey, text);
+        }
+        if (null != textPaint) {
+            this.dynamicTextPaints.put(forKey, textPaint);
+        }
     }
 
     public void clearDynamicObjects() {
         this.dynamicImages.clear();
+        this.dynamicTexts.clear();
+        this.dynamicTextPaints.clear();
     }
 
     @Override
@@ -242,7 +259,18 @@ class SVGADrawer extends Thread {
                             } else {
                                 canvas.drawBitmap(bitmap, concatTransform, paint);
                             }
-
+                            if (this.playerInstance.dynamicTexts.containsKey(sprite.imageKey)) {
+                                String text = this.playerInstance.dynamicTexts.get(sprite.imageKey);
+                                TextPaint textPaint = this.playerInstance.dynamicTextPaints.get(sprite.imageKey);
+                                textPaint.setAlpha(paint.getAlpha());
+                                float[] values = new float[9];
+                                concatTransform.getValues(values);
+                                Rect bounds = new Rect();
+                                textPaint.getTextBounds(text, 0, text.length(), bounds);
+                                int x = (int)(values[2] + ((values[0] * frame.layout.width - bounds.width()) / 2.0));
+                                int y = (int)(values[5] + ((values[4] * frame.layout.height - bounds.height()) / 2.0)) - bounds.top + bounds.bottom;
+                                canvas.drawText(text, x, y, textPaint);
+                            }
                         }
                     }
                 }
