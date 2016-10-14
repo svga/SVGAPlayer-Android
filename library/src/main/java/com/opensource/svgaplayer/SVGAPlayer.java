@@ -131,7 +131,7 @@ public class SVGAPlayer extends TextureView implements TextureView.SurfaceTextur
 
     @Override
     public void onSurfaceTextureUpdated(SurfaceTexture surface) {
-
+        
     }
 }
 

@@ -93,6 +93,28 @@ try {
 }
 ```
 
+## 动态对象
+
+自 0.1.0 起，SVGAPlayer 支持动态图像和动态文本，其添加方法如下。
+
+### 动态图像
+
+```
+// 你需要自行生成一个 BitmapDrawable 对象
+player.setDynamicImage(bitmapDrawable, "99");
+```
+
+### 动态文本
+
+```
+TextPaint textPaint = new TextPaint();
+textPaint.setTextSize(30);
+textPaint.setFakeBoldText(true);
+textPaint.setARGB(0xff, 0xff, 0xe0, 0xa4);
+textPaint.setShadowLayer((float)1.0, (float)0.0, (float)1.0, Color.BLACK); // 各种配置
+player.setDynamicText("崔小姐不吃鱼 送了魔法奇缘", textPaint, "banner");
+```
+
 ## 参数设置
 
 * FPS, FPS 由 SVGA 动画自身决定，客户端不能修改，在 SVGAConverter 转换的过程中添加该参数，默认的 FPS = 20。
