@@ -268,7 +268,11 @@ class SVGADrawer extends Thread {
                                 Rect bounds = new Rect();
                                 textPaint.getTextBounds(text, 0, text.length(), bounds);
                                 int x = (int)(values[2] + ((values[0] * frame.layout.width - bounds.width()) / 2.0));
-                                int y = (int)(values[5] + ((values[4] * frame.layout.height - bounds.height()) / 2.0)) - bounds.top + bounds.bottom;
+                                int targetRectTop = (int)(values[5]);
+                                int targetRectBottom = (int)(values[5] + values[4] * frame.layout.height);
+                                int fonrMetricsBottom = (int)textPaint.getFontMetrics().bottom;
+                                int fonrMetricsTop = (int)textPaint.getFontMetrics().top;
+                                int y = (targetRectBottom + targetRectTop - fonrMetricsBottom - fonrMetricsTop) / 2;
                                 canvas.drawText(text, x, y, textPaint);
                             }
                         }
