@@ -6,12 +6,12 @@ import android.text.TextUtils;
 /**
  * Created by ruoshili on 7/18/2016.
  */
-class BitmapCacheKey {
+class SVGABitmapCacheKey {
     @NonNull
     final String bitmapKey;
     final int width, height;
 
-    public BitmapCacheKey(String bitmapKey, int width, int height) {
+    public SVGABitmapCacheKey(String bitmapKey, int width, int height) {
         if (TextUtils.isEmpty(bitmapKey)) {
             throw new NullPointerException("bitmapKey is empty.");
         }
@@ -26,7 +26,7 @@ class BitmapCacheKey {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        BitmapCacheKey that = (BitmapCacheKey) o;
+        SVGABitmapCacheKey that = (SVGABitmapCacheKey) o;
 
         if (width != that.width) return false;
         if (height != that.height) return false;

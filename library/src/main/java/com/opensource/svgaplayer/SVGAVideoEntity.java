@@ -25,7 +25,7 @@ import java.util.Set;
  */
 public class SVGAVideoEntity implements Serializable {
     private static final String TAG = "SVGAVideoEntity";
-    CGRect videoSize;
+    SVGARect videoSize;
     int FPS;
     int frames;
 
@@ -34,21 +34,21 @@ public class SVGAVideoEntity implements Serializable {
     File cacheDir;
 
     transient final HashMap<String, BitmapDrawable> images = new HashMap<>();
-    transient final HashMap<BitmapCacheKey, Bitmap> bitmapCache = new HashMap<>();
+    transient final HashMap<SVGABitmapCacheKey, Bitmap> bitmapCache = new HashMap<>();
 
     public SVGAVideoEntity() {
     }
 
     public SVGAVideoEntity(JSONObject obj, File cacheDir) throws JSONException {
         this.cacheDir = cacheDir;
-        videoSize = new CGRect(0, 0, 100, 100);
+        videoSize = new SVGARect(0, 0, 100, 100);
         FPS = 20;
         sprites = new ArrayList<>();
         final JSONObject movie = obj.getJSONObject("movie");
 
         int width = movie.getJSONObject("viewBox").getInt("width");
         int height = movie.getJSONObject("viewBox").getInt("height");
-        videoSize = new CGRect(0, 0, width, height);
+        videoSize = new SVGARect(0, 0, width, height);
 
         FPS = movie.getInt("fps");
         FPS = FPS <= 15 ? FPS : 15;
@@ -109,110 +109,3 @@ public class SVGAVideoEntity implements Serializable {
 
 }
 
-class SVGAVideoSpriteEntity implements Serializable {
-
-    String imageKey;
-    ArrayList<SVGAVideoSpriteFrameEntity> frames;
-
-    public SVGAVideoSpriteEntity() {
-    }
-
-    SVGAVideoSpriteEntity(JSONObject obj) throws JSONException {
-        imageKey = obj.getString("imageKey");
-        frames = new ArrayList<>();
-        JSONArray jsonFrames = obj.getJSONArray("frames");
-        for (int i = 0; i < jsonFrames.length(); i++) {
-            JSONObject frameObject = jsonFrames.getJSONObject(i);
-            frames.add(new SVGAVideoSpriteFrameEntity(frameObject));
-        }
-    }
-
-}
-
-class CGRect implements Serializable {
-
-    double x = 0;
-    double y = 0;
-    double width = 0;
-    double height = 0;
-
-    public CGRect() {
-    }
-
-    CGRect(double x, double y, double width, double height) {
-        this.x = x;
-        this.y = y;
-        this.width = width;
-        this.height = height;
-    }
-
-}
-
-class SVGAVideoSpriteFrameEntity implements Serializable {
-
-    double alpha;
-    CGRect layout;
-    final float[] arr = new float[9];
-    private SVGAPath path;
-
-    private transient final Matrix transform = new Matrix();
-    private transient Path maskPath;
-
-    public Matrix getTransform() {
-        transform.setValues(arr);
-
-        return transform;
-    }
-
-    public Path getMaskPath() {
-        if (maskPath != null) {
-            return maskPath;
-        }
-        if (path != null) {
-            maskPath = path.getPath();
-        }
-        return maskPath;
-    }
-
-    public SVGAVideoSpriteFrameEntity() {
-
-    }
-
-    SVGAVideoSpriteFrameEntity(JSONObject obj) throws JSONException {
-        alpha = obj.optDouble("alpha", 0);
-        final JSONObject transformJO = obj.optJSONObject("transform");
-        if (transformJO != null) {
-            double a = transformJO.getDouble("a");
-            double b = transformJO.getDouble("b");
-            double c = transformJO.getDouble("c");
-            double d = transformJO.getDouble("d");
-            double tx = transformJO.getDouble("tx");
-            double ty = transformJO.getDouble("ty");
-            arr[0] = (float) a; // a
-            arr[1] = (float) c; // c
-            arr[2] = (float) tx; // tx
-            arr[3] = (float) b; // b
-            arr[4] = (float) d; // d
-            arr[5] = (float) ty; // ty
-            arr[6] = (float) 0.0;
-            arr[7] = (float) 0.0;
-            arr[8] = (float) 1.0;
-        }
-
-        final JSONObject layoutJO = obj.optJSONObject("layout");
-        if (layoutJO != null) {
-            double x = layoutJO.getDouble("x");
-            double y = layoutJO.getDouble("y");
-            double width = layoutJO.getDouble("width");
-            double height = layoutJO.getDouble("height");
-            layout = new CGRect(x, y, width, height);
-        }
-
-        String clipPath = obj.optString("clipPath");
-        if (!TextUtils.isEmpty(clipPath)) {
-            path = new SVGAPath();
-            path.setValues(clipPath);
-            maskPath = path.getPath();
-        }
-    }
-}

@@ -8,27 +8,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * Created by cuiminghui on 16/6/28.
- */
-
-class SVGAPoint implements Serializable {
-
-    float x;
-    float y;
-    float val;
-
-    SVGAPoint(float x, float y) {
-        this.x = x;
-        this.y = y;
-    }
-
-    SVGAPoint(float val) {
-        this.val = val;
-    }
-
-}
-
 class SVGAPath implements Serializable {
 
     private transient final Path mPath = new Path();

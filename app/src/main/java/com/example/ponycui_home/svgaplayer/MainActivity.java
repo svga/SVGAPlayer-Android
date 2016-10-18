@@ -1,5 +1,6 @@
 package com.example.ponycui_home.svgaplayer;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -42,14 +43,55 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         configureBackgroundView();
 //        configurePlayer();
         configureDynamicPlayer();
         addContentView(backgroundView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-//        FrameLayout frameLayout = new FrameLayout(this);
-//        frameLayout.addView(player, 400, 400);
-//        frameLayout.setBackgroundColor(Color.TRANSPARENT);
         addContentView(player, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        final MainActivity obj = this;
+        backgroundView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (obj.getIntent().getBooleanExtra("test", false)) {
+                    finish();
+                    return;
+                }
+                Intent intent = new Intent(obj, MainActivity.class);
+                intent.putExtra("test", true);
+                startActivityForResult(intent, RESULT_OK);
+            }
+        });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        configureDynamicPlayer();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (this.player != null) {
+            this.player.stopAnimation();
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (this.player != null) {
+            this.player.stopAnimation();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (this.player != null) {
+            this.player.stopAnimation();
+        }
     }
 
     void configureBackgroundView() {
@@ -84,7 +126,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void configureDynamicPlayer() {
-        player = new SVGAPlayer(this);
+        if (player == null) {
+            player = new SVGAPlayer(this);
+        }
         player.loops = 0;
         player.clearsAfterStop = true;
         final Handler handler = new Handler();
@@ -97,11 +141,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 BitmapDrawable bitmapDrawable = new BitmapDrawable(response.body().byteStream());
+                if (null == bitmapDrawable) {
+                    return;
+                }
                 bitmapDrawable = new BitmapDrawable(MainActivity.getRoundedCornerBitmap(bitmapDrawable.getBitmap(), 168));
                 if (null != bitmapDrawable) {
                     player.setDynamicImage(bitmapDrawable, "99");
                     TextPaint textPaint = new TextPaint();
-                    textPaint.setTextSize(30);
+                    textPaint.setTextSize(15);
                     textPaint.setFakeBoldText(true);
                     textPaint.setARGB(0xff, 0xff, 0xe0, 0xa4);
                     textPaint.setShadowLayer((float)1.0, (float)0.0, (float)1.0, Color.BLACK);

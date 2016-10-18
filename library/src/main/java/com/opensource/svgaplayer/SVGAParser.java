@@ -23,6 +23,7 @@ import java.util.zip.ZipInputStream;
  */
 public class SVGAParser {
 
+    static private final FSTConfiguration conf = FSTConfiguration.createAndroidDefaultConfiguration();
     private Context context;
 
     public SVGAParser(Context context) {
@@ -43,9 +44,6 @@ public class SVGAParser {
             throw e;
         }
     }
-
-    static final FSTConfiguration conf = FSTConfiguration.createAndroidDefaultConfiguration();
-
 
     public SVGAVideoEntity parse(InputStream inputStream, String cacheKey) throws Exception {
         if (!cacheDir(cacheKey).exists()) {
