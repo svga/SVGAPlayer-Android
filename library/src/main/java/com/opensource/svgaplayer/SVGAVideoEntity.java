@@ -41,18 +41,12 @@ public class SVGAVideoEntity implements Serializable {
 
     public SVGAVideoEntity(JSONObject obj, File cacheDir) throws JSONException {
         this.cacheDir = cacheDir;
-        videoSize = new SVGARect(0, 0, 100, 100);
-        FPS = 20;
         sprites = new ArrayList<>();
         final JSONObject movie = obj.getJSONObject("movie");
-
         int width = movie.getJSONObject("viewBox").getInt("width");
         int height = movie.getJSONObject("viewBox").getInt("height");
         videoSize = new SVGARect(0, 0, width, height);
-
         FPS = movie.getInt("fps");
-        FPS = FPS <= 15 ? FPS : 15;
-
         frames = movie.getInt("frames");
     }
 

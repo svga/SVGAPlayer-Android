@@ -1,7 +1,9 @@
 package com.opensource.svgaplayer;
 
 import android.content.Context;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.graphics.SurfaceTexture;
 import android.graphics.drawable.BitmapDrawable;
 import android.text.TextPaint;
@@ -51,11 +53,16 @@ public class SVGAPlayer extends TextureView implements TextureView.SurfaceTextur
     }
 
     /* Must call after set video item. */
-    public void startAnimation() {
+    /* Return False IF FAILED.*/
+    public boolean startAnimation() {
         this.animating = true;
         if (this.drawer == null && this.isAvailable()) {
             this.createDrawer();
             this.startDrawing();
+            return true;
+        }
+        else {
+            return false;
         }
     }
 
@@ -63,6 +70,9 @@ public class SVGAPlayer extends TextureView implements TextureView.SurfaceTextur
     public void stopAnimation() {
         this.animating = false;
         this.stopDrawing();
+        if (null != callback) {
+            callback.onPause(this);
+        }
     }
 
     /* Replace an image for key. */
@@ -134,8 +144,14 @@ public class SVGAPlayer extends TextureView implements TextureView.SurfaceTextur
             }
             if (null != drawer) {
                 if (null != drawer.currentCanvas) {
+                    drawer.currentCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
                     this.unlockCanvasAndPost(drawer.currentCanvas);
                     drawer.currentCanvas = null;
+                }
+                else {
+                    Canvas canvas = lockCanvas();
+                    canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+                    unlockCanvasAndPost(canvas);
                 }
                 drawer = null;
             }

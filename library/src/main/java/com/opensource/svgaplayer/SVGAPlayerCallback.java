@@ -5,6 +5,8 @@ package com.opensource.svgaplayer;
  */
 interface SVGAPlayerCallback {
 
+    void onPause(SVGAPlayer svgaPlayer);
+
     void onFinished(SVGAPlayer svgaPlayer);
 
 }

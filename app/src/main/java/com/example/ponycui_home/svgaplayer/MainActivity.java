@@ -43,10 +43,11 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        player = new SVGAPlayer(this);
 
         configureBackgroundView();
-//        configurePlayer();
-        configureDynamicPlayer();
+        configurePlayer();
+//        configureDynamicPlayer();
         addContentView(backgroundView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         addContentView(player, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         final MainActivity obj = this;
@@ -67,7 +68,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        configureDynamicPlayer();
+        configurePlayer();
+//        configureDynamicPlayer();
     }
 
     @Override
@@ -100,7 +102,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void configurePlayer() {
-        player = new SVGAPlayer(this);
         player.loops = 0;
         player.clearsAfterStop = true;
         final Handler handler = new Handler();
@@ -109,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 try {
-                    final SVGAVideoEntity videoItem = parser.parse(new URL("http://uedfe.yypm.com/assets/svga-me/rose.svga"));
+                    final SVGAVideoEntity videoItem = parser.parse(new URL("http://legox.yy.com/svga/svga-me/angel.svga"));
                     handler.post(new Runnable() {
                         @Override
                         public void run() {
