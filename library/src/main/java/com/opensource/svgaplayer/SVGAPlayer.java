@@ -150,8 +150,10 @@ public class SVGAPlayer extends TextureView implements TextureView.SurfaceTextur
                 }
                 else {
                     Canvas canvas = lockCanvas();
-                    canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
-                    unlockCanvasAndPost(canvas);
+                    if (canvas != null) {
+                        canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+                        unlockCanvasAndPost(canvas);
+                    }
                 }
                 drawer = null;
             }
