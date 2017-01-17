@@ -27,6 +27,8 @@ import com.opensource.svgaplayer.SVGAVideoEntity;
 import java.net.URL;
 
 import java.io.IOException;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -44,12 +46,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         player = new SVGAPlayer(this);
-
         configureBackgroundView();
-        configurePlayer();
-//        configureDynamicPlayer();
         addContentView(backgroundView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         addContentView(player, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+
         final MainActivity obj = this;
         backgroundView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -68,8 +68,18 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        configurePlayer();
-//        configureDynamicPlayer();
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+               runOnUiThread(new Runnable() {
+                   @Override
+                   public void run() {
+                       configurePlayer();
+//                        configureDynamicPlayer();
+                   }
+               });
+            }
+        }, 1000);
     }
 
     @Override
