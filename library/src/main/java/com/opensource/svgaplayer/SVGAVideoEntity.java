@@ -25,8 +25,8 @@ import java.util.Set;
  */
 public class SVGAVideoEntity implements Serializable {
     private static final String TAG = "SVGAVideoEntity";
-    SVGARect videoSize;
-    int FPS;
+    SVGARect videoSize = new SVGARect(0, 0, 0, 0);
+    int FPS = 15;
     int frames;
 
     HashMap<String, String> imagePathMap;
