@@ -1,10 +1,9 @@
 package com.opensource.svgaplayer;
 
 import android.content.Context;
-import android.util.Log;
+import android.support.v4.util.LruCache;
 
 import org.json.JSONObject;
-import org.nustaq.serialization.FSTConfiguration;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
@@ -23,14 +22,18 @@ import java.util.zip.ZipInputStream;
  */
 public class SVGAParser {
 
-    static private final FSTConfiguration conf = FSTConfiguration.createAndroidDefaultConfiguration();
-    private Context context;
+    private static LruCache<String, SVGAVideoEntity> sCaches = new LruCache<>(8 * 1024 * 1024);
+    private Context mContext;
 
     public SVGAParser(Context context) {
-        this.context = context;
+        this.mContext = context;
     }
 
     public SVGAVideoEntity parse(URL url) throws Exception {
+        SVGAVideoEntity cacheItem = sCaches.get(cacheKey(url));
+        if (null != cacheItem) {
+            return cacheItem;
+        }
         if (cacheDir(cacheKey(url)).exists()) {
             return parse(null, cacheKey(url));
         }
@@ -46,27 +49,15 @@ public class SVGAParser {
     }
 
     public SVGAVideoEntity parse(InputStream inputStream, String cacheKey) throws Exception {
+        SVGAVideoEntity cacheItem = sCaches.get(cacheKey);
+        if (null != cacheItem) {
+            return cacheItem;
+        }
         if (!cacheDir(cacheKey).exists()) {
             unzip(inputStream, cacheKey);
         }
-
-        final File cacheDir = new File(this.context.getCacheDir().getAbsolutePath() + "/" + cacheKey + "/");
-
-        final File fstFile = new File(cacheDir, "movie.fst");
-
-        if (fstFile.exists() && fstFile.isFile() && fstFile.length() > 0) {
-            FileInputStream fis = new FileInputStream(fstFile);
-            try {
-                SVGAVideoEntity entity = (SVGAVideoEntity) conf.decodeFromStream(fis);
-                entity.resetImages();
-                return entity;
-            } finally {
-                fis.close();
-            }
-        }
-
+        final File cacheDir = new File(this.mContext.getCacheDir().getAbsolutePath() + "/" + cacheKey + "/");
         final File jsonFile = new File(cacheDir, "movie.spec");
-
         FileInputStream fileInputStream = new FileInputStream(jsonFile);
         SVGAVideoEntity videoItem = null;
         try {
@@ -85,20 +76,9 @@ public class SVGAParser {
         } finally {
             fileInputStream.close();
         }
-        final FileOutputStream fos = new FileOutputStream(fstFile);
-        try {
-            conf.encodeToStream(fos, videoItem);
-            fos.flush();
-        } finally {
-            fos.close();
-        }
-
-        Log.v(TAG, String.format("FST file size: %d, JSON file size: %d", fstFile.length(), jsonFile.length()));
+        sCaches.put(cacheKey, videoItem);
         return videoItem;
-
     }
-
-    private static final String TAG = "SVGAParser";
 
     private String cacheKey(URL url) throws Exception {
         try {
@@ -116,7 +96,7 @@ public class SVGAParser {
     }
 
     private File cacheDir(String cacheKey) {
-        return new File(this.context.getCacheDir().getAbsolutePath() + "/" + cacheKey + "/");
+        return new File(this.mContext.getCacheDir().getAbsolutePath() + "/" + cacheKey + "/");
     }
 
     private void unzip(InputStream inputStream, String cacheKey) throws Exception {
