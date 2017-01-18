@@ -3,7 +3,7 @@ package com.opensource.svgaplayer;
 /**
  * Created by cuiminghui on 2016/10/17.
  */
-interface SVGAPlayerCallback {
+public interface SVGAPlayerCallback {
 
     void onPause(SVGAPlayer svgaPlayer);
 
