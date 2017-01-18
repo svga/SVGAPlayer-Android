@@ -72,9 +72,11 @@ class SVGADrawer implements Runnable {
             loopCount++;
             if (textureView.loops > 0 && loopCount >= textureView.loops) {
                 textureView.animating = false;
+                textureView.stopDrawing();
                 if (null != textureView.callback) {
                     textureView.callback.onFinished(textureView);
                 }
+                textureView.releaseDrawer();
             }
         }
     }

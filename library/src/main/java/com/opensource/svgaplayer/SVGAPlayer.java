@@ -56,7 +56,7 @@ public class SVGAPlayer extends TextureView implements TextureView.SurfaceTextur
     /* Return False IF FAILED.*/
     public boolean startAnimation() {
         this.animating = true;
-        if (this.drawer == null && this.isAvailable()) {
+        if (this.videoItem != null && this.drawer == null && this.isAvailable()) {
             this.createDrawer();
             this.startDrawing();
             return true;
@@ -73,6 +73,7 @@ public class SVGAPlayer extends TextureView implements TextureView.SurfaceTextur
         if (null != callback) {
             callback.onPause(this);
         }
+        this.releaseDrawer();
     }
 
     /* Replace an image for key. */
@@ -129,6 +130,13 @@ public class SVGAPlayer extends TextureView implements TextureView.SurfaceTextur
         this.drawer.scaledDensity = getResources().getDisplayMetrics().scaledDensity;
     }
 
+    protected void releaseDrawer() {
+        if (null != drawer) {
+            drawer.videoItem = null;
+            drawer = null;
+        }
+    }
+
     protected void startDrawing() {
         if (null != this.drawer) {
             drawerThread = new Thread(this.drawer);
@@ -155,7 +163,6 @@ public class SVGAPlayer extends TextureView implements TextureView.SurfaceTextur
                         unlockCanvasAndPost(canvas);
                     }
                 }
-                drawer = null;
             }
         }
     }

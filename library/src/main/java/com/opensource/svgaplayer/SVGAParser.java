@@ -22,7 +22,6 @@ import java.util.zip.ZipInputStream;
  */
 public class SVGAParser {
 
-    private static LruCache<String, SVGAVideoEntity> sCaches = new LruCache<>(8 * 1024 * 1024);
     private Context mContext;
 
     public SVGAParser(Context context) {
@@ -30,10 +29,6 @@ public class SVGAParser {
     }
 
     public SVGAVideoEntity parse(URL url) throws Exception {
-        SVGAVideoEntity cacheItem = sCaches.get(cacheKey(url));
-        if (null != cacheItem) {
-            return cacheItem;
-        }
         if (cacheDir(cacheKey(url)).exists()) {
             return parse(null, cacheKey(url));
         }
@@ -49,10 +44,6 @@ public class SVGAParser {
     }
 
     public SVGAVideoEntity parse(InputStream inputStream, String cacheKey) throws Exception {
-        SVGAVideoEntity cacheItem = sCaches.get(cacheKey);
-        if (null != cacheItem) {
-            return cacheItem;
-        }
         if (!cacheDir(cacheKey).exists()) {
             unzip(inputStream, cacheKey);
         }
@@ -76,7 +67,6 @@ public class SVGAParser {
         } finally {
             fileInputStream.close();
         }
-        sCaches.put(cacheKey, videoItem);
         return videoItem;
     }
 
