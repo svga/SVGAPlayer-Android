@@ -64,7 +64,12 @@ public class SVGAParser {
             videoItem = new SVGAVideoEntity(obj, cacheDir);
             videoItem.resetImages(obj);
             videoItem.resetSprites(obj);
-        } finally {
+        }
+        catch (Exception e) {
+            fileInputStream.close();
+            jsonFile.delete();
+        }
+        finally {
             fileInputStream.close();
         }
         return videoItem;

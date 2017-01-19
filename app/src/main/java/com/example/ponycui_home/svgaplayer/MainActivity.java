@@ -12,21 +12,20 @@ import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Looper;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextPaint;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 
 import com.opensource.svgaplayer.SVGAParser;
 import com.opensource.svgaplayer.SVGAPlayer;
+import com.opensource.svgaplayer.SVGAPlayerCallback;
 import com.opensource.svgaplayer.SVGAVideoEntity;
 
-import java.net.URL;
-
 import java.io.IOException;
+import java.net.URL;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -39,8 +38,8 @@ import okhttp3.Response;
 public class MainActivity extends AppCompatActivity {
 
     View backgroundView;
-    SVGAPlayer player;
     OkHttpClient client = new OkHttpClient();
+    protected Handler mUIHandler = new Handler(Looper.getMainLooper());
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +62,12 @@ public class MainActivity extends AppCompatActivity {
                 startActivityForResult(intent, RESULT_OK);
             }
         });
+//        player.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//
+//            }
+//        });
     }
 
     @Override
@@ -111,29 +116,68 @@ public class MainActivity extends AppCompatActivity {
         backgroundView.setBackgroundColor(Color.GRAY);
     }
 
+    String[] giftUrls = new String[]{
+            "http://legox.yy.com/svga/svga-me/angel.svga",
+            "http://legox.yy.com/svga/svga-me/dice_1.svga",
+            "http://legox.yy.com/svga/svga-me/dice_2.svga",
+            "http://legox.yy.com/svga/svga-me/dice_3.svga",
+            "http://legox.yy.com/svga/svga-me/dice_4.svga",
+            "http://legox.yy.com/svga/svga-me/dice_5.svga",
+            "http://legox.yy.com/svga/svga-me/dice_6.svga",
+            "http://legox.yy.com/svga/svga-me/firework.svga",
+            "http://legox.yy.com/svga/svga-me/kingset.svga",
+            "http://legox.yy.com/svga/svga-me/kingset_dyn.svga",
+            "http://legox.yy.com/svga/svga-me/posche.svga",
+            "http://legox.yy.com/svga/svga-me/rainbowrose.svga",
+            "http://legox.yy.com/svga/svga-me/rose.svga",
+
+    };
+
+    String[] giftUrls2 = new String[] {
+            "http://legox.yy.com/svga/svga-zhiniu/boom.svga",
+            "http://legox.yy.com/svga/svga-zhiniu/bs.svga",
+            "http://legox.yy.com/svga/svga-zhiniu/caishen.svga",
+            "http://legox.yy.com/svga/svga-zhiniu/fuduji.svga",
+            "http://legox.yy.com/svga/svga-zhiniu/shit.svga",
+            "http://legox.yy.com/svga/svga-zhiniu/snake.svga",
+            "http://legox.yy.com/svga/svga-zhiniu/yanhua.svga"
+    };
+
+    SVGAParser parser;
+    SVGAPlayer player;
+    int i = 0;
     void configurePlayer() {
-        player.loops = 0;
+        player.loops = 1;
         player.clearsAfterStop = true;
-        final Handler handler = new Handler();
-        final SVGAParser parser = new SVGAParser(this);
-        Thread thread = new Thread(new Runnable() {
+        if (parser == null) {
+            parser = new SVGAParser(this);
+        }
+        handler().post(new Runnable() {
             @Override
             public void run() {
                 try {
-                    final SVGAVideoEntity videoItem = parser.parse(new URL("http://legox.yy.com/svga/svga-me/angel.svga"));
-                    handler.post(new Runnable() {
+                    String url = giftUrls2[i++ % giftUrls2.length];
+                    final SVGAVideoEntity videoItem = parser.parse(new URL(url));
+                    mUIHandler.post(new Runnable() {
                         @Override
                         public void run() {
                             player.setVideoItem(videoItem);
                             player.startAnimation();
+
                         }
                     });
+                    mUIHandler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            player.stopAnimation();
+                            configurePlayer();
+                        }
+                    }, 8000);
                 } catch (Exception e) {
                     System.out.println(e);
                 }
             }
         });
-        thread.start();
     }
 
     void configureDynamicPlayer() {
@@ -211,5 +255,21 @@ public class MainActivity extends AppCompatActivity {
         return output;
     }
 
+
+    private static HandlerThread sHT;
+    private static Handler sHandler;
+
+    public synchronized static Handler handler() {
+        if (sHT == null) {
+            sHT = new HandlerThread("yycall-daemon");
+            sHT.start();
+        }
+
+        if (sHandler == null) {
+            sHandler = new Handler(sHT.getLooper());
+        }
+
+        return sHandler;
+    }
 
 }
