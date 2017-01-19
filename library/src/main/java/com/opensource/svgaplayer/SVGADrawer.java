@@ -12,7 +12,6 @@ import android.graphics.Rect;
 import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
 import android.text.TextPaint;
-import android.view.TextureView;
 
 /**
  * Created by cuiminghui on 2016/10/17.
@@ -111,16 +110,18 @@ class SVGADrawer implements Runnable {
                         bitmapDrawable = textureView.dynamicImages.get(sprite.imageKey);
                     }
                     if (null != bitmapDrawable) {
-                        Bitmap bitmap = bitmap(sprite.imageKey, bitmapDrawable, frame.layout);
+                        BitmapWithScale bitmap = scaleBitmap(bitmapDrawable, frame.layout);
                         if (null != bitmap) {
                             paint.setAlpha((int) (frame.alpha * 255));
                             concatTransform.setConcat(drawTransform, frame.getTransform());
-
+                            if (bitmap.mScale > 0) {
+                                concatTransform.preScale(bitmap.mScale, bitmap.mScale);
+                            }
                             if (null != frame.getMaskPath()) {
-                                bitmap(canvas, bitmap, frame.getMaskPath(), concatTransform);
+                                drawBitmap(canvas, bitmap.mBitmap, frame.getMaskPath(), concatTransform);
                             }
                             else {
-                                canvas.drawBitmap(bitmap, concatTransform, paint);
+                                canvas.drawBitmap(bitmap.mBitmap, concatTransform, paint);
                             }
                             if (textureView.dynamicTexts.containsKey(sprite.imageKey)) {
                                 String text = textureView.dynamicTexts.get(sprite.imageKey);
@@ -133,9 +134,9 @@ class SVGADrawer implements Runnable {
                                 int x = (int)(values[2] + ((values[0] * frame.layout.width - bounds.width()) / 2.0));
                                 int targetRectTop = (int)(values[5]);
                                 int targetRectBottom = (int)(values[5] + values[4] * frame.layout.height);
-                                int fonrMetricsBottom = (int)textPaint.getFontMetrics().bottom;
-                                int fonrMetricsTop = (int)textPaint.getFontMetrics().top;
-                                int y = (targetRectBottom + targetRectTop - fonrMetricsBottom - fonrMetricsTop) / 2;
+                                int fontMetricsBottom = (int)textPaint.getFontMetrics().bottom;
+                                int fontMetricsTop = (int)textPaint.getFontMetrics().top;
+                                int y = (targetRectBottom + targetRectTop - fontMetricsBottom - fontMetricsTop) / 2;
                                 canvas.drawText(text, x, y, textPaint);
                             }
                         }
@@ -147,7 +148,8 @@ class SVGADrawer implements Runnable {
     }
 
     private Paint maskPaint = new Paint();
-    private void bitmap(Canvas canvas, Bitmap imageBitmap, Path maskPath, Matrix matrix) {
+
+    private void drawBitmap(Canvas canvas, Bitmap imageBitmap, Path maskPath, Matrix matrix) {
         canvas.save();
         canvas.setMatrix(matrix);
         canvas.clipRect(0, 0, imageBitmap.getWidth(), imageBitmap.getHeight());
@@ -157,48 +159,28 @@ class SVGADrawer implements Runnable {
         canvas.restore();
     }
 
-    private Bitmap bitmap(String bitmapKey, BitmapDrawable bitmapDrawable, SVGARect layout) {
-        double imageWidth = bitmapDrawable.getIntrinsicWidth() * scaledDensity;
-        double imageHeight = bitmapDrawable.getIntrinsicHeight() * scaledDensity;
-
-        SVGABitmapCacheKey SVGABitmapCacheKey = new SVGABitmapCacheKey(bitmapKey, (int) layout.width, (int) layout.height);
-
-        if (layout.width == imageWidth && layout.height == imageHeight) {
-            Bitmap bitmap = videoItem.bitmapCache.get(SVGABitmapCacheKey);
-            if (null == bitmap) {
-                bitmap = bitmapDrawable.getBitmap();
-                videoItem.bitmapCache.put(SVGABitmapCacheKey, bitmap);
-            }
-            bitmap.prepareToDraw();
-            return bitmap;
+    static class BitmapWithScale {
+        final Bitmap mBitmap;
+        final float mScale;
+        BitmapWithScale(Bitmap bitmap) {
+            this(bitmap, -1f);
         }
-        if (layout.width > 0 && layout.height > 0 && imageWidth > 0 && imageHeight > 0) {
-            Bitmap bitmap = videoItem.bitmapCache.get(SVGABitmapCacheKey);
-            if (null != bitmap) {
-                bitmap.prepareToDraw();
-                return bitmap;
-            }
-            bitmap = Bitmap.createBitmap((int) layout.width, (int) layout.height, Bitmap.Config.ARGB_8888);
-            Canvas canvas = new Canvas(bitmap);
-            if (layout.width / layout.height < imageWidth / imageHeight) {
-                // width > height
-                double ratio = layout.width / imageWidth;
-                double top = (layout.height - imageHeight * ratio) / 2.0;
-                bitmapDrawable.setBounds(0, (int) top, (int) layout.width, (int) (layout.height - top));
-                bitmapDrawable.draw(canvas);
-            } else {
-                // height > width
-                double ratio = layout.height / imageHeight;
-                double left = (layout.width - imageWidth * ratio) / 2.0;
-                bitmapDrawable.setBounds((int) left, 0, (int) (layout.width - left), (int) layout.height);
-                bitmapDrawable.draw(canvas);
-            }
-            videoItem.bitmapCache.put(SVGABitmapCacheKey, bitmap);
-            return bitmap;
+        BitmapWithScale(Bitmap bitmap, float scale) {
+            mBitmap = bitmap;
+            mScale = scale;
+        }
+    }
+    private BitmapWithScale scaleBitmap(BitmapDrawable bitmapDrawable, SVGARect layout) {
+        Bitmap bitmap = bitmapDrawable.getBitmap();
+        if (Math.abs(layout.width - bitmap.getWidth()) < 0.01f
+                && Math.abs(layout.height - bitmap.getHeight()) < 0.01f) {
+            return new BitmapWithScale(bitmap);
+        }
+        if (layout.width > 0 && layout.height > 0) {
+            double scale = layout.width / bitmap.getWidth();
+            return new BitmapWithScale(bitmap, (float) scale);
         } else {
-            Bitmap bitmap = bitmapDrawable.getBitmap();
-            bitmap.prepareToDraw();
-            return bitmap;
+            return new BitmapWithScale(bitmapDrawable.getBitmap());
         }
     }
 
