@@ -48,15 +48,15 @@ public class SVGAPlayer extends TextureView implements TextureView.SurfaceTextur
 
     /* Set VideoItem, pause all animations if replacing. */
     public void setVideoItem(SVGAVideoEntity videoItem) {
-        this.stopAnimation();
         this.videoItem = videoItem;
     }
 
     /* Must call after set video item. */
     /* Return False IF FAILED.*/
     public boolean startAnimation() {
+        this.stopAnimation();
         this.animating = true;
-        if (this.videoItem != null && this.drawer == null && this.isAvailable()) {
+        if (this.videoItem != null && this.drawer == null) {
             this.createDrawer();
             this.startDrawing();
             return true;
@@ -169,10 +169,9 @@ public class SVGAPlayer extends TextureView implements TextureView.SurfaceTextur
 
     @Override
     public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
-        if (this.animating) {
-            synchronized (drawerLock) {
-                this.createDrawer();
-                this.startDrawing();
+        synchronized (drawerLock) {
+            if (null != this.drawer) {
+                this.drawer.videoWidth = (int) (getWidth() / getResources().getDisplayMetrics().scaledDensity);
             }
         }
     }
@@ -189,9 +188,6 @@ public class SVGAPlayer extends TextureView implements TextureView.SurfaceTextur
 
     @Override
     public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
-        synchronized (drawerLock) {
-            this.stopAnimation();
-        }
         return true;
     }
 

@@ -32,31 +32,43 @@ class SVGADrawer implements Runnable {
 
     @Override
     public void run() {
+        int fps = videoItem.FPS;
         boolean waiting = false;
-        while (textureView.animating && textureView.isAvailable()) {
-            synchronized (SVGADrawer.mLock) {
-                if (waiting) {
-                    if ((System.currentTimeMillis()) < nextTimestamp) {
-                        try {
-                            Thread.sleep((long) 1);
-                        } catch (InterruptedException e) {}
-                        continue;
+        while (textureView.animating) {
+            if (textureView.isAvailable()){
+                synchronized (SVGADrawer.mLock) {
+                    if (waiting) {
+                        if ((System.currentTimeMillis()) < nextTimestamp) {
+                            try {
+                                Thread.sleep((long) 1);
+                            } catch (InterruptedException e) {
+
+                            }
+                            continue;
+                        }
+                        if (null != currentCanvas) {
+                            textureView.unlockCanvasAndPost(currentCanvas);
+                            currentCanvas = null;
+                        }
+                        waiting = false;
+                        stepFrame();
+                    } else {
+                        nextTimestamp = System.currentTimeMillis() + (1000 / fps);
+                        currentCanvas = textureView.lockCanvas();
+                        if (currentCanvas != null) {
+                            drawFrame(currentCanvas);
+                        }
+                        waiting = true;
                     }
-                    if (null != currentCanvas) {
-                        textureView.unlockCanvasAndPost(currentCanvas);
-                        currentCanvas = null;
-                    }
-                    waiting = false;
-                    stepFrame();
                 }
-                else {
-                    int FPS = videoItem.FPS;
-                    nextTimestamp = System.currentTimeMillis() + (1000 / FPS);
-                    currentCanvas = textureView.lockCanvas();
-                    if (currentCanvas != null) {
-                        drawFrame(currentCanvas);
+            } else {
+                synchronized (SVGADrawer.mLock){
+                    try {
+                        Thread.sleep((long) (1000 / fps));
+                    } catch (InterruptedException e) {
+
                     }
-                    waiting = true;
+                    stepFrame();
                 }
             }
         }
