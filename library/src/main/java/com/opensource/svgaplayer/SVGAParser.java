@@ -1,7 +1,6 @@
 package com.opensource.svgaplayer;
 
 import android.content.Context;
-import android.support.v4.util.LruCache;
 
 import org.json.JSONObject;
 

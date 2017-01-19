@@ -1,11 +1,7 @@
 package com.opensource.svgaplayer;
 
 import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.Matrix;
-import android.graphics.Path;
 import android.graphics.drawable.BitmapDrawable;
-import android.text.TextUtils;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -17,8 +13,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Created by PonyCui_Home on 16/6/18.
@@ -34,10 +28,6 @@ public class SVGAVideoEntity implements Serializable {
     File cacheDir;
 
     transient final HashMap<String, BitmapDrawable> images = new HashMap<>();
-    transient final HashMap<SVGABitmapCacheKey, Bitmap> bitmapCache = new HashMap<>();
-
-    public SVGAVideoEntity() {
-    }
 
     public SVGAVideoEntity(JSONObject obj, File cacheDir) throws JSONException {
         this.cacheDir = cacheDir;
@@ -48,20 +38,6 @@ public class SVGAVideoEntity implements Serializable {
         videoSize = new SVGARect(0, 0, width, height);
         FPS = movie.getInt("fps");
         frames = movie.getInt("frames");
-    }
-
-    void resetImages() {
-        if (imagePathMap != null) {
-            Set<Map.Entry<String, String>> set = imagePathMap.entrySet();
-
-            for (Map.Entry<String, String> e : set) {
-                BitmapDrawable bitmapDrawable = new BitmapDrawable(
-                        Resources.getSystem(),
-                        e.getValue());
-                images.put(e.getKey(), bitmapDrawable);
-            }
-
-        }
     }
 
     void resetImages(JSONObject obj) {
