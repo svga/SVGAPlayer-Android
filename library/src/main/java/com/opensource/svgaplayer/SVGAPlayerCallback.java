@@ -9,4 +9,6 @@ public interface SVGAPlayerCallback {
 
     void onFinished(SVGAPlayer svgaPlayer);
 
+    void onStep(SVGAPlayer svgaPlayer, int frame, float percentage);
+
 }

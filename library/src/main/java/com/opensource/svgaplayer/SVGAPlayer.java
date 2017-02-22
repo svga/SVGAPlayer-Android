@@ -54,7 +54,7 @@ public class SVGAPlayer extends TextureView implements TextureView.SurfaceTextur
     /* Must call after set video item. */
     /* Return False IF FAILED.*/
     public boolean startAnimation() {
-        this.stopAnimation();
+        this.stopAnimation(true);
         this.animating = true;
         if (this.videoItem != null && this.drawer == null) {
             this.createDrawer();
@@ -66,14 +66,52 @@ public class SVGAPlayer extends TextureView implements TextureView.SurfaceTextur
         }
     }
 
+    public void pauseAnimation() {
+        if (this.drawer != null) {
+            this.drawer.pause();
+        }
+    }
+
     /* Stop current animation. */
     public void stopAnimation() {
+        stopAnimation(clearsAfterStop);
+    }
+
+    /* Stop current animation. */
+    public void stopAnimation(boolean clear) {
         this.animating = false;
-        this.stopDrawing();
+        this.stopDrawing(clear);
         if (null != callback) {
             callback.onPause(this);
         }
         this.releaseDrawer();
+    }
+
+    public void stepToFrame(int frame, boolean andPlay) {
+        if (frame >= videoItem.frames || frame < 0) {
+            return;
+        }
+        pauseAnimation();
+        if (this.drawer != null) {
+            this.drawer.currentFrame = frame;
+            this.drawer.draw();
+        }
+        if (andPlay) {
+            if (this.drawer != null) {
+                this.drawer.restore();
+            }
+            else {
+                startAnimation();
+            }
+        }
+    }
+
+    public void stepToPercentage(float percentage, boolean andPlay) {
+        int frame = (int)(videoItem.frames * percentage);
+        if (frame >= videoItem.frames && frame > 0) {
+            frame = videoItem.frames - 1;
+        }
+        stepToFrame(frame, andPlay);
     }
 
     /* Replace an image for key. */
@@ -144,7 +182,7 @@ public class SVGAPlayer extends TextureView implements TextureView.SurfaceTextur
         }
     }
 
-    protected void stopDrawing() {
+    protected void stopDrawing(boolean clear) {
         synchronized (SVGADrawer.mLock) {
             if (null != drawerThread) {
                 drawerThread.interrupt();
@@ -152,14 +190,18 @@ public class SVGAPlayer extends TextureView implements TextureView.SurfaceTextur
             }
             if (null != drawer) {
                 if (null != drawer.currentCanvas) {
-                    drawer.currentCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+                    if (clear) {
+                        drawer.currentCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+                    }
                     this.unlockCanvasAndPost(drawer.currentCanvas);
                     drawer.currentCanvas = null;
                 }
                 else {
                     Canvas canvas = lockCanvas();
                     if (canvas != null) {
-                        canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+                        if (clear) {
+                            canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+                        }
                         unlockCanvasAndPost(canvas);
                     }
                 }

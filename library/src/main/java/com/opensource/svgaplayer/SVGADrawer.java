@@ -31,6 +31,7 @@ class SVGADrawer implements Runnable {
     protected int loopCount = 0;
     protected int currentFrame = 0;
     protected long nextTimestamp = 0;
+    protected boolean paused = false;
 
     @Override
     public void run() {
@@ -39,13 +40,16 @@ class SVGADrawer implements Runnable {
         while (textureView.animating) {
             if (textureView.isAvailable()){
                 synchronized (SVGADrawer.mLock) {
-                    if (waiting) {
+                    if (paused) {
+                        try {
+                            Thread.sleep((long) 1);
+                        } catch (InterruptedException e) {}
+                    }
+                    else if (waiting) {
                         if ((System.currentTimeMillis()) < nextTimestamp) {
                             try {
                                 Thread.sleep((long) 1);
-                            } catch (InterruptedException e) {
-
-                            }
+                            } catch (InterruptedException e) {}
                             continue;
                         }
                         if (null != currentCanvas) {
@@ -63,14 +67,40 @@ class SVGADrawer implements Runnable {
                         waiting = true;
                     }
                 }
-            } else {
+            }
+            else {
                 synchronized (SVGADrawer.mLock){
                     try {
-                        Thread.sleep((long) (1000 / fps));
-                    } catch (InterruptedException e) {
-
+                        Thread.sleep((long) (1));
+                    } catch (InterruptedException e) {}
+                    if (!paused) {
+                        stepFrame();
                     }
-                    stepFrame();
+                }
+            }
+        }
+    }
+
+    void pause() {
+        paused = true;
+    }
+
+    void restore() {
+        paused = false;
+    }
+
+    void draw() {
+        if (textureView.isAvailable()) {
+            synchronized (SVGADrawer.mLock) {
+                if (null != currentCanvas) {
+                    textureView.unlockCanvasAndPost(currentCanvas);
+                    currentCanvas = null;
+                }
+                currentCanvas = textureView.lockCanvas();
+                if (currentCanvas != null) {
+                    drawFrame(currentCanvas);
+                    textureView.unlockCanvasAndPost(currentCanvas);
+                    currentCanvas = null;
                 }
             }
         }
@@ -86,12 +116,15 @@ class SVGADrawer implements Runnable {
             loopCount++;
             if (textureView.loops > 0 && loopCount >= textureView.loops) {
                 textureView.animating = false;
-                textureView.stopDrawing();
+                textureView.stopDrawing(textureView.clearsAfterStop);
                 if (null != textureView.callback) {
                     textureView.callback.onFinished(textureView);
                 }
                 textureView.releaseDrawer();
             }
+        }
+        if (textureView.callback != null && videoItem.frames > 0) {
+            textureView.callback.onStep(textureView, currentFrame, (float) currentFrame / (float) videoItem.frames);
         }
     }
 
