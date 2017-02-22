@@ -8,6 +8,7 @@ import android.graphics.DashPathEffect;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.PathMeasure;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.Shader;
@@ -196,24 +197,13 @@ class SVGADrawer implements Runnable {
     }
 
     private void drawShape(Canvas canvas, SVGAVideoShapeEntity shape, Matrix drawTransform) {
+        Path finalPath = new Path();
         if (shape.type == SVGAVideoShapeEntity.Type.shape) {
             Object d = shape.args.get("d");
             if (d instanceof String) {
                 SVGAPath svgaPath = new SVGAPath();
                 svgaPath.setValues((String) d);
-                Path finalPath = svgaPath.getPath();
-                drawTransform.postConcat(shape.transform);
-                finalPath.transform(drawTransform);
-                if (shape.styles.fill != 0x00000000) {
-                    paint.reset();
-                    paint.setAntiAlias(true);
-                    paint.setColor(shape.styles.fill);
-                    canvas.drawPath(finalPath, paint); // draw fill
-                }
-                if (shape.styles.strokeWidth > 0) {
-                    resetShapeStrokePaint(shape);
-                    canvas.drawPath(finalPath, paint); // draw stroke
-                }
+                finalPath = svgaPath.getPath();
             }
         }
         else if (shape.type == SVGAVideoShapeEntity.Type.ellipse) {
@@ -222,7 +212,6 @@ class SVGADrawer implements Runnable {
             Object rxv = shape.args.get("radiusX");
             Object ryv = shape.args.get("radiusY");
             if (xv instanceof Number && yv instanceof Number && rxv instanceof Number && ryv instanceof Number) {
-                Path finalPath = new Path();
                 float x = ((Number) xv).floatValue();
                 float y = ((Number) yv).floatValue();
                 float rx = ((Number) rxv).floatValue();
@@ -233,18 +222,6 @@ class SVGADrawer implements Runnable {
                 else if (Math.abs(rx - ry) < 0.1) {
                     finalPath.addCircle(x, y, rx, Path.Direction.CW);
                 }
-                drawTransform.postConcat(shape.transform);
-                finalPath.transform(drawTransform);
-                if (shape.styles.fill != 0x00000000) {
-                    paint.reset();
-                    paint.setAntiAlias(true);
-                    paint.setColor(shape.styles.fill);
-                    canvas.drawPath(finalPath, paint); // draw fill
-                }
-                if (shape.styles.strokeWidth > 0) {
-                    resetShapeStrokePaint(shape);
-                    canvas.drawPath(finalPath, paint); // draw stroke
-                }
             }
         }
         else if (shape.type == SVGAVideoShapeEntity.Type.rect) {
@@ -254,7 +231,6 @@ class SVGADrawer implements Runnable {
             Object hv = shape.args.get("height");
             Object crv = shape.args.get("cornerRadius");
             if (xv instanceof Number && yv instanceof Number && wv instanceof Number && hv instanceof Number && crv instanceof Number) {
-                Path finalPath = new Path();
                 float x = ((Number) xv).floatValue();
                 float y = ((Number) yv).floatValue();
                 float width = ((Number) wv).floatValue();
@@ -267,6 +243,50 @@ class SVGADrawer implements Runnable {
                     finalPath.addRect(x, y, x + width, y + height, Path.Direction.CW);
                 }
             }
+        }
+        if (finalPath != null) {
+            Matrix thisTransform = new Matrix();
+            thisTransform.postConcat(shape.transform);
+            thisTransform.postConcat(drawTransform);
+            finalPath.transform(thisTransform);
+            if (shape.styles.fill != 0x00000000) {
+                paint.reset();
+                paint.setAntiAlias(true);
+                paint.setColor(shape.styles.fill);
+                canvas.drawPath(finalPath, paint); // draw fill
+            }
+            if (shape.styles.strokeWidth > 0) {
+                resetShapeStrokePaint(shape);
+                canvas.drawPath(trimmedPath(finalPath, shape.styles.trimStart, shape.styles.trimEnd), paint); // draw stroke
+            }
+        }
+    }
+
+    private Path trimmedPath(Path path, float start, float end) {
+        if (Math.abs(start - 0.0) < 0.01 && Math.abs(end - 1.0) < 0.01) {
+            return path;
+        }
+        else {
+            Path currentPath = new Path(path);
+            Path tmpPath = new Path();
+            tmpPath.set(currentPath);
+            PathMeasure pathMeasure = new PathMeasure();
+            pathMeasure.setPath(tmpPath, false);
+            float length = pathMeasure.getLength();
+            float _start = length * start;
+            float _end = length * end;
+            float newStart = Math.min(_start, _end);
+            float newEnd = Math.max(_start, _end);
+            currentPath.reset();
+            if (newStart > length && newEnd > length) {
+                newStart %= length;
+                newEnd %= length;
+            }
+            if (newStart > newEnd) {
+                newStart -= length;
+            }
+            pathMeasure.getSegment(newStart, newEnd, currentPath, true);
+            return currentPath;
         }
     }
 
@@ -296,7 +316,11 @@ class SVGADrawer implements Runnable {
         }
         paint.setStrokeMiter(shape.styles.miterLimit);
         if (shape.styles.lineDash.length == 3) {
-            paint.setPathEffect(new DashPathEffect(new float[] {shape.styles.lineDash[0], shape.styles.lineDash[1]}, shape.styles.lineDash[2]));
+            paint.setPathEffect(new DashPathEffect(new float[] {
+                    shape.styles.lineDash[0] < 1f ? 1f : shape.styles.lineDash[0],
+                    shape.styles.lineDash[1] < 0.1f ? 0.1f : shape.styles.lineDash[1]
+                    }, shape.styles.lineDash[2])
+            );
         }
     }
 
