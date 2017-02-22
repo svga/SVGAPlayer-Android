@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.DashPathEffect;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
@@ -11,6 +12,7 @@ import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
+import android.os.Build;
 import android.text.TextPaint;
 
 /**
@@ -113,12 +115,12 @@ class SVGADrawer implements Runnable {
                         BitmapWithScale bitmap = scaleBitmap(bitmapDrawable, frame.layout);
                         if (null != bitmap) {
                             paint.setAlpha((int) (frame.alpha * 255));
-                            concatTransform.setConcat(drawTransform, frame.getTransform());
+                            concatTransform.setConcat(drawTransform, frame.transform);
                             if (bitmap.mScale > 0) {
                                 concatTransform.preScale(bitmap.mScale, bitmap.mScale);
                             }
-                            if (null != frame.getMaskPath()) {
-                                drawBitmap(canvas, bitmap.mBitmap, frame.getMaskPath(), concatTransform);
+                            if (null != frame.maskPath) {
+                                drawBitmap(canvas, bitmap.mBitmap, frame.maskPath, concatTransform);
                             }
                             else {
                                 canvas.drawBitmap(bitmap.mBitmap, concatTransform, paint);
@@ -139,6 +141,14 @@ class SVGADrawer implements Runnable {
                                 int y = (targetRectBottom + targetRectTop - fontMetricsBottom - fontMetricsTop) / 2;
                                 canvas.drawText(text, x, y, textPaint);
                             }
+                        }
+                    }
+                    if (frame.shapes.length > 0) {
+                        for (int j = 0; j < frame.shapes.length; j++) {
+                            SVGAVideoShapeEntity shape = frame.shapes[j];
+                            concatTransform.reset();
+                            concatTransform.setConcat(drawTransform, frame.transform);
+                            drawShape(canvas, shape, concatTransform);
                         }
                     }
                 }
@@ -170,6 +180,7 @@ class SVGADrawer implements Runnable {
             mScale = scale;
         }
     }
+
     private BitmapWithScale scaleBitmap(BitmapDrawable bitmapDrawable, SVGARect layout) {
         Bitmap bitmap = bitmapDrawable.getBitmap();
         if (Math.abs(layout.width - bitmap.getWidth()) < 0.01f
@@ -181,6 +192,111 @@ class SVGADrawer implements Runnable {
             return new BitmapWithScale(bitmap, (float) scale);
         } else {
             return new BitmapWithScale(bitmapDrawable.getBitmap());
+        }
+    }
+
+    private void drawShape(Canvas canvas, SVGAVideoShapeEntity shape, Matrix drawTransform) {
+        if (shape.type == SVGAVideoShapeEntity.Type.shape) {
+            Object d = shape.args.get("d");
+            if (d instanceof String) {
+                SVGAPath svgaPath = new SVGAPath();
+                svgaPath.setValues((String) d);
+                Path finalPath = svgaPath.getPath();
+                drawTransform.postConcat(shape.transform);
+                finalPath.transform(drawTransform);
+                if (shape.styles.fill != 0x00000000) {
+                    paint.reset();
+                    paint.setAntiAlias(true);
+                    paint.setColor(shape.styles.fill);
+                    canvas.drawPath(finalPath, paint); // draw fill
+                }
+                if (shape.styles.strokeWidth > 0) {
+                    resetShapeStrokePaint(shape);
+                    canvas.drawPath(finalPath, paint); // draw stroke
+                }
+            }
+        }
+        else if (shape.type == SVGAVideoShapeEntity.Type.ellipse) {
+            Object xv = shape.args.get("x");
+            Object yv = shape.args.get("y");
+            Object rxv = shape.args.get("radiusX");
+            Object ryv = shape.args.get("radiusY");
+            if (xv instanceof Number && yv instanceof Number && rxv instanceof Number && ryv instanceof Number) {
+                Path finalPath = new Path();
+                float x = ((Number) xv).floatValue();
+                float y = ((Number) yv).floatValue();
+                float rx = ((Number) rxv).floatValue();
+                float ry = ((Number) ryv).floatValue();
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    finalPath.addOval(x - rx, y - ry, x + rx, y + ry, Path.Direction.CW);
+                }
+                else if (Math.abs(rx - ry) < 0.1) {
+                    finalPath.addCircle(x, y, rx, Path.Direction.CW);
+                }
+                drawTransform.postConcat(shape.transform);
+                finalPath.transform(drawTransform);
+                if (shape.styles.fill != 0x00000000) {
+                    paint.reset();
+                    paint.setAntiAlias(true);
+                    paint.setColor(shape.styles.fill);
+                    canvas.drawPath(finalPath, paint); // draw fill
+                }
+                if (shape.styles.strokeWidth > 0) {
+                    resetShapeStrokePaint(shape);
+                    canvas.drawPath(finalPath, paint); // draw stroke
+                }
+            }
+        }
+        else if (shape.type == SVGAVideoShapeEntity.Type.rect) {
+            Object xv = shape.args.get("x");
+            Object yv = shape.args.get("y");
+            Object wv = shape.args.get("width");
+            Object hv = shape.args.get("height");
+            Object crv = shape.args.get("cornerRadius");
+            if (xv instanceof Number && yv instanceof Number && wv instanceof Number && hv instanceof Number && crv instanceof Number) {
+                Path finalPath = new Path();
+                float x = ((Number) xv).floatValue();
+                float y = ((Number) yv).floatValue();
+                float width = ((Number) wv).floatValue();
+                float height = ((Number) hv).floatValue();
+                float cornerRadius = ((Number) crv).floatValue();
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    finalPath.addRoundRect(x, y, x + width, y + height, cornerRadius, cornerRadius, Path.Direction.CW);
+                }
+                else {
+                    finalPath.addRect(x, y, x + width, y + height, Path.Direction.CW);
+                }
+            }
+        }
+    }
+
+    private void resetShapeStrokePaint(SVGAVideoShapeEntity shape) {
+        paint.reset();
+        paint.setAntiAlias(true);
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setColor(shape.styles.stroke);
+        paint.setStrokeWidth(shape.styles.strokeWidth);
+        if (shape.styles.lineCap.equalsIgnoreCase("butt")) {
+            paint.setStrokeCap(Paint.Cap.BUTT);
+        }
+        else if (shape.styles.lineCap.equalsIgnoreCase("round")) {
+            paint.setStrokeCap(Paint.Cap.ROUND);
+        }
+        else if (shape.styles.lineCap.equalsIgnoreCase("square")) {
+            paint.setStrokeCap(Paint.Cap.SQUARE);
+        }
+        if (shape.styles.lineJoin.equalsIgnoreCase("miter")) {
+            paint.setStrokeJoin(Paint.Join.MITER);
+        }
+        else if (shape.styles.lineJoin.equalsIgnoreCase("round")) {
+            paint.setStrokeJoin(Paint.Join.ROUND);
+        }
+        else if (shape.styles.lineJoin.equalsIgnoreCase("bevel")) {
+            paint.setStrokeJoin(Paint.Join.BEVEL);
+        }
+        paint.setStrokeMiter(shape.styles.miterLimit);
+        if (shape.styles.lineDash.length == 3) {
+            paint.setPathEffect(new DashPathEffect(new float[] {shape.styles.lineDash[0], shape.styles.lineDash[1]}, shape.styles.lineDash[2]));
         }
     }
 

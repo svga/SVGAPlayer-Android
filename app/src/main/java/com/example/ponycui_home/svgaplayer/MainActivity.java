@@ -143,11 +143,19 @@ public class MainActivity extends AppCompatActivity {
             "http://legox.yy.com/svga/svga-zhiniu/yanhua.svga"
     };
 
+    String[] vectorUrls = new String[] {
+            "http://legox.yy.com/svga/svga-vector/EmptyState.svga",
+            "http://legox.yy.com/svga/svga-vector/HamburgerArrow.svga",
+            "http://legox.yy.com/svga/svga-vector/PinJump.svga",
+            "http://legox.yy.com/svga/svga-vector/TwitterHeart.svga",
+            "http://legox.yy.com/svga/svga-vector/Walkthrough.svga"
+    };
+
     SVGAParser parser;
     SVGAPlayer player;
     int i = 0;
     void configurePlayer() {
-        player.loops = 1;
+        player.loops = 0;
         player.clearsAfterStop = true;
         if (parser == null) {
             parser = new SVGAParser(this);
@@ -156,7 +164,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 try {
-                    String url = giftUrls2[i++ % giftUrls2.length];
+                    String url = "http://legox.yy.com/svga/svga-vector/EmptyState.svga";
                     final SVGAVideoEntity videoItem = parser.parse(new URL(url));
                     mUIHandler.post(new Runnable() {
                         @Override
@@ -166,13 +174,13 @@ public class MainActivity extends AppCompatActivity {
 
                         }
                     });
-                    mUIHandler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            player.stopAnimation();
-                            configurePlayer();
-                        }
-                    }, 8000);
+//                    mUIHandler.postDelayed(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            player.stopAnimation();
+//                            configurePlayer();
+//                        }
+//                    }, 10000);
                 } catch (Exception e) {
                     System.out.println(e);
                 }

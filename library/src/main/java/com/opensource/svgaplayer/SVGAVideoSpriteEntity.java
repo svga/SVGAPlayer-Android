@@ -10,7 +10,7 @@ import java.util.ArrayList;
 /**
  * Created by cuiminghui on 2016/10/17.
  */
-class SVGAVideoSpriteEntity implements Serializable {
+class SVGAVideoSpriteEntity {
 
     String imageKey;
     ArrayList<SVGAVideoSpriteFrameEntity> frames;
@@ -24,7 +24,11 @@ class SVGAVideoSpriteEntity implements Serializable {
         JSONArray jsonFrames = obj.getJSONArray("frames");
         for (int i = 0; i < jsonFrames.length(); i++) {
             JSONObject frameObject = jsonFrames.getJSONObject(i);
-            frames.add(new SVGAVideoSpriteFrameEntity(frameObject));
+            SVGAVideoSpriteFrameEntity frameItem = new SVGAVideoSpriteFrameEntity(frameObject);
+            if (frameItem.shapes.length == 1 && frameItem.shapes[0].isKeep() && frames.size() > 0) {
+                frameItem.shapes = frames.get(frames.size() - 1).shapes;
+            }
+            frames.add(frameItem);
         }
     }
 

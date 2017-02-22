@@ -17,7 +17,8 @@ import java.util.Iterator;
 /**
  * Created by PonyCui_Home on 16/6/18.
  */
-public class SVGAVideoEntity implements Serializable {
+public class SVGAVideoEntity {
+
     private static final String TAG = "SVGAVideoEntity";
     SVGARect videoSize = new SVGARect(0, 0, 0, 0);
     int FPS = 15;
@@ -27,7 +28,7 @@ public class SVGAVideoEntity implements Serializable {
     ArrayList<SVGAVideoSpriteEntity> sprites;
     File cacheDir;
 
-    transient final HashMap<String, BitmapDrawable> images = new HashMap<>();
+    final HashMap<String, BitmapDrawable> images = new HashMap<>();
 
     public SVGAVideoEntity(JSONObject obj, File cacheDir) throws JSONException {
         this.cacheDir = cacheDir;

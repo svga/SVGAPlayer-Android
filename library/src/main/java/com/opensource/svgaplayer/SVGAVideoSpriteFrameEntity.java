@@ -4,6 +4,7 @@ import android.graphics.Matrix;
 import android.graphics.Path;
 import android.text.TextUtils;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -12,40 +13,21 @@ import java.io.Serializable;
 /**
  * Created by cuiminghui on 2016/10/17.
  */
-class SVGAVideoSpriteFrameEntity implements Serializable {
+class SVGAVideoSpriteFrameEntity {
 
-    double alpha;
-    SVGARect layout;
-    final float[] arr = new float[9];
-    private SVGAPath path;
+    double alpha = 0.0;
+    SVGARect layout = new SVGARect();
+    Matrix transform = new Matrix();
+    Path maskPath = null;
+    SVGAVideoShapeEntity[] shapes = new SVGAVideoShapeEntity[0];
 
-    private transient final Matrix transform = new Matrix();
-    private transient Path maskPath;
-
-    public Matrix getTransform() {
-        transform.setValues(arr);
-
-        return transform;
-    }
-
-    public Path getMaskPath() {
-        if (maskPath != null) {
-            return maskPath;
-        }
-        if (path != null) {
-            maskPath = path.getPath();
-        }
-        return maskPath;
-    }
-
-    public SVGAVideoSpriteFrameEntity() {
-
-    }
+    public SVGAVideoSpriteFrameEntity() {}
 
     SVGAVideoSpriteFrameEntity(JSONObject obj) throws JSONException {
         alpha = obj.optDouble("alpha", 0);
         final JSONObject transformJO = obj.optJSONObject("transform");
         if (transformJO != null) {
+            final float[] arr = new float[9];
             double a = transformJO.getDouble("a");
             double b = transformJO.getDouble("b");
             double c = transformJO.getDouble("c");
@@ -61,8 +43,8 @@ class SVGAVideoSpriteFrameEntity implements Serializable {
             arr[6] = (float) 0.0;
             arr[7] = (float) 0.0;
             arr[8] = (float) 1.0;
+            transform.setValues(arr);
         }
-
         final JSONObject layoutJO = obj.optJSONObject("layout");
         if (layoutJO != null) {
             double x = layoutJO.getDouble("x");
@@ -71,12 +53,24 @@ class SVGAVideoSpriteFrameEntity implements Serializable {
             double height = layoutJO.getDouble("height");
             layout = new SVGARect(x, y, width, height);
         }
-
         String clipPath = obj.optString("clipPath");
         if (!TextUtils.isEmpty(clipPath)) {
-            path = new SVGAPath();
+            SVGAPath path = new SVGAPath();
             path.setValues(clipPath);
             maskPath = path.getPath();
         }
+        JSONArray shapes = obj.optJSONArray("shapes");
+        if (shapes != null) {
+            this.shapes = new SVGAVideoShapeEntity[shapes.length()];
+            for (int i = 0; i < shapes.length(); i++) {
+                if (shapes.optJSONObject(i) != null) {
+                    this.shapes[i] = new SVGAVideoShapeEntity(shapes.optJSONObject(i));
+                }
+                else {
+                    this.shapes[i] = new SVGAVideoShapeEntity();
+                }
+            }
+        }
     }
+
 }
