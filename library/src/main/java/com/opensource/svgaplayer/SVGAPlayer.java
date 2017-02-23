@@ -70,6 +70,9 @@ public class SVGAPlayer extends TextureView implements TextureView.SurfaceTextur
         if (this.drawer != null) {
             this.drawer.pause();
         }
+        if (null != callback) {
+            callback.onPause(this);
+        }
     }
 
     /* Stop current animation. */
