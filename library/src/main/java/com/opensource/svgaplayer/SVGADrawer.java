@@ -290,36 +290,8 @@ class SVGADrawer implements Runnable {
             }
             if (shape.styles.strokeWidth > 0) {
                 resetShapeStrokePaint(shape);
-                canvas.drawPath(trimmedPath(finalPath, shape.styles.trimStart, shape.styles.trimEnd), paint); // draw stroke
+                canvas.drawPath(finalPath, paint); // draw stroke
             }
-        }
-    }
-
-    private Path trimmedPath(Path path, float start, float end) {
-        if (Math.abs(start - 0.0) < 0.01 && Math.abs(end - 1.0) < 0.01) {
-            return path;
-        }
-        else {
-            Path currentPath = new Path(path);
-            Path tmpPath = new Path();
-            tmpPath.set(currentPath);
-            PathMeasure pathMeasure = new PathMeasure();
-            pathMeasure.setPath(tmpPath, false);
-            float length = pathMeasure.getLength();
-            float _start = length * start;
-            float _end = length * end;
-            float newStart = Math.min(_start, _end);
-            float newEnd = Math.max(_start, _end);
-            currentPath.reset();
-            if (newStart > length && newEnd > length) {
-                newStart %= length;
-                newEnd %= length;
-            }
-            if (newStart > newEnd) {
-                newStart -= length;
-            }
-            pathMeasure.getSegment(newStart, newEnd, currentPath, true);
-            return currentPath;
         }
     }
 

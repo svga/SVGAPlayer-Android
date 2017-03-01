@@ -28,8 +28,6 @@ class SVGAVideoShapeEntity {
         int fill = 0x00000000;
         int stroke = 0x00000000;
         float strokeWidth = 0.0f;
-        float trimStart = 0.0f;
-        float trimEnd = 1.0f;
         String lineCap = "butt";
         String lineJoin = "miter";
         int miterLimit = 0;
@@ -107,11 +105,6 @@ class SVGAVideoShapeEntity {
                 styles.stroke = Color.argb((int)(strokeArr.optDouble(3) * 255), (int)(strokeArr.optDouble(0) * 255), (int)(strokeArr.optDouble(1) * 255), (int)(strokeArr.optDouble(2) * 255));
             }
             styles.strokeWidth = (float) values.optDouble("strokeWidth", 0.0);
-            JSONObject trimObj = values.optJSONObject("trim");
-            if (trimObj != null) {
-                styles.trimStart = (float) trimObj.optDouble("start", 0.0);
-                styles.trimEnd = (float) trimObj.optDouble("end", 1.0);
-            }
             styles.lineCap = values.optString("lineCap", "butt");
             styles.lineJoin = values.optString("lineJoin", "miter");
             styles.miterLimit = values.optInt("miterLimit", 0);
