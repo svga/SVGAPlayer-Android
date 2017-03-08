@@ -19,6 +19,7 @@ import android.text.TextPaint;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.opensource.svgaplayer.SVGAExporter;
 import com.opensource.svgaplayer.SVGAParser;
 import com.opensource.svgaplayer.SVGAPlayer;
 import com.opensource.svgaplayer.SVGAPlayerCallback;
@@ -48,7 +49,6 @@ public class MainActivity extends AppCompatActivity {
         configureBackgroundView();
         addContentView(backgroundView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         addContentView(player, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-
         final MainActivity obj = this;
         backgroundView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -62,12 +62,6 @@ public class MainActivity extends AppCompatActivity {
                 startActivityForResult(intent, RESULT_OK);
             }
         });
-//        player.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//
-//            }
-//        });
     }
 
     @Override
@@ -238,6 +232,26 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    void configureExporter() {
+        if (parser == null) {
+            parser = new SVGAParser(this);
+        }
+        handler().post(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    String url = "http://legox.yy.com/svga/svga-me/angel.svga";
+                    final SVGAVideoEntity videoItem = parser.parse(new URL(url));
+                    SVGAExporter exporter = new SVGAExporter();
+                    exporter.videoItem = videoItem;
+                    exporter.toPNGByteArray();
+                } catch (Exception e) {
+                    System.out.println(e);
+                }
+            }
+        });
     }
 
     // 你需要自行将 Image 处理成最终要展现的 Image，比如，添加圆角、添加边框等等。
