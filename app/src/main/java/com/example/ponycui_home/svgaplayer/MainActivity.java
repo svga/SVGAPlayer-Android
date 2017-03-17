@@ -73,8 +73,8 @@ public class MainActivity extends AppCompatActivity {
                runOnUiThread(new Runnable() {
                    @Override
                    public void run() {
-                       configurePlayer();
-//                        configureDynamicPlayer();
+//                       configurePlayer();
+                        configureDynamicPlayer();
                    }
                });
             }
@@ -209,12 +209,12 @@ public class MainActivity extends AppCompatActivity {
                     textPaint.setFakeBoldText(true);
                     textPaint.setARGB(0xff, 0xff, 0xe0, 0xa4);
                     textPaint.setShadowLayer((float)1.0, (float)0.0, (float)1.0, Color.BLACK);
-                    player.setDynamicText("崔小姐不吃鱼 送了魔法奇缘", textPaint, "banner");
+                    player.setDynamicText("崔小姐不吃鱼 送了魔法奇缘", textPaint, "MZ");
                     Thread thread = new Thread(new Runnable() {
                         @Override
                         public void run() {
                             try {
-                                final SVGAVideoEntity videoItem = parser.parse(new URL("http://uedfe.yypm.com/assets/svga-me/kingset_dyn.svga"));
+                                final SVGAVideoEntity videoItem = parser.parse(new URL("http://legox.yy.com/svga/svga-jy/170227baodeng.svga"));
                                 handler.post(new Runnable() {
                                     @Override
                                     public void run() {
