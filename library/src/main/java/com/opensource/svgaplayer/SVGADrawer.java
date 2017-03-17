@@ -160,27 +160,7 @@ class SVGADrawer implements Runnable {
                                 canvas.drawBitmap(bitmap.mBitmap, concatTransform, paint);
                             }
                             if (textureView.dynamicTexts.containsKey(sprite.imageKey)) {
-                                Bitmap textBitmap = Bitmap.createBitmap(bitmap.mBitmap.getWidth(), bitmap.mBitmap.getHeight(), Bitmap.Config.ARGB_8888);
-                                Canvas textCanvas = new Canvas(textBitmap);
-                                String text = textureView.dynamicTexts.get(sprite.imageKey);
-                                TextPaint textPaint = textureView.dynamicTextPaints.get(sprite.imageKey);
-                                textPaint.setAntiAlias(true);
-                                Rect bounds = new Rect();
-                                textPaint.getTextBounds(text, 0, text.length(), bounds);
-                                int x = (int)((bitmap.mBitmap.getWidth() - bounds.width()) / 2.0);
-                                int targetRectTop = 0;
-                                int targetRectBottom = bitmap.mBitmap.getHeight();
-                                int fontMetricsBottom = (int)textPaint.getFontMetrics().bottom;
-                                int fontMetricsTop = (int)textPaint.getFontMetrics().top;
-                                int y = (targetRectBottom + targetRectTop - fontMetricsBottom - fontMetricsTop) / 2;
-                                textCanvas.drawText(text, x, y, textPaint);
-                                if (null != frame.maskPath) {
-                                    drawBitmap(canvas, textBitmap, frame.maskPath, concatTransform);
-                                }
-                                else {
-                                    paint.setAntiAlias(true);
-                                    canvas.drawBitmap(textBitmap, concatTransform, paint);
-                                }
+                                drawText(canvas, bitmap.mBitmap, frame.maskPath, textureView.dynamicTexts.get(sprite.imageKey), textureView.dynamicTextPaints.get(sprite.imageKey));
                             }
                         }
                     }
@@ -234,6 +214,28 @@ class SVGADrawer implements Runnable {
             return new BitmapWithScale(bitmap, (float) scale);
         } else {
             return new BitmapWithScale(bitmapDrawable.getBitmap());
+        }
+    }
+
+    private void drawText(Canvas canvas, Bitmap targetBitmap, Path maskPath, String text, TextPaint textPaint) {
+        Bitmap textBitmap = Bitmap.createBitmap(targetBitmap.getWidth(), targetBitmap.getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas textCanvas = new Canvas(textBitmap);
+        textPaint.setAntiAlias(true);
+        Rect bounds = new Rect();
+        textPaint.getTextBounds(text, 0, text.length(), bounds);
+        int x = (int)((targetBitmap.getWidth() - bounds.width()) / 2.0);
+        int targetRectTop = 0;
+        int targetRectBottom = targetBitmap.getHeight();
+        int fontMetricsBottom = (int)textPaint.getFontMetrics().bottom;
+        int fontMetricsTop = (int)textPaint.getFontMetrics().top;
+        int y = (targetRectBottom + targetRectTop - fontMetricsBottom - fontMetricsTop) / 2;
+        textCanvas.drawText(text, x, y, textPaint);
+        if (null != maskPath) {
+            drawBitmap(canvas, textBitmap, maskPath, concatTransform);
+        }
+        else {
+            paint.setAntiAlias(true);
+            canvas.drawBitmap(textBitmap, concatTransform, paint);
         }
     }
 
