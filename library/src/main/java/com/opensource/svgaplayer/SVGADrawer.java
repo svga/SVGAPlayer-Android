@@ -8,7 +8,6 @@ import android.graphics.DashPathEffect;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.PathMeasure;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.Shader;
@@ -107,12 +106,12 @@ class SVGADrawer implements Runnable {
     }
 
     private void stepFrame() {
-        if (this.videoItem.sprites.size() == 0) {
+        if (videoItem == null || videoItem.sprites.size() == 0) {
             return;
         }
-        this.currentFrame++;
-        if (this.currentFrame >= this.videoItem.frames) {
-            this.currentFrame = 0;
+        currentFrame++;
+        if (currentFrame >= videoItem.frames) {
+            currentFrame = 0;
             loopCount++;
             if (textureView.loops > 0 && loopCount >= textureView.loops) {
                 textureView.animating = false;
@@ -135,8 +134,8 @@ class SVGADrawer implements Runnable {
         canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
         if (null != videoItem) {
             drawTransform.setScale(
-                    (float) (this.videoWidth / (videoItem.videoSize.width / scaledDensity)),
-                    (float) (this.videoWidth / (videoItem.videoSize.width / scaledDensity)));
+                    (float) (videoWidth / (videoItem.videoSize.width / scaledDensity)),
+                    (float) (videoWidth / (videoItem.videoSize.width / scaledDensity)));
             for (int i = 0; i < videoItem.sprites.size(); i++) {
                 SVGAVideoSpriteEntity sprite = videoItem.sprites.get(i);
                 SVGAVideoSpriteFrameEntity frame = sprite.frames.get(currentFrame);
