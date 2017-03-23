@@ -188,7 +188,6 @@ public class SVGAPlayer extends TextureView implements TextureView.SurfaceTextur
     protected void stopDrawing(boolean clear) {
         synchronized (SVGADrawer.mLock) {
             if (null != drawerThread) {
-                drawerThread.interrupt();
                 drawerThread = null;
             }
             if (null != drawer) {
