@@ -119,7 +119,6 @@ class SVGADrawer implements Runnable {
                 if (null != textureView.callback) {
                     textureView.callback.onFinished(textureView);
                 }
-                textureView.releaseDrawer();
             }
         }
         if (textureView.callback != null && videoItem.frames > 0) {
