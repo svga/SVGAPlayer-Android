@@ -2,6 +2,10 @@
 
 ## Version
 
+### 1.1.1-alpha
+
+SVGAPlayer 的第 3 个版本，将使用 Kotlin 重写整个 SVGAPlayer。
+
 ### 1.1.0-beta
 
 SVGAPlayer 的第 2 个版本，对应 SVGA-1.1.0 协议，支持矢量动画，向下兼容 SVGA-1.0.0 协议。
