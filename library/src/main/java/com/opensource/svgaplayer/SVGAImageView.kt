@@ -65,9 +65,18 @@ class SVGAImageView : ImageView {
         val drawable = drawable as? SVGADrawable ?: return
         drawable.cleared = false
         drawable.videoItem?.let {
+            var durationScale = 1.0
             val animator = ValueAnimator.ofInt(0, it.frames - 1)
+            Class.forName("android.animation.ValueAnimator")?.let {
+                it.getDeclaredField("sDurationScale")?.let {
+                    it.isAccessible = true
+                    it.getFloat(Class.forName("android.animation.ValueAnimator"))?.let {
+                        durationScale = it.toDouble()
+                    }
+                }
+            }
             animator.interpolator = LinearInterpolator()
-            animator.duration = (it.frames * (1000 / it.FPS)).toLong()
+            animator.duration = (it.frames * (1000 / it.FPS) / durationScale).toLong()
             animator.repeatCount = if (loops <= 0) 99999 else loops - 1
             animator.addUpdateListener {
                 drawable.currentFrame = animator.animatedValue as Int
@@ -100,6 +109,10 @@ class SVGAImageView : ImageView {
             it.cleared = clear
             it.invalidateSelf()
         }
+    }
+
+    fun setVideoItem(videoItem: SVGAVideoEntity) {
+        setImageDrawable(SVGADrawable(videoItem))
     }
 
 }

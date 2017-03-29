@@ -120,6 +120,7 @@ class SVGAVideoShapeEntity(obj: JSONObject) {
                     styles.lineDash[i] = it.optDouble(i, 0.0).toFloat()
                 }
             }
+            this.styles = styles
         }
     }
 
@@ -127,12 +128,12 @@ class SVGAVideoShapeEntity(obj: JSONObject) {
         obj.optJSONObject("transform")?.let {
             val transform = Matrix()
             val arr = FloatArray(9)
-            val a = obj.optDouble("a", 1.0)
-            val b = obj.optDouble("b", 0.0)
-            val c = obj.optDouble("c", 0.0)
-            val d = obj.optDouble("d", 1.0)
-            val tx = obj.optDouble("tx", 0.0)
-            val ty = obj.optDouble("ty", 0.0)
+            val a = it.optDouble("a", 1.0)
+            val b = it.optDouble("b", 0.0)
+            val c = it.optDouble("c", 0.0)
+            val d = it.optDouble("d", 1.0)
+            val tx = it.optDouble("tx", 0.0)
+            val ty = it.optDouble("ty", 0.0)
             arr[0] = a.toFloat() // a
             arr[1] = c.toFloat() // c
             arr[2] = tx.toFloat() // tx

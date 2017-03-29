@@ -1,5 +1,6 @@
 package com.example.ponycui_home.svgaplayer;
 
+import android.animation.ValueAnimator;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Canvas;
@@ -30,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
         testView.setBackgroundColor(Color.GRAY);
         SVGAParser parser = new SVGAParser(this);
         try {
-            parser.parse(new URL("http://legox.yy.com/svga/svga-me/rainbowrose.svga"), new SVGAParser.ParseCompletion() {
+            parser.parse(new URL("http://legox.yy.com/svga/svga-vector/PinJump.svga"), new SVGAParser.ParseCompletion() {
                 @Override
                 public void onComplete(@NotNull SVGAVideoEntity videoItem) {
                     SVGADrawable drawable = new SVGADrawable(videoItem);
