@@ -3,9 +3,11 @@ package com.opensource.svgaplayer
 import android.animation.Animator
 import android.animation.ValueAnimator
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.ColorFilter
 import android.graphics.drawable.Drawable
+import android.text.TextPaint
 import android.util.AttributeSet
 import android.view.Choreographer
 import android.view.ViewPropertyAnimator
@@ -16,7 +18,9 @@ import android.widget.ImageView
  * Created by cuiminghui on 2017/3/29.
  */
 
-class SVGADrawable(val videoItem: SVGAVideoEntity): Drawable() {
+class SVGADrawable(val videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicEntity): Drawable() {
+
+    constructor(videoItem: SVGAVideoEntity): this(videoItem, SVGADynamicEntity())
 
     var cleared = true
 
@@ -28,7 +32,7 @@ class SVGADrawable(val videoItem: SVGAVideoEntity): Drawable() {
             return
         }
         canvas?.let {
-            val drawer = SVGACanvasDrawer(videoItem, it)
+            val drawer = SVGACanvasDrawer(videoItem, dynamicItem, it)
             drawer.drawFrame(currentFrame)
         }
     }
@@ -113,6 +117,10 @@ class SVGAImageView : ImageView {
 
     fun setVideoItem(videoItem: SVGAVideoEntity) {
         setImageDrawable(SVGADrawable(videoItem))
+    }
+
+    fun setVideoItem(videoItem: SVGAVideoEntity, dynamicItem: SVGADynamicEntity) {
+        setImageDrawable(SVGADrawable(videoItem, dynamicItem))
     }
 
 }
