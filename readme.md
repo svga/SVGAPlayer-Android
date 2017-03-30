@@ -26,6 +26,22 @@ SVGAPlayer 的第 1 个版本，对应 SVGA-1.0.0 协议，支持位图（位移
 
 ### Gradle 
 
+添加 JitPack.io 到 root build.gradle 中
+```
+allprojects {
+    repositories {
+        ...
+        maven { url 'https://jitpack.io' }
+    }
+}
+```
+
+添加以下依赖，请根据需要修改版本号，要获取最新的版本请点入 https://jitpack.io/#yyued/SVGAPlayer-Android/1.1.0-beta
+```
+compile 'com.github.yyued:SVGAPlayer-Android:1.2.0-beta'
+compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:1.1.1"
+```
+
 ## 使用
 
 ### Layout.xml
