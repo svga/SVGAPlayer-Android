@@ -49,21 +49,63 @@ class SVGADrawable(val videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
 
 }
 
-class SVGAImageView : ImageView {
+open class SVGAImageView : ImageView {
+
+    enum class FillMode {
+        Backward,
+        Forward,
+    }
 
     var loops = 0
 
     var clearsAfterStop = true
 
+    var fillMode: FillMode = FillMode.Forward
+
+    var callback: SVGACallback? = null
+
     private var animator: ValueAnimator? = null
 
     constructor(context: Context) : super(context) {}
 
-    constructor(context: Context, attrs: AttributeSet) : super(context, attrs) {}
+    constructor(context: Context, attrs: AttributeSet) : super(context, attrs) {
+        loadAttrs(attrs)
+    }
 
-    constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {}
+    constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
+        loadAttrs(attrs)
+    }
 
-    constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes) {}
+    constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes) {
+        loadAttrs(attrs)
+    }
+
+    fun loadAttrs(attrs: AttributeSet) {
+        val typedArray = context.theme.obtainStyledAttributes(attrs, R.styleable.SVGAImageView, 0, 0)
+        loops = typedArray.getInt(R.styleable.SVGAImageView_loopCount, 0)
+        clearsAfterStop = typedArray.getBoolean(R.styleable.SVGAImageView_clearsAfterStop, true)
+        typedArray.getString(R.styleable.SVGAImageView_source).let {
+            val parser = SVGAParser(context)
+            Thread({
+                parser.parse(it)?.let {
+                    handler.post({
+                        setVideoItem(it)
+                        if (typedArray.getBoolean(R.styleable.SVGAImageView_autoPlay, true)) {
+                            startAnimation()
+                        }
+                    })
+                }
+            }).start()
+        }
+        typedArray.getString(R.styleable.SVGAImageView_fillMode)?.let {
+            if (it.equals("0")) {
+                fillMode = FillMode.Backward
+            }
+            else if (it.equals("1")) {
+                fillMode = FillMode.Forward
+            }
+        }
+    }
 
     fun startAnimation() {
         val drawable = drawable as? SVGADrawable ?: return
@@ -85,11 +127,21 @@ class SVGAImageView : ImageView {
             animator.addUpdateListener {
                 drawable.currentFrame = animator.animatedValue as Int
                 drawable.invalidateSelf()
+                callback?.onStep(drawable.currentFrame, ((drawable.currentFrame + 1).toDouble() / drawable.videoItem.frames.toDouble()))
             }
             animator.addListener(object : Animator.AnimatorListener {
-                override fun onAnimationRepeat(animation: Animator?) {}
+                override fun onAnimationRepeat(animation: Animator?) {
+                    callback?.onRepeat()
+                }
                 override fun onAnimationEnd(animation: Animator?) {
                     stopAnimation()
+                    if (!clearsAfterStop) {
+                        if (fillMode == FillMode.Backward) {
+                            drawable.currentFrame = 0
+                            drawable.invalidateSelf()
+                        }
+                    }
+                    callback?.onFinished()
                 }
                 override fun onAnimationCancel(animation: Animator?) {}
                 override fun onAnimationStart(animation: Animator?) {}
@@ -101,6 +153,7 @@ class SVGAImageView : ImageView {
 
     fun pauseAnimation() {
         stopAnimation(false)
+        callback?.onPause()
     }
 
     fun stopAnimation() {
@@ -116,11 +169,35 @@ class SVGAImageView : ImageView {
     }
 
     fun setVideoItem(videoItem: SVGAVideoEntity) {
-        setImageDrawable(SVGADrawable(videoItem))
+        setVideoItem(videoItem, SVGADynamicEntity())
     }
 
     fun setVideoItem(videoItem: SVGAVideoEntity, dynamicItem: SVGADynamicEntity) {
-        setImageDrawable(SVGADrawable(videoItem, dynamicItem))
+        val drawable = SVGADrawable(videoItem, dynamicItem)
+        drawable.cleared = clearsAfterStop
+        setImageDrawable(drawable)
+    }
+
+    fun stepToFrame(frame: Int, andPlay: Boolean) {
+        pauseAnimation()
+        val drawable = drawable as? SVGADrawable ?: return
+        drawable.currentFrame = frame
+        drawable.invalidateSelf()
+        if (andPlay) {
+            startAnimation()
+            animator?.let {
+                it.currentPlayTime = (Math.max(0.0f, Math.min(1.0f, (frame.toFloat() / drawable.videoItem.frames.toFloat()))) * it.duration).toLong()
+            }
+        }
+    }
+
+    fun stepToPercentage(percentage: Double, andPlay: Boolean) {
+        val drawable = drawable as? SVGADrawable ?: return
+        var frame = (drawable.videoItem.frames * percentage).toInt()
+        if (frame >= drawable.videoItem.frames && frame > 0) {
+            frame = drawable.videoItem.frames - 1
+        }
+        stepToFrame(frame, andPlay)
     }
 
 }

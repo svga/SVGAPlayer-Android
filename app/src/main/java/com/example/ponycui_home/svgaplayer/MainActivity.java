@@ -20,6 +20,7 @@ import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.view.View;
 
+import com.opensource.svgaplayer.SVGACallback;
 import com.opensource.svgaplayer.SVGACanvasDrawer;
 import com.opensource.svgaplayer.SVGADrawable;
 import com.opensource.svgaplayer.SVGADynamicEntity;
@@ -38,6 +39,12 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
+
+/**
+ * Created by cuiminghui on 2017/3/30.
+ * 这是最复杂的一个 Sample， 演示了从网络加载动画，并播放动画。
+ */
+
 public class MainActivity extends AppCompatActivity {
 
     SVGAImageView testView = null;
@@ -48,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         testView = new SVGAImageView(this);
         testView.setBackgroundColor(Color.GRAY);
+        setupCallback();
         loadDynamicText();
         loadDynamicBitmap(new Runnable() {
             @Override
@@ -56,6 +64,31 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         setContentView(testView);
+    }
+
+    private void setupCallback() {
+        testView.setCallback(new SVGACallback() {
+            @Override
+            public void onPause() {
+
+            }
+
+            @Override
+            public void onFinished() {
+
+            }
+
+            @Override
+            public void onRepeat() {
+
+            }
+
+            @Override
+            public void onStep(int frame, double percentage) {
+//                System.out.println("当前帧:" + frame);
+//                System.out.println("当前百分比:" + percentage);
+            }
+        });
     }
 
     // 加载动态图像
@@ -115,7 +148,7 @@ public class MainActivity extends AppCompatActivity {
     private void loadAnimation() {
         SVGAParser parser = new SVGAParser(this);
         try {
-            parser.parse(new URL("http://legox.yy.com/svga/svga-me/kingset_dyn.svga"), new SVGAParser.ParseCompletion() {
+            parser.parse(new URL("http://legox.yy.com/svga/svga-me/angel.svga"), new SVGAParser.ParseCompletion() {
                 @Override
                 public void onComplete(@NotNull SVGAVideoEntity videoItem) {
                     SVGADrawable drawable = new SVGADrawable(videoItem, dynamicItem);

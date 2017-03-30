@@ -17,14 +17,10 @@ class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
 
     override fun drawFrame(frameIndex: Int) {
         super.drawFrame(frameIndex)
-        val t = System.currentTimeMillis()
         val sprites = requestFrameSprites(frameIndex)
         sprites.forEach {
             drawSprite(it)
         }
-        val e = System.currentTimeMillis()
-        val o = e - t
-        System.out.println("帧渲染耗时" + o + "ms")
     }
 
     private fun drawSprite(sprite: SVGADrawerSprite) {
