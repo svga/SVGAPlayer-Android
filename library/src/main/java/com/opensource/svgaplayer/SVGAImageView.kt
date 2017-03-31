@@ -23,9 +23,22 @@ class SVGADrawable(val videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
     constructor(videoItem: SVGAVideoEntity): this(videoItem, SVGADynamicEntity())
 
     var cleared = true
+        internal set (value) {
+            if (field == value) {
+                return
+            }
+            field = value
+            invalidateSelf()
+        }
 
     var currentFrame = 0
-        internal set
+        internal set (value) {
+            if (field == value) {
+                return
+            }
+            field = value
+            invalidateSelf()
+        }
 
     override fun draw(canvas: Canvas?) {
         if (cleared) {
@@ -126,7 +139,6 @@ open class SVGAImageView : ImageView {
             animator.repeatCount = if (loops <= 0) 99999 else loops - 1
             animator.addUpdateListener {
                 drawable.currentFrame = animator.animatedValue as Int
-                drawable.invalidateSelf()
                 callback?.onStep(drawable.currentFrame, ((drawable.currentFrame + 1).toDouble() / drawable.videoItem.frames.toDouble()))
             }
             animator.addListener(object : Animator.AnimatorListener {
@@ -138,7 +150,6 @@ open class SVGAImageView : ImageView {
                     if (!clearsAfterStop) {
                         if (fillMode == FillMode.Backward) {
                             drawable.currentFrame = 0
-                            drawable.invalidateSelf()
                         }
                     }
                     callback?.onFinished()
@@ -164,7 +175,6 @@ open class SVGAImageView : ImageView {
         animator?.cancel()
         (drawable as? SVGADrawable)?.let {
             it.cleared = clear
-            it.invalidateSelf()
         }
     }
 
@@ -182,7 +192,6 @@ open class SVGAImageView : ImageView {
         pauseAnimation()
         val drawable = drawable as? SVGADrawable ?: return
         drawable.currentFrame = frame
-        drawable.invalidateSelf()
         if (andPlay) {
             startAnimation()
             animator?.let {
