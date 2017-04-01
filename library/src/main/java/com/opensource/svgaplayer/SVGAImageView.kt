@@ -13,6 +13,7 @@ import android.view.Choreographer
 import android.view.ViewPropertyAnimator
 import android.view.animation.LinearInterpolator
 import android.widget.ImageView
+import java.net.URL
 
 /**
  * Created by cuiminghui on 2017/3/29.
@@ -100,6 +101,19 @@ open class SVGAImageView : ImageView {
         typedArray.getString(R.styleable.SVGAImageView_source)?.let {
             val parser = SVGAParser(context)
             Thread({
+                if(it.startsWith("http://") || it.startsWith("https://")) {
+                    URL(it)?.let {
+                        parser.parse(it)?.let {
+                            handler.post({
+                                setVideoItem(it)
+                                if (typedArray.getBoolean(R.styleable.SVGAImageView_autoPlay, true)) {
+                                    startAnimation()
+                                }
+                            })
+                        }
+                        return@Thread
+                    }
+                }
                 parser.parse(it)?.let {
                     handler.post({
                         setVideoItem(it)
