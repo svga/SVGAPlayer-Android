@@ -97,7 +97,7 @@ open class SVGAImageView : ImageView {
         val typedArray = context.theme.obtainStyledAttributes(attrs, R.styleable.SVGAImageView, 0, 0)
         loops = typedArray.getInt(R.styleable.SVGAImageView_loopCount, 0)
         clearsAfterStop = typedArray.getBoolean(R.styleable.SVGAImageView_clearsAfterStop, true)
-        typedArray.getString(R.styleable.SVGAImageView_source).let {
+        typedArray.getString(R.styleable.SVGAImageView_source)?.let {
             val parser = SVGAParser(context)
             Thread({
                 parser.parse(it)?.let {
