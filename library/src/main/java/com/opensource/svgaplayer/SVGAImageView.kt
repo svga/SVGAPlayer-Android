@@ -82,15 +82,15 @@ open class SVGAImageView : ImageView {
     constructor(context: Context) : super(context) {}
 
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs) {
-        loadAttrs(attrs)
+        attrs?.let { loadAttrs(it) }
     }
 
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
-        loadAttrs(attrs)
+        attrs?.let { loadAttrs(it) }
     }
 
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes) {
-        loadAttrs(attrs)
+        attrs?.let { loadAttrs(it) }
     }
 
     fun loadAttrs(attrs: AttributeSet) {
