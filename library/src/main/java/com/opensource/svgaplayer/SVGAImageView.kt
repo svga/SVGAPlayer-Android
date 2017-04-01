@@ -94,6 +94,11 @@ open class SVGAImageView : ImageView {
         attrs?.let { loadAttrs(it) }
     }
 
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        animator?.cancel()
+    }
+
     fun loadAttrs(attrs: AttributeSet) {
         val typedArray = context.theme.obtainStyledAttributes(attrs, R.styleable.SVGAImageView, 0, 0)
         loops = typedArray.getInt(R.styleable.SVGAImageView_loopCount, 0)
