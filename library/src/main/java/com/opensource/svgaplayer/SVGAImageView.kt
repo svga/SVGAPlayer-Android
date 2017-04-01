@@ -79,17 +79,17 @@ open class SVGAImageView : ImageView {
 
     private var animator: ValueAnimator? = null
 
-    constructor(context: Context) : super(context) {}
+    constructor(context: Context?) : super(context) {}
 
-    constructor(context: Context, attrs: AttributeSet) : super(context, attrs) {
+    constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs) {
         attrs?.let { loadAttrs(it) }
     }
 
-    constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
+    constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
         attrs?.let { loadAttrs(it) }
     }
 
-    constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes) {
+    constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes) {
         attrs?.let { loadAttrs(it) }
     }
 
