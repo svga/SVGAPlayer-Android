@@ -2,9 +2,9 @@
 
 ## Version
 
-### 1.2.0-beta2
+### 1.2.0-beta3
 
-SVGAPlayer 的第 3 个版本，使用 Kotlin 重写整个 SVGAPlayer，修正 beta1 的 CPU 消耗过高问题。
+SVGAPlayer 的第 3 个版本，使用 Kotlin 重写整个 SVGAPlayer，修正 beta1 的 CPU 消耗过高问题，修正 beta2 Crash 的问题，并且当 View 被移出视图层级时，会自动停止动画。
 
 ### 1.1.0
 
