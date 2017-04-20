@@ -52,9 +52,17 @@ class SVGAVideoEntity(obj: JSONObject, val cacheDir: File) {
             val imgObjects = it
             it.keys().forEach {
                 val imageKey = it
-                val filePath = cacheDir.absolutePath + "/" + imgObjects[imageKey] + ".png"
-                BitmapFactory.decodeFile(filePath)?.let {
-                    images.put(imageKey, it)
+                var filePath = cacheDir.absolutePath + "/" + imgObjects[imageKey]
+                var bitmap = BitmapFactory.decodeFile(filePath)
+                if (bitmap != null) {
+                    images.put(imageKey, bitmap)
+                }
+                else {
+                    filePath = cacheDir.absolutePath + "/" + imageKey + ".png"
+                    bitmap = BitmapFactory.decodeFile(filePath)
+                    if (bitmap != null) {
+                        images.put(imageKey, bitmap)
+                    }
                 }
             }
         }
