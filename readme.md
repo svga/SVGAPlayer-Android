@@ -38,7 +38,7 @@ allprojects {
 
 添加以下依赖，请根据需要修改版本号，要获取最新的版本请点入 https://jitpack.io/#yyued/SVGAPlayer-Android/
 ```
-compile 'com.github.yyued:SVGAPlayer-Android:1.2.0-beta'
+compile 'com.github.yyued:SVGAPlayer-Android:1.2.0-beta5'
 compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:1.1.1"
 ```
 
