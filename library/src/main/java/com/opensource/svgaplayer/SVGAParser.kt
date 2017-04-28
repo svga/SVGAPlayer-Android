@@ -35,9 +35,7 @@ class SVGAParser(val context: Context) {
             context.assets.open(assetsName)?.let {
                 return parse(it, cacheKey("file:///assets/" + assetsName))
             }
-        } catch (e: Exception) {
-            return null
-        }
+        } catch (e: Exception) {}
         return null
     }
 
@@ -54,9 +52,7 @@ class SVGAParser(val context: Context) {
                     return parse(it.inputStream, cacheKey(url))
                 }
             }
-        } catch (e: Exception) {
-            return null
-        }
+        } catch (e: Exception) {}
         return null
     }
 
@@ -101,10 +97,9 @@ class SVGAParser(val context: Context) {
                     }
                 }
             }
+        } catch (e: Exception) {
             cacheDir.delete()
             jsonFile.delete()
-        } catch (e: Exception) {
-            return null
         }
         return null
     }
