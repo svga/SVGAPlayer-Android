@@ -2,9 +2,9 @@
 
 ## Version
 
-### 1.2.0-beta3
+### 1.2.0-beta5
 
-SVGAPlayer 的第 3 个版本，使用 Kotlin 重写整个 SVGAPlayer，修正 beta1 的 CPU 消耗过高问题，修正 beta2 Crash 的问题，并且当 View 被移出视图层级时，会自动停止动画。
+SVGAPlayer 的第 3 个版本，使用 Kotlin 重写整个 SVGAPlayer，修正 beta1 的 CPU 消耗过高问题，修正 beta2 Crash 的问题，并且当 View 被移出视图层级时，会自动停止动画，修正 beta4 前 sDurationScale 在 Android 4.0 中报错的问题。
 
 ### 1.1.0
 
@@ -38,7 +38,7 @@ allprojects {
 
 添加以下依赖，请根据需要修改版本号，要获取最新的版本请点入 https://jitpack.io/#yyued/SVGAPlayer-Android/
 ```
-compile 'com.github.yyued:SVGAPlayer-Android:1.2.0-beta'
+compile 'com.github.yyued:SVGAPlayer-Android:1.2.0-beta5'
 compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:1.1.1"
 ```
 
