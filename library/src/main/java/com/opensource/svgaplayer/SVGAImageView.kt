@@ -145,14 +145,16 @@ open class SVGAImageView : ImageView {
         drawable.videoItem?.let {
             var durationScale = 1.0
             val animator = ValueAnimator.ofInt(0, it.frames - 1)
-            Class.forName("android.animation.ValueAnimator")?.let {
-                it.getDeclaredField("sDurationScale")?.let {
-                    it.isAccessible = true
-                    it.getFloat(Class.forName("android.animation.ValueAnimator"))?.let {
-                        durationScale = it.toDouble()
+            try {
+                Class.forName("android.animation.ValueAnimator")?.let {
+                    it.getDeclaredField("sDurationScale")?.let {
+                        it.isAccessible = true
+                        it.getFloat(Class.forName("android.animation.ValueAnimator"))?.let {
+                            durationScale = it.toDouble()
+                        }
                     }
                 }
-            }
+            } catch (e: Exception) {}
             animator.interpolator = LinearInterpolator()
             animator.duration = (it.frames * (1000 / it.FPS) / durationScale).toLong()
             animator.repeatCount = if (loops <= 0) 99999 else loops - 1
