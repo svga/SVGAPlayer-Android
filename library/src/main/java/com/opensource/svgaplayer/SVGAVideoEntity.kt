@@ -36,8 +36,8 @@ class SVGAVideoEntity(obj: JSONObject, val cacheDir: File) {
         private set
 
     init {
-        obj.getJSONObject("movie")?.let {
-            it.getJSONObject("viewBox")?.let {
+        obj.optJSONObject("movie")?.let {
+            it.optJSONObject("viewBox")?.let {
                 videoSize = SVGARect(0.0, 0.0, it.optDouble("width", 0.0), it.optDouble("height", 0.0))
             }
             FPS = it.optInt("fps", 20)
@@ -48,7 +48,7 @@ class SVGAVideoEntity(obj: JSONObject, val cacheDir: File) {
     }
 
     internal fun resetImages(obj: JSONObject) {
-        obj.getJSONObject("images")?.let {
+        obj.optJSONObject("images")?.let {
             val imgObjects = it
             it.keys().forEach {
                 val imageKey = it
@@ -70,9 +70,9 @@ class SVGAVideoEntity(obj: JSONObject, val cacheDir: File) {
 
     internal fun resetSprites(obj: JSONObject) {
         val mutableList: MutableList<SVGAVideoSpriteEntity> = mutableListOf()
-        obj.getJSONArray("sprites")?.let {
+        obj.optJSONArray("sprites")?.let {
             for (i in 0..it.length() - 1) {
-                it.getJSONObject(i)?.let {
+                it.optJSONObject(i)?.let {
                     mutableList.add(SVGAVideoSpriteEntity(it))
                 }
             }

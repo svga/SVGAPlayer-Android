@@ -56,13 +56,7 @@ public class MainActivity extends AppCompatActivity {
         testView = new SVGAImageView(this);
         testView.setBackgroundColor(Color.GRAY);
         setupCallback();
-        loadDynamicText();
-        loadDynamicBitmap(new Runnable() {
-            @Override
-            public void run() {
-                loadAnimation();
-            }
-        });
+        loadAnimation();
         setContentView(testView);
     }
 
@@ -160,7 +154,9 @@ public class MainActivity extends AppCompatActivity {
 
                 }
             });
-        } catch (Exception e) {}
+        } catch (Exception e) {
+            System.out.print(true);
+        }
     }
 
 }

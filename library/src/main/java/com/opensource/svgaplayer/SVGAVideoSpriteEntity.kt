@@ -12,23 +12,25 @@ import java.util.ArrayList
  */
 class SVGAVideoSpriteEntity(obj: JSONObject) {
 
-    val imageKey: String? = obj.getString("imageKey")
+    val imageKey: String? = obj.optString("imageKey")
 
     val frames: List<SVGAVideoSpriteFrameEntity>
 
     init {
         val mutableFrames: MutableList<SVGAVideoSpriteFrameEntity> = mutableListOf()
-        obj.getJSONArray("frames")?.let {
+        obj.optJSONArray("frames")?.let {
             for (i in 0..it.length() - 1) {
-                val frameItem = SVGAVideoSpriteFrameEntity(it.getJSONObject(i))
-                if (frameItem.shapes.size > 0) {
-                    frameItem.shapes.first()?.let {
-                        if (it.isKeep && mutableFrames.size > 0) {
-                            frameItem.shapes = mutableFrames.last().shapes
+                it.optJSONObject(i)?.let {
+                    val frameItem = SVGAVideoSpriteFrameEntity(it)
+                    if (frameItem.shapes.size > 0) {
+                        frameItem.shapes.first()?.let {
+                            if (it.isKeep && mutableFrames.size > 0) {
+                                frameItem.shapes = mutableFrames.last().shapes
+                            }
                         }
                     }
+                    mutableFrames.add(frameItem)
                 }
-                mutableFrames.add(frameItem)
             }
         }
         frames = mutableFrames.toList()
