@@ -97,6 +97,7 @@ open class SVGAImageView : ImageView {
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
         animator?.cancel()
+        animator?.removeAllUpdateListeners()
     }
 
     fun loadAttrs(attrs: AttributeSet) {
@@ -194,6 +195,7 @@ open class SVGAImageView : ImageView {
 
     fun stopAnimation(clear: Boolean) {
         animator?.cancel()
+        animator?.removeAllUpdateListeners()
         (drawable as? SVGADrawable)?.let {
             it.cleared = clear
         }
