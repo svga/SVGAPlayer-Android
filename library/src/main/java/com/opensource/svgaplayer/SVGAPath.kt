@@ -29,8 +29,8 @@ internal class SVGAPath {
             }
             val firstLetter = item.substring(0, 1)
             if (VALID_METHODS.contains(firstLetter)) {
-                if (null != argLast) {
-                    args.add(SVGAPoint(0.0f, 0.0f, argLast.toFloat()))
+                argLast?.takeIf { it.isNotEmpty() }?.let {
+                    args.add(SVGAPoint(0.0f, 0.0f, try {it.toFloat()} catch (e: Exception) { 0.0f }))
                 }
                 this.operate(finalPath, currentMethod, args)
                 args.clear()
@@ -38,7 +38,11 @@ internal class SVGAPath {
                 argLast = item.substring(1)
             } else {
                 if (null != argLast && argLast.trim { it <= ' ' }.length > 0) {
-                    args.add(SVGAPoint(argLast.toFloat(), item.toFloat(), 0.0f))
+                    args.add(SVGAPoint(try {
+                        argLast.toFloat()
+                    } catch (e: Exception) {0.0f}, try {
+                        item.toFloat()
+                    } catch (e: Exception) {0.0f}, 0.0f))
                     argLast = null
                 } else {
                     argLast = item
