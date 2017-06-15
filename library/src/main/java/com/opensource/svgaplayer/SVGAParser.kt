@@ -4,13 +4,8 @@ import android.app.Activity
 import android.content.Context
 
 import org.json.JSONObject
+import java.io.*
 
-import java.io.BufferedInputStream
-import java.io.ByteArrayOutputStream
-import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
-import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.URL
 import java.security.MessageDigest
@@ -45,6 +40,14 @@ class SVGAParser(val context: Context) {
         return null
     }
 
+    fun parse(assetsName: String, callback: ParseCompletion) {
+        try {
+            context.assets.open(assetsName)?.let {
+                parse(it, cacheKey("file:///assets/" + assetsName), callback)
+            }
+        } catch (e: Exception) {}
+    }
+
     fun parse(url: URL): SVGAVideoEntity? {
         try {
             if (cacheDir(cacheKey(url)).exists()) {
@@ -63,15 +66,33 @@ class SVGAParser(val context: Context) {
     }
 
     fun parse(url: URL, callback: ParseCompletion) {
-        Thread(Runnable {
-            parse(url)?.let {
-                (context as? Activity)?.runOnUiThread {
-                    callback.onComplete(it)
+        Thread({
+            val BUFFER_SIZE = 4096
+            try {
+                if (cacheDir(cacheKey(url)).exists()) {
+                    parse(null, cacheKey(url), callback)
                 }
-                return@Runnable
-            }
-            (context as? Activity)?.runOnUiThread {
-                callback.onError()
+                else {
+                    (url.openConnection() as? HttpURLConnection)?.let {
+                        it.connectTimeout = 20 * 1000
+                        it.requestMethod = "GET"
+                        it.connect()
+                        val inputStream = it.inputStream
+                        val outputStream = ByteArrayOutputStream()
+                        val buffer = ByteArray(BUFFER_SIZE)
+                        var count: Int
+                        while (true) {
+                            count = inputStream.read(buffer, 0, BUFFER_SIZE)
+                            if (count == -1) {
+                                break
+                            }
+                            outputStream.write(buffer, 0, count)
+                        }
+                        parse(ByteArrayInputStream(outputStream.toByteArray()), cacheKey(url), callback)
+                    }
+                }
+            } catch (e: Exception) {
+                print(e)
             }
         }).start()
     }
@@ -111,17 +132,33 @@ class SVGAParser(val context: Context) {
     }
 
     fun parse(inputStream: InputStream?, cacheKey: String, callback: ParseCompletion) {
-        synchronized(sharedLock, {
-            val videoItem = parse(inputStream, cacheKey)
-            Thread({
-                if (videoItem != null) {
-                    callback.onComplete(videoItem)
-                }
-                else {
-                    callback.onError()
-                }
-            }).start()
-        })
+        Thread({
+            synchronized(sharedLock, {
+                val videoItem = parse(inputStream, cacheKey)
+                Thread({
+                    if (videoItem != null) {
+                        if (context as? Activity != null) {
+                            (context as? Activity)?.runOnUiThread {
+                                callback.onComplete(videoItem)
+                            }
+                        }
+                        else {
+                            callback.onComplete(videoItem)
+                        }
+                    }
+                    else {
+                        if (context as? Activity != null) {
+                            (context as? Activity)?.runOnUiThread {
+                                callback.onError()
+                            }
+                        }
+                        else {
+                            callback.onError()
+                        }
+                    }
+                }).start()
+            })
+        }).start()
     }
 
     private fun cacheKey(str: String): String {
