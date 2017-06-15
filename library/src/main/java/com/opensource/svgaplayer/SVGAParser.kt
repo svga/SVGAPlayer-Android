@@ -30,6 +30,12 @@ class SVGAParser(val context: Context) {
 
     }
 
+    companion object {
+
+        private var sharedLock: Int = 0
+
+    }
+
     fun parse(assetsName: String): SVGAVideoEntity? {
         try {
             context.assets.open(assetsName)?.let {
@@ -102,6 +108,20 @@ class SVGAParser(val context: Context) {
             jsonFile.delete()
         }
         return null
+    }
+
+    fun parse(inputStream: InputStream?, cacheKey: String, callback: ParseCompletion) {
+        synchronized(sharedLock, {
+            val videoItem = parse(inputStream, cacheKey)
+            Thread({
+                if (videoItem != null) {
+                    callback.onComplete(videoItem)
+                }
+                else {
+                    callback.onError()
+                }
+            }).start()
+        })
     }
 
     private fun cacheKey(str: String): String {
