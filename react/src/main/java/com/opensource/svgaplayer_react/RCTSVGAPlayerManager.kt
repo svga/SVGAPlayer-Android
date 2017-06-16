@@ -1,6 +1,7 @@
 package com.opensource.svgaplayer_react
 
 import android.content.Context
+import com.facebook.react.bridge.ReactContext
 import com.facebook.react.uimanager.SimpleViewManager
 import com.facebook.react.uimanager.ThemedReactContext
 import com.facebook.react.uimanager.annotations.ReactProp
@@ -23,9 +24,10 @@ class RCTSVGAPlayerManager: SimpleViewManager<RCTSVGAImageView>() {
 
     @ReactProp(name = "source")
     fun setSource(view: RCTSVGAImageView, source: String) {
+        val context = (view.context as? ReactContext)?.currentActivity ?: return
         if (source.startsWith("http") || source.startsWith("https")) {
             try {
-                SVGAParser(view.context).parse(URL(source), object: SVGAParser.ParseCompletion {
+                SVGAParser(context).parse(URL(source), object: SVGAParser.ParseCompletion {
                     override fun onComplete(videoItem: SVGAVideoEntity) {
                         view.setVideoItem(videoItem)
                         view.startAnimation()
@@ -36,7 +38,7 @@ class RCTSVGAPlayerManager: SimpleViewManager<RCTSVGAImageView>() {
         }
         else {
             try {
-                SVGAParser(view.context).parse(source, object: SVGAParser.ParseCompletion {
+                SVGAParser(context).parse(source, object: SVGAParser.ParseCompletion {
                     override fun onComplete(videoItem: SVGAVideoEntity) {
                         view.setVideoItem(videoItem)
                         view.startAnimation()
