@@ -4,11 +4,16 @@ apply plugin: 'kotlin-android'
 android {
     compileSdkVersion 25
     buildToolsVersion "25.0.2"
+
     defaultConfig {
-        minSdkVersion 14
+        minSdkVersion 16
         targetSdkVersion 25
         versionCode 1
         versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        ndk {
+            abiFilters "armeabi-v7a", "x86"
+        }
     }
     buildTypes {
         release {
@@ -16,23 +21,16 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-    productFlavors {
-    }
-    packagingOptions {
-        exclude 'META-INF/ASL2.0'
-        exclude 'META-INF/LICENSE'
-        exclude 'META-INF/NOTICE'
-        exclude 'META-INF/NOTICE.txt'
-        exclude 'META-INF/LICENSE.txt'
-        exclude 'META-INF/MANIFEST.MF'
-    }
 }
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
     compile 'com.android.support:appcompat-v7:25.3.1'
+    testCompile 'junit:junit:4.12'
+    compile project(':library')
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
-}
-repositories {
-    mavenCentral()
+    compile 'com.facebook.react:react-native:+'
 }
