@@ -24,7 +24,9 @@ class RCTSVGAImageView @JvmOverloads constructor(
 
             override fun onFinished() {
                 (context as? ReactContext)?.let {
-                    it.getJSModule(RCTEventEmitter::class.java).receiveEvent(id, "onFinished", Arguments.createMap())
+                    val map = Arguments.createMap()
+                    map.putString("action", "onFinished")
+                    it.getJSModule(RCTEventEmitter::class.java).receiveEvent(id, "topChange", map)
                 }
             }
 
@@ -33,13 +35,15 @@ class RCTSVGAImageView @JvmOverloads constructor(
             override fun onStep(frame: Int, percentage: Double) {
                 (context as? ReactContext)?.let {
                     val map = Arguments.createMap()
+                    map.putString("action", "onFrame")
                     map.putInt("value", frame)
-                    it.getJSModule(RCTEventEmitter::class.java).receiveEvent(id, "onFrame", map)
+                    it.getJSModule(RCTEventEmitter::class.java).receiveEvent(id, "topChange", map)
                 }
                 (context as? ReactContext)?.let {
                     val map = Arguments.createMap()
+                    map.putString("action", "onPercentage")
                     map.putDouble("value", percentage)
-                    it.getJSModule(RCTEventEmitter::class.java).receiveEvent(id, "onPercentage", map)
+                    it.getJSModule(RCTEventEmitter::class.java).receiveEvent(id, "topChange", map)
                 }
             }
 
