@@ -33,6 +33,7 @@ class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
             val drawingBitmap = it
             sharedPaint.reset()
             sharedContentTransform.reset()
+            sharedPaint.isAntiAlias = videoItem.antiAlias
             sharedPaint.alpha = (sprite.frameEntity.alpha * 255).toInt()
             sharedContentTransform.setScale((canvas.width / videoItem.videoSize.width).toFloat(), (canvas.width / videoItem.videoSize.width).toFloat())
             sharedContentTransform.preConcat(sprite.frameEntity.transform)

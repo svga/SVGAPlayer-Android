@@ -20,6 +20,8 @@ import java.util.HashMap
  */
 class SVGAVideoEntity(obj: JSONObject, val cacheDir: File) {
 
+    var antiAlias = false
+
     var videoSize = SVGARect(0.0, 0.0, 0.0, 0.0)
         private set
 

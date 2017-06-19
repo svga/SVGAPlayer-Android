@@ -3,6 +3,7 @@
     <declare-styleable name="SVGAImageView">
         <attr name="source" format="string" />
         <attr name="autoPlay" format="boolean" />
+        <attr name="antiAlias" format="boolean" />
         <attr name="loopCount" format="integer" />
         <attr name="clearsAfterStop" format="boolean" />
         <attr name="fillMode" format="enum">

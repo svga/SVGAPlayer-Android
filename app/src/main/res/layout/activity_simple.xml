@@ -8,6 +8,7 @@
     <com.opensource.svgaplayer.SVGAImageView
         android:layout_height="match_parent"
         android:layout_width="match_parent"
-        app:source="posche.svga"/>
+        app:source="posche.svga"
+        app:antiAlias="true"/>
 
 </RelativeLayout>
