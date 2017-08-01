@@ -146,6 +146,7 @@ class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
                     if (it != 0x00000000) {
                         sharedPaint.reset()
                         sharedPaint.color = it
+                        sharedPaint.alpha = (sprite.frameEntity.alpha * 255).toInt()
                         sharedPaint.isAntiAlias = true
                         canvas.drawPath(finalPath, sharedPaint)
                     }
@@ -153,6 +154,7 @@ class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
                 shape.styles?.strokeWidth?.let {
                     if (it > 0) {
                         sharedPaint.reset()
+                        sharedPaint.alpha = (sprite.frameEntity.alpha * 255).toInt()
                         resetShapeStrokePaint(shape)
                         canvas.drawPath(finalPath, sharedPaint)
                     }
