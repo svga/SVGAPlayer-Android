@@ -13,6 +13,7 @@ import android.R.attr.x
 class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicEntity, val canvas: Canvas) : SGVADrawer(videoItem) {
 
     val sharedPaint = Paint()
+    val sharedPath = Path()
     val sharedContentTransform = Matrix()
 
     override fun drawFrame(frameIndex: Int) {
@@ -93,62 +94,24 @@ class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
         sharedContentTransform.preConcat(sprite.frameEntity.transform)
         sprite.frameEntity.shapes.forEach {
             val shape = it
-            var finalPath = Path()
-            if (shape.type == SVGAVideoShapeEntity.Type.shape) {
-                (shape.args?.get("d") as? String)?.let {
-                    SVGAPath(it).path?.let {
-                        finalPath = it
-                    }
-                }
+            sharedPath.reset()
+            shape.shapePath?.let {
+                sharedPath.addPath(it)
             }
-            else if (shape.type == SVGAVideoShapeEntity.Type.ellipse) {
-                val xv = shape.args?.get("x") as? Number ?: return
-                val yv = shape.args?.get("y") as? Number ?: return
-                val rxv = shape.args?.get("radiusX") as? Number ?: return
-                val ryv = shape.args?.get("radiusY") as? Number ?: return
-                val x = xv.toFloat()
-                val y = yv.toFloat()
-                val rx = rxv.toFloat()
-                val ry = ryv.toFloat()
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    finalPath.addOval(x - rx, y - ry, x + rx, y + ry, Path.Direction.CW)
-                }
-                else if (Math.abs(rx - ry) < 0.1) {
-                    finalPath.addCircle(x, y, rx, Path.Direction.CW)
-                }
-            }
-            else if (shape.type == SVGAVideoShapeEntity.Type.rect) {
-                val xv = shape.args?.get("x") as? Number ?: return
-                val yv = shape.args?.get("y") as? Number ?: return
-                val wv = shape.args?.get("width") as? Number ?: return
-                val hv = shape.args?.get("height") as? Number ?: return
-                val crv = shape.args?.get("cornerRadius") as? Number ?: return
-                val x = xv.toFloat()
-                val y = yv.toFloat()
-                val width = wv.toFloat()
-                val height = hv.toFloat()
-                val cornerRadius = crv.toFloat()
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    finalPath.addRoundRect(x, y, x + width, y + height, cornerRadius, cornerRadius, Path.Direction.CW)
-                }
-                else {
-                    finalPath.addRect(x, y, x + width, y + height, Path.Direction.CW)
-                }
-            }
-            if (finalPath != null) {
+            if (!sharedPath.isEmpty) {
                 val thisTransform = Matrix()
                 shape.transform?.let {
                     thisTransform.postConcat(it)
                 }
                 thisTransform.postConcat(sharedContentTransform)
-                finalPath.transform(thisTransform)
+                sharedPath.transform(thisTransform)
                 shape.styles?.fill?.let {
                     if (it != 0x00000000) {
                         sharedPaint.reset()
                         sharedPaint.color = it
                         sharedPaint.alpha = (sprite.frameEntity.alpha * 255).toInt()
                         sharedPaint.isAntiAlias = true
-                        canvas.drawPath(finalPath, sharedPaint)
+                        canvas.drawPath(sharedPath, sharedPaint)
                     }
                 }
                 shape.styles?.strokeWidth?.let {
@@ -156,7 +119,7 @@ class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
                         sharedPaint.reset()
                         sharedPaint.alpha = (sprite.frameEntity.alpha * 255).toInt()
                         resetShapeStrokePaint(shape)
-                        canvas.drawPath(finalPath, sharedPaint)
+                        canvas.drawPath(sharedPath, sharedPaint)
                     }
                 }
             }

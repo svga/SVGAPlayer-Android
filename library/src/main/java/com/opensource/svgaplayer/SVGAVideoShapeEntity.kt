@@ -2,6 +2,8 @@ package com.opensource.svgaplayer
 
 import android.graphics.Color
 import android.graphics.Matrix
+import android.graphics.Path
+import android.os.Build
 
 import org.json.JSONArray
 import org.json.JSONException
@@ -64,10 +66,13 @@ class SVGAVideoShapeEntity(obj: JSONObject) {
         parseArgs(obj)
         parseStyles(obj)
         parseTransform(obj)
+        buildPath()
     }
 
     val isKeep: Boolean
         get() = type == Type.keep
+
+    var shapePath: Path? = null
 
     fun parseType(obj: JSONObject) {
         obj.optString("type")?.let {
@@ -146,6 +151,50 @@ class SVGAVideoShapeEntity(obj: JSONObject) {
             transform.setValues(arr)
             this.transform = transform
         }
+    }
+
+    fun buildPath() {
+        val aPath = Path()
+        if (this.type == SVGAVideoShapeEntity.Type.shape) {
+            (this.args?.get("d") as? String)?.let {
+                SVGAPath(it, aPath)
+            }
+        }
+        else if (this.type == SVGAVideoShapeEntity.Type.ellipse) {
+            val xv = this.args?.get("x") as? Number ?: return
+            val yv = this.args?.get("y") as? Number ?: return
+            val rxv = this.args?.get("radiusX") as? Number ?: return
+            val ryv = this.args?.get("radiusY") as? Number ?: return
+            val x = xv.toFloat()
+            val y = yv.toFloat()
+            val rx = rxv.toFloat()
+            val ry = ryv.toFloat()
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                aPath.addOval(x - rx, y - ry, x + rx, y + ry, Path.Direction.CW)
+            }
+            else if (Math.abs(rx - ry) < 0.1) {
+                aPath.addCircle(x, y, rx, Path.Direction.CW)
+            }
+        }
+        else if (this.type == SVGAVideoShapeEntity.Type.rect) {
+            val xv = this.args?.get("x") as? Number ?: return
+            val yv = this.args?.get("y") as? Number ?: return
+            val wv = this.args?.get("width") as? Number ?: return
+            val hv = this.args?.get("height") as? Number ?: return
+            val crv = this.args?.get("cornerRadius") as? Number ?: return
+            val x = xv.toFloat()
+            val y = yv.toFloat()
+            val width = wv.toFloat()
+            val height = hv.toFloat()
+            val cornerRadius = crv.toFloat()
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                aPath.addRoundRect(x, y, x + width, y + height, cornerRadius, cornerRadius, Path.Direction.CW)
+            }
+            else {
+                aPath.addRect(x, y, x + width, y + height, Path.Direction.CW)
+            }
+        }
+        this.shapePath = aPath
     }
 
 }

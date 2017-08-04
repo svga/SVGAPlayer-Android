@@ -44,9 +44,10 @@ class SVGAVideoSpriteFrameEntity(obj: JSONObject) {
             arr[8] = 1.0.toFloat()
             transform.setValues(arr)
         }
-        obj.optString("clipPath")?.let {
-            if (it.isNotEmpty()) {
-                maskPath = SVGAPath(it).path
+        obj.optString("clipPath")?.let { d ->
+            if (d.isNotEmpty()) {
+                maskPath = Path()
+                maskPath?.let { maskPath -> SVGAPath(d, maskPath) }
             }
         }
         obj.optJSONArray("shapes")?.let {
