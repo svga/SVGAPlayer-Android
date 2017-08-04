@@ -104,30 +104,39 @@ open class SVGAImageView : ImageView {
         val typedArray = context.theme.obtainStyledAttributes(attrs, R.styleable.SVGAImageView, 0, 0)
         loops = typedArray.getInt(R.styleable.SVGAImageView_loopCount, 0)
         clearsAfterStop = typedArray.getBoolean(R.styleable.SVGAImageView_clearsAfterStop, true)
+        val antiAlias = typedArray.getBoolean(R.styleable.SVGAImageView_antiAlias, false)
         typedArray.getString(R.styleable.SVGAImageView_source)?.let {
             val parser = SVGAParser(context)
             Thread({
                 if(it.startsWith("http://") || it.startsWith("https://")) {
                     URL(it)?.let {
-                        parser.parse(it)?.let {
-                            handler.post({
-                                setVideoItem(it)
-                                if (typedArray.getBoolean(R.styleable.SVGAImageView_autoPlay, true)) {
-                                    startAnimation()
+                        parser.parse(it, object : SVGAParser.ParseCompletion {
+                            override fun onComplete(videoItem: SVGAVideoEntity) {
+                                handler.post {
+                                    videoItem.antiAlias = antiAlias
+                                    setVideoItem(videoItem)
+                                    if (typedArray.getBoolean(R.styleable.SVGAImageView_autoPlay, true)) {
+                                        startAnimation()
+                                    }
                                 }
-                            })
-                        }
+                            }
+                            override fun onError() { }
+                        })
                         return@Thread
                     }
                 }
-                parser.parse(it)?.let {
-                    handler.post({
-                        setVideoItem(it)
-                        if (typedArray.getBoolean(R.styleable.SVGAImageView_autoPlay, true)) {
-                            startAnimation()
+                parser.parse(it, object : SVGAParser.ParseCompletion {
+                    override fun onComplete(videoItem: SVGAVideoEntity) {
+                        handler.post {
+                            videoItem.antiAlias = antiAlias
+                            setVideoItem(videoItem)
+                            if (typedArray.getBoolean(R.styleable.SVGAImageView_autoPlay, true)) {
+                                startAnimation()
+                            }
                         }
-                    })
-                }
+                    }
+                    override fun onError() { }
+                })
             }).start()
         }
         typedArray.getString(R.styleable.SVGAImageView_fillMode)?.let {
