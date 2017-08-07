@@ -112,7 +112,7 @@ open class SVGAImageView : ImageView {
                     URL(it)?.let {
                         parser.parse(it, object : SVGAParser.ParseCompletion {
                             override fun onComplete(videoItem: SVGAVideoEntity) {
-                                handler.post {
+                                handler?.post {
                                     videoItem.antiAlias = antiAlias
                                     setVideoItem(videoItem)
                                     if (typedArray.getBoolean(R.styleable.SVGAImageView_autoPlay, true)) {
@@ -127,7 +127,7 @@ open class SVGAImageView : ImageView {
                 }
                 parser.parse(it, object : SVGAParser.ParseCompletion {
                     override fun onComplete(videoItem: SVGAVideoEntity) {
-                        handler.post {
+                        handler?.post {
                             videoItem.antiAlias = antiAlias
                             setVideoItem(videoItem)
                             if (typedArray.getBoolean(R.styleable.SVGAImageView_autoPlay, true)) {
