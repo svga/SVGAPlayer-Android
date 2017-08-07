@@ -2,6 +2,11 @@
 
 ## Version
 
+### 1.2.7
+
+添加 ScaleType 支持；
+修正使用 xml 加载 view 时，如果 view 被提前移除所引发的 crash。
+
 ### 1.2.6
 
 复用 Path 以减少 GC 触发，提升矢量动画性能。
@@ -46,7 +51,7 @@ allprojects {
 
 添加以下依赖，请根据需要修改版本号，要获取最新的版本请点入 https://jitpack.io/#yyued/SVGAPlayer-Android/
 ```
-compile 'com.github.yyued:SVGAPlayer-Android:1.2.4'
+compile 'com.github.yyued:SVGAPlayer-Android:1.2.7'
 compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:1.1.1"
 ```
 
