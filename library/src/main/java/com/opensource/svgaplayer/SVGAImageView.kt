@@ -41,13 +41,15 @@ class SVGADrawable(val videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
             invalidateSelf()
         }
 
+    var scaleType: ImageView.ScaleType = ImageView.ScaleType.MATRIX
+
     override fun draw(canvas: Canvas?) {
         if (cleared) {
             return
         }
         canvas?.let {
             val drawer = SVGACanvasDrawer(videoItem, dynamicItem, it)
-            drawer.drawFrame(currentFrame)
+            drawer.drawFrame(currentFrame, scaleType)
         }
     }
 
@@ -112,7 +114,7 @@ open class SVGAImageView : ImageView {
                     URL(it)?.let {
                         parser.parse(it, object : SVGAParser.ParseCompletion {
                             override fun onComplete(videoItem: SVGAVideoEntity) {
-                                handler.post {
+                                handler?.post {
                                     videoItem.antiAlias = antiAlias
                                     setVideoItem(videoItem)
                                     if (typedArray.getBoolean(R.styleable.SVGAImageView_autoPlay, true)) {
@@ -127,7 +129,7 @@ open class SVGAImageView : ImageView {
                 }
                 parser.parse(it, object : SVGAParser.ParseCompletion {
                     override fun onComplete(videoItem: SVGAVideoEntity) {
-                        handler.post {
+                        handler?.post {
                             videoItem.antiAlias = antiAlias
                             setVideoItem(videoItem)
                             if (typedArray.getBoolean(R.styleable.SVGAImageView_autoPlay, true)) {
@@ -152,6 +154,7 @@ open class SVGAImageView : ImageView {
     fun startAnimation() {
         val drawable = drawable as? SVGADrawable ?: return
         drawable.cleared = false
+        drawable.scaleType = scaleType
         drawable.videoItem?.let {
             var durationScale = 1.0
             val animator = ValueAnimator.ofInt(0, it.frames - 1)

@@ -1,5 +1,7 @@
 package com.opensource.svgaplayer
 
+import android.widget.ImageView
+
 /**
  * Created by cuiminghui on 2017/3/29.
  */
@@ -20,7 +22,7 @@ open class SGVADrawer(val videoItem: SVGAVideoEntity) {
         }
     }
 
-    open fun drawFrame(frameIndex: Int) {
+    open fun drawFrame(frameIndex: Int, scaleType: ImageView.ScaleType) {
 
     }
 
