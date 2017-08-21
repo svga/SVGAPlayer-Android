@@ -157,7 +157,7 @@ class SVGAVideoShapeEntity(obj: JSONObject) {
         val aPath = Path()
         if (this.type == SVGAVideoShapeEntity.Type.shape) {
             (this.args?.get("d") as? String)?.let {
-                SVGAPath(it, aPath)
+                SVGAPath(it).buildPath(aPath)
             }
         }
         else if (this.type == SVGAVideoShapeEntity.Type.ellipse) {

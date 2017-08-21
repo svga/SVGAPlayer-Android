@@ -18,7 +18,7 @@ class SVGAVideoSpriteFrameEntity(obj: JSONObject) {
     var alpha = obj.optDouble("alpha", 0.0)
     var layout = SVGARect(0.0, 0.0, 0.0, 0.0)
     var transform = Matrix()
-    var maskPath: Path? = null
+    var maskPath: SVGAPath? = null
     var shapes: List<SVGAVideoShapeEntity> = listOf()
 
     init {
@@ -46,8 +46,7 @@ class SVGAVideoSpriteFrameEntity(obj: JSONObject) {
         }
         obj.optString("clipPath")?.let { d ->
             if (d.isNotEmpty()) {
-                maskPath = Path()
-                maskPath?.let { maskPath -> SVGAPath(d, maskPath) }
+                maskPath = SVGAPath(d)
             }
         }
         obj.optJSONArray("shapes")?.let {

@@ -3,18 +3,21 @@ package com.opensource.svgaplayer
 import android.graphics.Path
 import java.util.*
 
-internal class SVGAPath {
+class SVGAPath(val strValue: String) {
 
+    var cachedPath: Path? = null
     val VALID_METHODS: List<String> = listOf("M", "L", "H", "V", "C", "S", "Q", "R", "A", "Z", "m", "l", "h", "v", "c", "s", "q", "r", "a", "z")
 
-    constructor(strValue: String, toPath: Path) {
-        buildPath(strValue.split("[,\\s+]".toRegex()).dropLastWhile(String::isEmpty).toTypedArray(), toPath)
-    }
-
-    private fun buildPath(items: Array<String>, toPath: Path) {
+    fun buildPath(toPath: Path) {
+        cachedPath?.let {
+            toPath.addPath(it)
+            return
+        }
+        val cachedPath = Path()
         var currentMethod = ""
         val args = ArrayList<SVGAPoint>()
         var argLast: String? = null
+        val items = strValue.split("[,\\s+]".toRegex()).dropLastWhile(String::isEmpty).toTypedArray()
         for (item in items) {
             if (item.length < 1) {
                 continue
@@ -24,7 +27,7 @@ internal class SVGAPath {
                 argLast?.takeIf { it.isNotEmpty() }?.let {
                     args.add(SVGAPoint(0.0f, 0.0f, try {it.toFloat()} catch (e: Exception) { 0.0f }))
                 }
-                this.operate(toPath, currentMethod, args)
+                this.operate(cachedPath, currentMethod, args)
                 args.clear()
                 currentMethod = firstLetter
                 argLast = item.substring(1)
@@ -41,7 +44,9 @@ internal class SVGAPath {
                 }
             }
         }
-        this.operate(toPath, currentMethod, args)
+        this.operate(cachedPath, currentMethod, args)
+        this.cachedPath = cachedPath
+        toPath.addPath(cachedPath)
     }
 
     private fun operate(finalPath: Path, method: String, args: List<SVGAPoint>) {
