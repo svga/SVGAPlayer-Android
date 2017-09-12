@@ -79,7 +79,7 @@ Add SVGAImageView via code.
 SVGAImageView imageView = new SVGAImageView(this);
 ```
 
-### Init Parser, Load File
+#### Init Parser & Load File
 
 ```
 parser = new SVGAParser(this);
