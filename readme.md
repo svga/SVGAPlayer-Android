@@ -4,12 +4,12 @@
 
 ### 1.2.7
 
-add ScaleType support.
-bug-fix: crash on layout.xml, view removing.
+* add ScaleType support.
+* bug-fix: crash on layout.xml, view removing.
 
 ### 1.2.6
 
-reuse Path, decrease GC trigger, improves vector animation performance.
+* reuse Path, decrease GC trigger, improves vector animation performance.
 
 ## SVGA Format
 
