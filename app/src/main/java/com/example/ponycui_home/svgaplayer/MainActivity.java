@@ -43,6 +43,7 @@ import okhttp3.Response;
 /**
  * Created by cuiminghui on 2017/3/30.
  * 这是最复杂的一个 Sample， 演示了从网络加载动画，并播放动画。
+ * 更多的 Sample 可以在这里找到 https://github.com/yyued/SVGA-Samples
  */
 
 public class MainActivity extends AppCompatActivity {
@@ -55,97 +56,17 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         testView = new SVGAImageView(this);
         testView.setBackgroundColor(Color.GRAY);
-        setupCallback();
         loadAnimation();
         setContentView(testView);
-    }
-
-    private void setupCallback() {
-        testView.setCallback(new SVGACallback() {
-            @Override
-            public void onPause() {
-
-            }
-
-            @Override
-            public void onFinished() {
-
-            }
-
-            @Override
-            public void onRepeat() {
-
-            }
-
-            @Override
-            public void onStep(int frame, double percentage) {
-//                System.out.println("当前帧:" + frame);
-//                System.out.println("当前百分比:" + percentage);
-            }
-        });
-    }
-
-    // 加载动态图像
-    private void loadDynamicBitmap(final Runnable complete) {
-        OkHttpClient client = new OkHttpClient();
-        Request request = new Request.Builder().url("http://img.hb.aicdn.com/80cc8e001ccdc54febd448dc45119b4bd7924ea5530b-RllWp3_sq320").build();
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-
-            }
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                final Bitmap dynamicBitmap = BitmapFactory.decodeStream(response.body().byteStream());
-                if (dynamicBitmap != null) {
-                    final Bitmap editedBitmap = getRoundedCornerBitmap(dynamicBitmap, 168);
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            dynamicItem.setDynamicImage(editedBitmap, "99"); // 99 这个值是由设计提供的
-                            complete.run();
-                        }
-                    });
-                }
-            }
-        });
-    }
-
-    private void loadDynamicText() {
-        TextPaint textPaint = new TextPaint();
-        textPaint.setTextSize(30);
-        textPaint.setFakeBoldText(true);
-        textPaint.setARGB(0xff, 0xff, 0xe0, 0xa4);
-        textPaint.setShadowLayer((float)1.0, (float)0.0, (float)1.0, Color.BLACK);
-        dynamicItem.setDynamicText("崔小姐不吃鱼 送了魔法奇缘", textPaint, "banner");
-    }
-
-    // 如果有需要，你需要为动态加载的图像自行裁剪圆角、添加滤镜等操作。
-    private static Bitmap getRoundedCornerBitmap(Bitmap bitmap, int pixels) {
-        Bitmap output = Bitmap.createBitmap(bitmap.getWidth(), bitmap
-                .getHeight(), Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(output);
-        final int color = 0xff424242;
-        final Paint paint = new Paint();
-        final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
-        final RectF rectF = new RectF(rect);
-        final float roundPx = pixels;
-        paint.setAntiAlias(true);
-        canvas.drawARGB(0, 0, 0, 0);
-        paint.setColor(color);
-        canvas.drawRoundRect(rectF, roundPx, roundPx, paint);
-        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
-        canvas.drawBitmap(bitmap, rect, rect, paint);
-        return output;
     }
 
     private void loadAnimation() {
         SVGAParser parser = new SVGAParser(this);
         try {
-            parser.parse(new URL("http://legox.yy.com/svga/svga-me/angel.svga"), new SVGAParser.ParseCompletion() {
+            parser.parse(new URL("https://github.com/yyued/SVGA-Samples/blob/master/angel.svga?raw=true"), new SVGAParser.ParseCompletion() {
                 @Override
                 public void onComplete(@NotNull SVGAVideoEntity videoItem) {
-                    SVGADrawable drawable = new SVGADrawable(videoItem, dynamicItem);
+                    SVGADrawable drawable = new SVGADrawable(videoItem);
                     testView.setImageDrawable(drawable);
                     testView.startAnimation();
                 }
