@@ -15,7 +15,7 @@ import java.util.HashMap
  * Created by cuiminghui on 2017/2/22.
  */
 
-class SVGAVideoShapeEntity(obj: JSONObject) {
+class SVGAVideoShapeEntity {
 
     enum class Type {
         shape,
@@ -61,7 +61,15 @@ class SVGAVideoShapeEntity(obj: JSONObject) {
     var transform: Matrix? = null
         private set
 
-    init {
+    constructor(obj: JSONObject) {
+        parseType(obj)
+        parseArgs(obj)
+        parseStyles(obj)
+        parseTransform(obj)
+        buildPath()
+    }
+
+    constructor(obj: ComOpensourceSvgaVideo.ShapeEntity) {
         parseType(obj)
         parseArgs(obj)
         parseStyles(obj)
@@ -74,21 +82,27 @@ class SVGAVideoShapeEntity(obj: JSONObject) {
 
     var shapePath: Path? = null
 
-    fun parseType(obj: JSONObject) {
+    private fun parseType(obj: JSONObject) {
         obj.optString("type")?.let {
-            if (it.equals("shape", ignoreCase = true)) {
-                type = Type.shape
-            } else if (it.equals("rect", ignoreCase = true)) {
-                type = Type.rect
-            } else if (it.equals("ellipse", ignoreCase = true)) {
-                type = Type.ellipse
-            } else if (it.equals("keep", ignoreCase = true)) {
-                type = Type.keep
+            when {
+                it.equals("shape", ignoreCase = true) -> type = Type.shape
+                it.equals("rect", ignoreCase = true) -> type = Type.rect
+                it.equals("ellipse", ignoreCase = true) -> type = Type.ellipse
+                it.equals("keep", ignoreCase = true) -> type = Type.keep
             }
         }
     }
 
-    fun parseArgs(obj: JSONObject) {
+    private fun parseType(obj: ComOpensourceSvgaVideo.ShapeEntity) {
+        when (obj.type) {
+            ComOpensourceSvgaVideo.ShapeEntity.ShapeType.SHAPE -> type = Type.shape
+            ComOpensourceSvgaVideo.ShapeEntity.ShapeType.RECT -> type = Type.rect
+            ComOpensourceSvgaVideo.ShapeEntity.ShapeType.ELLIPSE -> type = Type.ellipse
+            ComOpensourceSvgaVideo.ShapeEntity.ShapeType.KEEP -> type = Type.keep
+        }
+    }
+
+    private fun parseArgs(obj: JSONObject) {
         val args = HashMap<String, Any>()
         obj.optJSONObject("args")?.let {
             val values = it
@@ -102,7 +116,34 @@ class SVGAVideoShapeEntity(obj: JSONObject) {
         }
     }
 
-    fun parseStyles(obj: JSONObject) {
+    private fun parseArgs(obj: ComOpensourceSvgaVideo.ShapeEntity) {
+        val args = HashMap<String, Any>()
+        when (obj.argsCase) {
+            ComOpensourceSvgaVideo.ShapeEntity.ArgsCase.SHAPE -> {
+                obj.shape?.d?.let { args.put("d", it) }
+            }
+            ComOpensourceSvgaVideo.ShapeEntity.ArgsCase.ELLIPSE -> {
+                obj.ellipse?.let {
+                    args.put("x", it.x)
+                    args.put("y", it.y)
+                    args.put("radiusX", it.radiusX)
+                    args.put("radiusY", it.radiusY)
+                }
+            }
+            ComOpensourceSvgaVideo.ShapeEntity.ArgsCase.RECT -> {
+                obj.rect?.let {
+                    args.put("x", it.x)
+                    args.put("y", it.y)
+                    args.put("width", it.width)
+                    args.put("height", it.height)
+                    args.put("cornerRadius", it.cornerRadius)
+                }
+            }
+        }
+        this.args = args
+    }
+
+    private fun parseStyles(obj: JSONObject) {
         obj.optJSONObject("styles")?.let {
             val styles = Styles()
             it.optJSONArray("fill")?.let {
@@ -121,7 +162,7 @@ class SVGAVideoShapeEntity(obj: JSONObject) {
             styles.miterLimit = it.optInt("miterLimit", 0)
             it.optJSONArray("lineDash")?.let {
                 styles.lineDash = FloatArray(it.length())
-                for (i in 0..it.length() - 1) {
+                for (i in 0 until it.length()) {
                     styles.lineDash[i] = it.optDouble(i, 0.0).toFloat()
                 }
             }
@@ -129,7 +170,44 @@ class SVGAVideoShapeEntity(obj: JSONObject) {
         }
     }
 
-    fun parseTransform(obj: JSONObject) {
+    private fun parseStyles(obj: ComOpensourceSvgaVideo.ShapeEntity) {
+        if (obj.hasStyles()) {
+            obj.styles?.let {
+                val styles = Styles()
+                if (it.hasFill()) {
+                    it.fill?.let {
+                        styles.fill = Color.argb((it.a * 255).toInt(), (it.r * 255).toInt(), (it.g * 255).toInt(), (it.b * 255).toInt())
+                    }
+                }
+                if (it.hasStroke()) {
+                    it.stroke?.let {
+                        styles.stroke = Color.argb((it.a * 255).toInt(), (it.r * 255).toInt(), (it.g * 255).toInt(), (it.b * 255).toInt())
+                    }
+                }
+                styles.strokeWidth = it.strokeWidth
+                when (it.lineCap) {
+                    ComOpensourceSvgaVideo.ShapeEntity.ShapeStyle.LineCap.LineCap_BUTT -> styles.lineCap = "butt"
+                    ComOpensourceSvgaVideo.ShapeEntity.ShapeStyle.LineCap.LineCap_ROUND -> styles.lineCap = "round"
+                    ComOpensourceSvgaVideo.ShapeEntity.ShapeStyle.LineCap.LineCap_SQUARE -> styles.lineCap = "square"
+                    else -> styles.lineCap = "butt"
+                }
+                when (it.lineJoin) {
+                    ComOpensourceSvgaVideo.ShapeEntity.ShapeStyle.LineJoin.LineJoin_BEVEL -> styles.lineJoin = "bevel"
+                    ComOpensourceSvgaVideo.ShapeEntity.ShapeStyle.LineJoin.LineJoin_MITER -> styles.lineJoin = "miter"
+                    ComOpensourceSvgaVideo.ShapeEntity.ShapeStyle.LineJoin.LineJoin_ROUND -> styles.lineJoin = "round"
+                    else -> styles.lineJoin = "miter"
+                }
+                styles.miterLimit = it.miterLimit.toInt()
+                styles.lineDash = kotlin.FloatArray(3)
+                styles.lineDash[0] = it.lineDashI
+                styles.lineDash[1] = it.lineDashII
+                styles.lineDash[2] = it.lineDashIII
+                this.styles = styles
+            }
+        }
+    }
+
+    private fun parseTransform(obj: JSONObject) {
         obj.optJSONObject("transform")?.let {
             val transform = Matrix()
             val arr = FloatArray(9)
@@ -153,7 +231,33 @@ class SVGAVideoShapeEntity(obj: JSONObject) {
         }
     }
 
-    fun buildPath() {
+    private fun parseTransform(obj: ComOpensourceSvgaVideo.ShapeEntity) {
+        if (obj.hasTransform()) {
+            obj.transform?.let {
+                val transform = Matrix()
+                val arr = FloatArray(9)
+                val a = it.a
+                val b = it.b
+                val c = it.c
+                val d = it.d
+                val tx = it.tx
+                val ty = it.ty
+                arr[0] = a
+                arr[1] = c
+                arr[2] = tx
+                arr[3] = b
+                arr[4] = d
+                arr[5] = ty
+                arr[6] = 0.0f
+                arr[7] = 0.0f
+                arr[8] = 1.0f
+                transform.setValues(arr)
+                this.transform = transform
+            }
+        }
+    }
+
+    private fun buildPath() {
         val aPath = Path()
         if (this.type == SVGAVideoShapeEntity.Type.shape) {
             (this.args?.get("d") as? String)?.let {

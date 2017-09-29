@@ -13,15 +13,16 @@ import java.io.Serializable
 /**
  * Created by cuiminghui on 2016/10/17.
  */
-class SVGAVideoSpriteFrameEntity(obj: JSONObject) {
+class SVGAVideoSpriteFrameEntity {
 
-    var alpha = obj.optDouble("alpha", 0.0)
+    var alpha: Double
     var layout = SVGARect(0.0, 0.0, 0.0, 0.0)
     var transform = Matrix()
     var maskPath: SVGAPath? = null
     var shapes: List<SVGAVideoShapeEntity> = listOf()
 
-    init {
+    constructor(obj: JSONObject) {
+        this.alpha = obj.optDouble("alpha", 0.0)
         obj.optJSONObject("layout")?.let {
             layout = SVGARect(it.optDouble("x", 0.0), it.optDouble("y", 0.0), it.optDouble("width", 0.0), it.optDouble("height", 0.0))
         }
@@ -57,6 +58,42 @@ class SVGAVideoSpriteFrameEntity(obj: JSONObject) {
                 }
             }
             shapes = mutableList.toList()
+        }
+    }
+
+    constructor(obj: ComOpensourceSvgaVideo.FrameEntity) {
+        this.alpha = obj.alpha.toDouble()
+        if (obj.hasLayout()) {
+            obj.layout?.let {
+                this.layout = SVGARect(it.x.toDouble(), it.y.toDouble(), it.width.toDouble(), it.height.toDouble())
+            }
+        }
+        if (obj.hasTransform()) {
+            obj.transform?.let {
+                val arr = FloatArray(9)
+                val a = it.a
+                val b = it.b
+                val c = it.c
+                val d = it.d
+                val tx = it.tx
+                val ty = it.ty
+                arr[0] = a
+                arr[1] = c
+                arr[2] = tx
+                arr[3] = b
+                arr[4] = d
+                arr[5] = ty
+                arr[6] = 0.0f
+                arr[7] = 0.0f
+                arr[8] = 1.0f
+                transform.setValues(arr)
+            }
+        }
+        obj.clipPath?.takeIf { it.isNotEmpty() }?.let {
+            maskPath = SVGAPath(it)
+        }
+        this.shapes = obj.shapesList.map {
+            return@map SVGAVideoShapeEntity(it)
         }
     }
 

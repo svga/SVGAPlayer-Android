@@ -104,29 +104,45 @@ class SVGAParser(val context: Context) {
             }
         }
         val cacheDir = File(context.cacheDir.absolutePath + "/" + cacheKey + "/")
+        val binaryFile = File(cacheDir, "movie.binary")
         val jsonFile = File(cacheDir, "movie.spec")
-        try {
-            FileInputStream(jsonFile)?.let {
-                val fileInputStream = it
-                val byteArrayOutputStream = ByteArrayOutputStream()
-                val buffer = ByteArray(2048)
-                while (true) {
-                    val size = fileInputStream.read(buffer, 0, buffer.size)
-                    if (size == -1) {
-                        break
-                    }
-                    byteArrayOutputStream.write(buffer, 0, size)
+        if (binaryFile.isFile) {
+            try {
+                FileInputStream(binaryFile)?.let {
+                    val videoItem = SVGAVideoEntity(ComOpensourceSvgaVideo.MovieEntity.parseFrom(it), cacheDir)
+                    it.close()
+                    return videoItem
                 }
-                byteArrayOutputStream.toString()?.let {
-                    JSONObject(it)?.let {
-                        fileInputStream.close()
-                        return SVGAVideoEntity(it, cacheDir)
-                    }
-                }
+            } catch (e: Exception) {
+                cacheDir.delete()
+                binaryFile.delete()
+                jsonFile.delete()
             }
-        } catch (e: Exception) {
-            cacheDir.delete()
-            jsonFile.delete()
+        }
+        else {
+            try {
+                FileInputStream(jsonFile)?.let { fileInputStream ->
+                    val byteArrayOutputStream = ByteArrayOutputStream()
+                    val buffer = ByteArray(2048)
+                    while (true) {
+                        val size = fileInputStream.read(buffer, 0, buffer.size)
+                        if (size == -1) {
+                            break
+                        }
+                        byteArrayOutputStream.write(buffer, 0, size)
+                    }
+                    byteArrayOutputStream.toString()?.let {
+                        JSONObject(it)?.let {
+                            fileInputStream.close()
+                            return SVGAVideoEntity(it, cacheDir)
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                cacheDir.delete()
+                binaryFile.delete()
+                jsonFile.delete()
+            }
         }
         return null
     }

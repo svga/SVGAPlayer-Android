@@ -18,7 +18,7 @@ import java.util.HashMap
 /**
  * Created by PonyCui_Home on 16/6/18.
  */
-class SVGAVideoEntity(obj: JSONObject, val cacheDir: File) {
+class SVGAVideoEntity {
 
     var antiAlias = false
 
@@ -37,7 +37,10 @@ class SVGAVideoEntity(obj: JSONObject, val cacheDir: File) {
     var images = HashMap<String, Bitmap>()
         private set
 
-    init {
+    private var cacheDir: File
+
+    constructor(obj: JSONObject, cacheDir: File) {
+        this.cacheDir = cacheDir
         obj.optJSONObject("movie")?.let {
             it.optJSONObject("viewBox")?.let {
                 videoSize = SVGARect(0.0, 0.0, it.optDouble("width", 0.0), it.optDouble("height", 0.0))
@@ -49,7 +52,20 @@ class SVGAVideoEntity(obj: JSONObject, val cacheDir: File) {
         resetSprites(obj)
     }
 
-    internal fun resetImages(obj: JSONObject) {
+    constructor(obj: ComOpensourceSvgaVideo.MovieEntity, cacheDir: File) {
+        this.cacheDir = cacheDir
+        if (obj.hasParams()) {
+            obj.params?.let { movieParams ->
+                videoSize = SVGARect(0.0, 0.0, movieParams.viewBoxWidth.toDouble(), movieParams.viewBoxHeight.toDouble())
+                FPS = movieParams.fps
+                frames = movieParams.frames
+            }
+        }
+        resetImages(obj)
+        resetSprites(obj)
+    }
+
+    private fun resetImages(obj: JSONObject) {
         obj.optJSONObject("images")?.let {
             val imgObjects = it
             it.keys().forEach {
@@ -70,16 +86,40 @@ class SVGAVideoEntity(obj: JSONObject, val cacheDir: File) {
         }
     }
 
-    internal fun resetSprites(obj: JSONObject) {
+    private fun resetImages(obj: ComOpensourceSvgaVideo.MovieEntity) {
+        obj.imagesMap.entries.forEach {
+            val imageKey = it.key
+            var filePath = cacheDir.absolutePath + "/" + it.value
+            var bitmap = if (File(filePath).exists()) BitmapFactory.decodeFile(filePath) else null
+            if (bitmap != null) {
+                images.put(imageKey, bitmap)
+            }
+            else {
+                filePath = cacheDir.absolutePath + "/" + imageKey + ".png"
+                bitmap = if (File(filePath).exists()) BitmapFactory.decodeFile(filePath) else null
+                if (bitmap != null) {
+                    images.put(imageKey, bitmap)
+                }
+            }
+        }
+    }
+
+    private fun resetSprites(obj: JSONObject) {
         val mutableList: MutableList<SVGAVideoSpriteEntity> = mutableListOf()
         obj.optJSONArray("sprites")?.let {
-            for (i in 0..it.length() - 1) {
+            for (i in 0 until it.length()) {
                 it.optJSONObject(i)?.let {
                     mutableList.add(SVGAVideoSpriteEntity(it))
                 }
             }
         }
         sprites = mutableList.toList()
+    }
+
+    private fun resetSprites(obj: ComOpensourceSvgaVideo.MovieEntity) {
+        sprites = obj.spritesList.map {
+            return@map SVGAVideoSpriteEntity(it)
+        }
     }
 
 }
