@@ -69,7 +69,7 @@ class SVGAVideoShapeEntity {
         buildPath()
     }
 
-    constructor(obj: ComOpensourceSvgaVideo.ShapeEntity) {
+    constructor(obj: Svga.ShapeEntity) {
         parseType(obj)
         parseArgs(obj)
         parseStyles(obj)
@@ -93,12 +93,12 @@ class SVGAVideoShapeEntity {
         }
     }
 
-    private fun parseType(obj: ComOpensourceSvgaVideo.ShapeEntity) {
+    private fun parseType(obj: Svga.ShapeEntity) {
         when (obj.type) {
-            ComOpensourceSvgaVideo.ShapeEntity.ShapeType.SHAPE -> type = Type.shape
-            ComOpensourceSvgaVideo.ShapeEntity.ShapeType.RECT -> type = Type.rect
-            ComOpensourceSvgaVideo.ShapeEntity.ShapeType.ELLIPSE -> type = Type.ellipse
-            ComOpensourceSvgaVideo.ShapeEntity.ShapeType.KEEP -> type = Type.keep
+            Svga.ShapeEntity.ShapeType.SHAPE -> type = Type.shape
+            Svga.ShapeEntity.ShapeType.RECT -> type = Type.rect
+            Svga.ShapeEntity.ShapeType.ELLIPSE -> type = Type.ellipse
+            Svga.ShapeEntity.ShapeType.KEEP -> type = Type.keep
         }
     }
 
@@ -116,13 +116,13 @@ class SVGAVideoShapeEntity {
         }
     }
 
-    private fun parseArgs(obj: ComOpensourceSvgaVideo.ShapeEntity) {
+    private fun parseArgs(obj: Svga.ShapeEntity) {
         val args = HashMap<String, Any>()
         when (obj.argsCase) {
-            ComOpensourceSvgaVideo.ShapeEntity.ArgsCase.SHAPE -> {
+            Svga.ShapeEntity.ArgsCase.SHAPE -> {
                 obj.shape?.d?.let { args.put("d", it) }
             }
-            ComOpensourceSvgaVideo.ShapeEntity.ArgsCase.ELLIPSE -> {
+            Svga.ShapeEntity.ArgsCase.ELLIPSE -> {
                 obj.ellipse?.let {
                     args.put("x", it.x)
                     args.put("y", it.y)
@@ -130,7 +130,7 @@ class SVGAVideoShapeEntity {
                     args.put("radiusY", it.radiusY)
                 }
             }
-            ComOpensourceSvgaVideo.ShapeEntity.ArgsCase.RECT -> {
+            Svga.ShapeEntity.ArgsCase.RECT -> {
                 obj.rect?.let {
                     args.put("x", it.x)
                     args.put("y", it.y)
@@ -170,7 +170,7 @@ class SVGAVideoShapeEntity {
         }
     }
 
-    private fun parseStyles(obj: ComOpensourceSvgaVideo.ShapeEntity) {
+    private fun parseStyles(obj: Svga.ShapeEntity) {
         if (obj.hasStyles()) {
             obj.styles?.let {
                 val styles = Styles()
@@ -186,15 +186,15 @@ class SVGAVideoShapeEntity {
                 }
                 styles.strokeWidth = it.strokeWidth
                 when (it.lineCap) {
-                    ComOpensourceSvgaVideo.ShapeEntity.ShapeStyle.LineCap.LineCap_BUTT -> styles.lineCap = "butt"
-                    ComOpensourceSvgaVideo.ShapeEntity.ShapeStyle.LineCap.LineCap_ROUND -> styles.lineCap = "round"
-                    ComOpensourceSvgaVideo.ShapeEntity.ShapeStyle.LineCap.LineCap_SQUARE -> styles.lineCap = "square"
+                    Svga.ShapeEntity.ShapeStyle.LineCap.LineCap_BUTT -> styles.lineCap = "butt"
+                    Svga.ShapeEntity.ShapeStyle.LineCap.LineCap_ROUND -> styles.lineCap = "round"
+                    Svga.ShapeEntity.ShapeStyle.LineCap.LineCap_SQUARE -> styles.lineCap = "square"
                     else -> styles.lineCap = "butt"
                 }
                 when (it.lineJoin) {
-                    ComOpensourceSvgaVideo.ShapeEntity.ShapeStyle.LineJoin.LineJoin_BEVEL -> styles.lineJoin = "bevel"
-                    ComOpensourceSvgaVideo.ShapeEntity.ShapeStyle.LineJoin.LineJoin_MITER -> styles.lineJoin = "miter"
-                    ComOpensourceSvgaVideo.ShapeEntity.ShapeStyle.LineJoin.LineJoin_ROUND -> styles.lineJoin = "round"
+                    Svga.ShapeEntity.ShapeStyle.LineJoin.LineJoin_BEVEL -> styles.lineJoin = "bevel"
+                    Svga.ShapeEntity.ShapeStyle.LineJoin.LineJoin_MITER -> styles.lineJoin = "miter"
+                    Svga.ShapeEntity.ShapeStyle.LineJoin.LineJoin_ROUND -> styles.lineJoin = "round"
                     else -> styles.lineJoin = "miter"
                 }
                 styles.miterLimit = it.miterLimit.toInt()
@@ -231,7 +231,7 @@ class SVGAVideoShapeEntity {
         }
     }
 
-    private fun parseTransform(obj: ComOpensourceSvgaVideo.ShapeEntity) {
+    private fun parseTransform(obj: Svga.ShapeEntity) {
         if (obj.hasTransform()) {
             obj.transform?.let {
                 val transform = Matrix()

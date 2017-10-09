@@ -9,8 +9,7 @@ import java.io.*
 import java.net.HttpURLConnection
 import java.net.URL
 import java.security.MessageDigest
-import java.util.logging.Handler
-import java.util.zip.ZipEntry
+import java.util.zip.Inflater
 import java.util.zip.ZipInputStream
 
 /**
@@ -98,9 +97,26 @@ class SVGAParser(val context: Context) {
     }
 
     fun parse(inputStream: InputStream?, cacheKey: String): SVGAVideoEntity? {
-        inputStream?.let {
-            if (!cacheDir(cacheKey).exists()) {
-                unzip(it, cacheKey)
+        readAsBytes(inputStream)?.let {
+            if (it.size > 4 && it[0].toInt() == 80 && it[1].toInt() == 75 && it[2].toInt() == 3 && it[3].toInt() == 4) {
+                if (!cacheDir(cacheKey).exists()) {
+                    try {
+                        unzip(ByteArrayInputStream(it), cacheKey)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        return null
+                    }
+                } else { }
+            }
+            else {
+                try {
+                    inflate(it)?.let {
+                        return SVGAVideoEntity(Svga.MovieEntity.parseFrom(it), File(cacheKey))
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    return null
+                }
             }
         }
         val cacheDir = File(context.cacheDir.absolutePath + "/" + cacheKey + "/")
@@ -109,11 +125,12 @@ class SVGAParser(val context: Context) {
         if (binaryFile.isFile) {
             try {
                 FileInputStream(binaryFile)?.let {
-                    val videoItem = SVGAVideoEntity(ComOpensourceSvgaVideo.MovieEntity.parseFrom(it), cacheDir)
+                    val videoItem = SVGAVideoEntity(Svga.MovieEntity.parseFrom(it), cacheDir)
                     it.close()
                     return videoItem
                 }
             } catch (e: Exception) {
+                e.printStackTrace()
                 cacheDir.delete()
                 binaryFile.delete()
                 jsonFile.delete()
@@ -139,6 +156,7 @@ class SVGAParser(val context: Context) {
                     }
                 }
             } catch (e: Exception) {
+                e.printStackTrace()
                 cacheDir.delete()
                 binaryFile.delete()
                 jsonFile.delete()
@@ -196,28 +214,64 @@ class SVGAParser(val context: Context) {
         return File(context.cacheDir.absolutePath + "/" + cacheKey + "/")
     }
 
-    private fun unzip(inputStream: InputStream, cacheKey: String) {
-        try {
-            val cacheDir = this.cacheDir(cacheKey)
-            cacheDir.mkdirs()
-            val zipInputStream = ZipInputStream(BufferedInputStream(inputStream))
+    private fun readAsBytes(inputStream: InputStream?): ByteArray? {
+        inputStream?.let {
+            val byteArrayOutputStream = ByteArrayOutputStream()
+            val byteArray = ByteArray(2048)
             while (true) {
-                val zipItem = zipInputStream.nextEntry ?: break
-                val file = File(cacheDir, zipItem.name)
-                val fileOutputStream = FileOutputStream(file)
-                val buff = ByteArray(2048)
-                while (true) {
-                    val readBytes = zipInputStream.read(buff)
-                    if (readBytes <= 0) {
-                        break
-                    }
-                    fileOutputStream.write(buff, 0, readBytes)
+                val count = inputStream.read(byteArray, 0, 2048)
+                if (count <= 0) {
+                    break
                 }
-                fileOutputStream.close()
-                zipInputStream.closeEntry()
+                else {
+                    byteArrayOutputStream.write(byteArray, 0, count)
+                }
             }
-            zipInputStream.close()
-        } catch (e: Exception) { }
+            return byteArrayOutputStream.toByteArray()
+        }
+        return null
+    }
+
+    private fun inflate(byteArray: ByteArray): ByteArray? {
+        try {
+            val inflater = Inflater()
+            inflater.setInput(byteArray, 0, byteArray.size)
+            val inflatedBytes = ByteArray(2048)
+            val inflatedOutputStream = ByteArrayOutputStream()
+            while (true) {
+                val count = inflater.inflate(inflatedBytes, 0, 2048)
+                if (count <= 0) {
+                    break
+                }
+                else {
+                    inflatedOutputStream.write(inflatedBytes, 0, count)
+                }
+            }
+            return inflatedOutputStream.toByteArray()
+        } catch (e: Exception) { e.printStackTrace(); }
+        return null
+    }
+
+    private fun unzip(inputStream: InputStream, cacheKey: String) {
+        val cacheDir = this.cacheDir(cacheKey)
+        cacheDir.mkdirs()
+        val zipInputStream = ZipInputStream(BufferedInputStream(inputStream))
+        while (true) {
+            val zipItem = zipInputStream.nextEntry ?: break
+            val file = File(cacheDir, zipItem.name)
+            val fileOutputStream = FileOutputStream(file)
+            val buff = ByteArray(2048)
+            while (true) {
+                val readBytes = zipInputStream.read(buff)
+                if (readBytes <= 0) {
+                    break
+                }
+                fileOutputStream.write(buff, 0, readBytes)
+            }
+            fileOutputStream.close()
+            zipInputStream.closeEntry()
+        }
+        zipInputStream.close()
     }
 
 }

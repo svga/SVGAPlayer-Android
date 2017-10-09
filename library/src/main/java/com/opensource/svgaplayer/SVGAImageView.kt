@@ -128,10 +128,8 @@ open class SVGAImageView : ImageView {
                         return@Thread
                     }
                 }
-                System.out.println("ssss, s" + Date().time.toString())
                 parser.parse(it, object : SVGAParser.ParseCompletion {
                     override fun onComplete(videoItem: SVGAVideoEntity) {
-                        System.out.println("ssss, e" + Date().time.toString())
                         handler?.post {
                             videoItem.antiAlias = antiAlias
                             setVideoItem(videoItem)

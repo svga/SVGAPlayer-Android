@@ -52,7 +52,7 @@ class SVGAVideoEntity {
         resetSprites(obj)
     }
 
-    constructor(obj: ComOpensourceSvgaVideo.MovieEntity, cacheDir: File) {
+    constructor(obj: Svga.MovieEntity, cacheDir: File) {
         this.cacheDir = cacheDir
         if (obj.hasParams()) {
             obj.params?.let { movieParams ->
@@ -86,17 +86,25 @@ class SVGAVideoEntity {
         }
     }
 
-    private fun resetImages(obj: ComOpensourceSvgaVideo.MovieEntity) {
+    private fun resetImages(obj: Svga.MovieEntity) {
         obj.imagesMap.entries.forEach {
             val imageKey = it.key
-            var filePath = cacheDir.absolutePath + "/" + it.value
-            var bitmap = if (File(filePath).exists()) BitmapFactory.decodeFile(filePath) else null
-            if (bitmap != null) {
-                images.put(imageKey, bitmap)
+            if (it.value.isValidUtf8) {
+                var filePath = cacheDir.absolutePath + "/" + it.value.toString()
+                var bitmap = if (File(filePath).exists()) BitmapFactory.decodeFile(filePath) else null
+                if (bitmap != null) {
+                    images.put(imageKey, bitmap)
+                }
+                else {
+                    filePath = cacheDir.absolutePath + "/" + imageKey + ".png"
+                    bitmap = if (File(filePath).exists()) BitmapFactory.decodeFile(filePath) else null
+                    if (bitmap != null) {
+                        images.put(imageKey, bitmap)
+                    }
+                }
             }
             else {
-                filePath = cacheDir.absolutePath + "/" + imageKey + ".png"
-                bitmap = if (File(filePath).exists()) BitmapFactory.decodeFile(filePath) else null
+                val bitmap = BitmapFactory.decodeByteArray(it.value.toByteArray(), 0, it.value.size())
                 if (bitmap != null) {
                     images.put(imageKey, bitmap)
                 }
@@ -116,7 +124,7 @@ class SVGAVideoEntity {
         sprites = mutableList.toList()
     }
 
-    private fun resetSprites(obj: ComOpensourceSvgaVideo.MovieEntity) {
+    private fun resetSprites(obj: Svga.MovieEntity) {
         sprites = obj.spritesList.map {
             return@map SVGAVideoSpriteEntity(it)
         }

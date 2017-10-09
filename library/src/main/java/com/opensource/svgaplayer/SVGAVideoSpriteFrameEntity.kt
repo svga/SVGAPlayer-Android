@@ -61,7 +61,7 @@ class SVGAVideoSpriteFrameEntity {
         }
     }
 
-    constructor(obj: ComOpensourceSvgaVideo.FrameEntity) {
+    constructor(obj: Svga.FrameEntity) {
         this.alpha = obj.alpha.toDouble()
         if (obj.hasLayout()) {
             obj.layout?.let {

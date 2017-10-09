@@ -37,7 +37,7 @@ class SVGAVideoSpriteEntity {
         frames = mutableFrames.toList()
     }
 
-    constructor(obj: ComOpensourceSvgaVideo.SpriteEntity) {
+    constructor(obj: Svga.SpriteEntity) {
         this.imageKey = obj.imageKey
         var lastFrame: SVGAVideoSpriteFrameEntity? = null
         frames = obj.framesList.map {
