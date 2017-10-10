@@ -31,8 +31,13 @@ import com.opensource.svgaplayer.SVGAVideoEntity;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 
+import kotlin.Unit;
+import kotlin.jvm.functions.Function1;
+import kotlin.jvm.functions.Function3;
+import okhttp3.CacheControl;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
@@ -62,6 +67,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void loadAnimation() {
         SVGAParser parser = new SVGAParser(this);
+        resetDownloader(parser);
         try {
             parser.parse(new URL("https://github.com/yyued/SVGA-Samples/blob/master/angel.svga?raw=true"), new SVGAParser.ParseCompletion() {
                 @Override
@@ -78,6 +84,32 @@ public class MainActivity extends AppCompatActivity {
         } catch (Exception e) {
             System.out.print(true);
         }
+    }
+
+    /**
+     * 设置下载器，这是一个可选的配置项。
+     * @param parser
+     */
+    private void resetDownloader(SVGAParser parser) {
+        parser.setFileDownloader(new SVGAParser.FileDownloader() {
+            @Override
+            public void resume(final URL url, final Function1<? super InputStream, Unit> complete, final Function1<? super Exception, Unit> failure) {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        OkHttpClient client = new OkHttpClient();
+                        Request request = new Request.Builder().url(url).get().build();
+                        try {
+                            Response response = client.newCall(request).execute();
+                            complete.invoke(response.body().byteStream());
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            failure.invoke(e);
+                        }
+                    }
+                }).start();
+            }
+        });
     }
 
 }

@@ -1,8 +1,6 @@
 package com.opensource.svgaplayer
 
 import android.graphics.*
-import android.os.Build
-import android.R.attr.x
 import android.widget.ImageView
 
 
@@ -10,11 +8,11 @@ import android.widget.ImageView
  * Created by cuiminghui on 2017/3/29.
  */
 
-class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicEntity, val canvas: Canvas) : SGVADrawer(videoItem) {
+class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicEntity, private val canvas: Canvas) : SGVADrawer(videoItem) {
 
-    val sharedPaint = Paint()
-    val sharedPath = Path()
-    val sharedContentTransform = Matrix()
+    private val sharedPaint = Paint()
+    private val sharedPath = Path()
+    private val sharedContentTransform = Matrix()
 
     override fun drawFrame(frameIndex: Int, scaleType: ImageView.ScaleType) {
         super.drawFrame(frameIndex, scaleType)
@@ -111,20 +109,19 @@ class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
 
     private fun drawImage(sprite: SVGADrawerSprite, scaleType: ImageView.ScaleType) {
         (dynamicItem.dynamicImage[sprite.imageKey] ?: videoItem.images[sprite.imageKey])?.let {
-            val drawingBitmap = it
             sharedPaint.reset()
             sharedContentTransform.reset()
             sharedPaint.isAntiAlias = videoItem.antiAlias
             sharedPaint.alpha = (sprite.frameEntity.alpha * 255).toInt()
             performScaleType(scaleType)
             sharedContentTransform.preConcat(sprite.frameEntity.transform)
-            sharedContentTransform.preScale((sprite.frameEntity.layout.width / drawingBitmap.width).toFloat(), (sprite.frameEntity.layout.width / drawingBitmap.width).toFloat())
+            sharedContentTransform.preScale((sprite.frameEntity.layout.width / it.width).toFloat(), (sprite.frameEntity.layout.width / it.width).toFloat())
             if (sprite.frameEntity.maskPath != null) {
                 val maskPath = sprite.frameEntity.maskPath ?: return@let
                 canvas.save()
                 canvas.concat(sharedContentTransform)
-                canvas.clipRect(0, 0, drawingBitmap.width, drawingBitmap.height)
-                val bitmapShader = BitmapShader(drawingBitmap, Shader.TileMode.REPEAT, Shader.TileMode.REPEAT)
+                canvas.clipRect(0, 0, it.width, it.height)
+                val bitmapShader = BitmapShader(it, Shader.TileMode.REPEAT, Shader.TileMode.REPEAT)
                 sharedPaint.shader = bitmapShader
                 sharedPaint.isAntiAlias = true
                 sharedPath.reset()
@@ -133,17 +130,15 @@ class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
                 canvas.restore()
             }
             else {
-                canvas.drawBitmap(drawingBitmap, sharedContentTransform, sharedPaint)
+                canvas.drawBitmap(it, sharedContentTransform, sharedPaint)
             }
-            drawText(drawingBitmap, sprite)
+            drawText(it, sprite)
         }
     }
 
     private fun drawText(drawingBitmap: Bitmap, sprite: SVGADrawerSprite) {
-        dynamicItem.dynamicText[sprite.imageKey]?.let {
-            val drawingText = it
-            dynamicItem.dynamicTextPaint[sprite.imageKey]?.let {
-                val drawingTextPaint = it
+        dynamicItem.dynamicText[sprite.imageKey]?.let { drawingText ->
+            dynamicItem.dynamicTextPaint[sprite.imageKey]?.let { drawingTextPaint ->
                 val textBitmap = Bitmap.createBitmap(drawingBitmap.width, drawingBitmap.height, Bitmap.Config.ARGB_8888)
                 val textCanvas = Canvas(textBitmap)
                 drawingTextPaint.isAntiAlias = true
@@ -178,8 +173,7 @@ class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
         sharedContentTransform.reset()
         performScaleType(scaleType)
         sharedContentTransform.preConcat(sprite.frameEntity.transform)
-        sprite.frameEntity.shapes.forEach {
-            val shape = it
+        sprite.frameEntity.shapes.forEach { shape ->
             sharedPath.reset()
             shape.shapePath?.let {
                 sharedPath.addPath(it)
@@ -223,25 +217,17 @@ class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
             sharedPaint.strokeWidth = it
         }
         shape.styles?.lineCap?.let {
-            if (it.equals("butt", true)) {
-                sharedPaint.strokeCap = Paint.Cap.BUTT
-            }
-            else if (it.equals("round", true)) {
-                sharedPaint.strokeCap = Paint.Cap.ROUND
-            }
-            else if (it.equals("square", true)) {
-                sharedPaint.strokeCap = Paint.Cap.SQUARE
+            when {
+                it.equals("butt", true) -> sharedPaint.strokeCap = Paint.Cap.BUTT
+                it.equals("round", true) -> sharedPaint.strokeCap = Paint.Cap.ROUND
+                it.equals("square", true) -> sharedPaint.strokeCap = Paint.Cap.SQUARE
             }
         }
         shape.styles?.lineJoin?.let {
-            if (it.equals("miter", true)) {
-                sharedPaint.strokeJoin = Paint.Join.MITER
-            }
-            else if (it.equals("round", true)) {
-                sharedPaint.strokeJoin = Paint.Join.ROUND
-            }
-            else if (it.equals("bevel", true)) {
-                sharedPaint.strokeJoin = Paint.Join.BEVEL
+            when {
+                it.equals("miter", true) -> sharedPaint.strokeJoin = Paint.Join.MITER
+                it.equals("round", true) -> sharedPaint.strokeJoin = Paint.Join.ROUND
+                it.equals("bevel", true) -> sharedPaint.strokeJoin = Paint.Join.BEVEL
             }
         }
         shape.styles?.miterLimit?.let {
