@@ -2,6 +2,10 @@
 
 ## Version
 
+### 2.0.0
+
+Add SVGA-Format 2.0.0 support.
+
 ### 1.2.7
 
 * add ScaleType support.
