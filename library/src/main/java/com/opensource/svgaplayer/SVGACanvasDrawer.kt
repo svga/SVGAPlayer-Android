@@ -12,6 +12,7 @@ class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
 
     private val sharedPaint = Paint()
     private val sharedPath = Path()
+    private val sharedPath2 = Path()
     private val sharedContentTransform = Matrix()
 
     override fun drawFrame(frameIndex: Int, scaleType: ImageView.ScaleType) {
@@ -191,7 +192,15 @@ class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
                         sharedPaint.color = it
                         sharedPaint.alpha = (sprite.frameEntity.alpha * 255).toInt()
                         sharedPaint.isAntiAlias = true
+                        if (sprite.frameEntity.maskPath !== null) canvas.save()
+                        sprite.frameEntity.maskPath?.let { maskPath ->
+                            sharedPath2.reset()
+                            maskPath.buildPath(sharedPath2)
+                            sharedPath2.transform(this.sharedContentTransform)
+                            canvas.clipPath(sharedPath2)
+                        }
                         canvas.drawPath(sharedPath, sharedPaint)
+                        if (sprite.frameEntity.maskPath !== null) canvas.restore()
                     }
                 }
                 shape.styles?.strokeWidth?.let {
@@ -199,7 +208,15 @@ class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
                         sharedPaint.reset()
                         sharedPaint.alpha = (sprite.frameEntity.alpha * 255).toInt()
                         resetShapeStrokePaint(shape)
+                        if (sprite.frameEntity.maskPath !== null) canvas.save()
+                        sprite.frameEntity.maskPath?.let { maskPath ->
+                            sharedPath2.reset()
+                            maskPath.buildPath(sharedPath2)
+                            sharedPath2.transform(this.sharedContentTransform)
+                            canvas.clipPath(sharedPath2)
+                        }
                         canvas.drawPath(sharedPath, sharedPaint)
+                        if (sprite.frameEntity.maskPath !== null) canvas.restore()
                     }
                 }
             }
