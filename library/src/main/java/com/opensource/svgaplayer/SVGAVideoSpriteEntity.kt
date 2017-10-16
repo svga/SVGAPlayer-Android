@@ -1,11 +1,7 @@
 package com.opensource.svgaplayer
 
-import org.json.JSONArray
-import org.json.JSONException
+import com.opensource.svgaplayer.proto.SpriteEntity
 import org.json.JSONObject
-
-import java.io.Serializable
-import java.util.ArrayList
 
 /**
  * Created by cuiminghui on 2016/10/17.
@@ -20,10 +16,10 @@ class SVGAVideoSpriteEntity {
         this.imageKey = obj.optString("imageKey")
         val mutableFrames: MutableList<SVGAVideoSpriteFrameEntity> = mutableListOf()
         obj.optJSONArray("frames")?.let {
-            for (i in 0..it.length() - 1) {
+            for (i in 0 until it.length()) {
                 it.optJSONObject(i)?.let {
                     val frameItem = SVGAVideoSpriteFrameEntity(it)
-                    if (frameItem.shapes.size > 0) {
+                    if (frameItem.shapes.isNotEmpty()) {
                         frameItem.shapes.first()?.let {
                             if (it.isKeep && mutableFrames.size > 0) {
                                 frameItem.shapes = mutableFrames.last().shapes
@@ -37,12 +33,12 @@ class SVGAVideoSpriteEntity {
         frames = mutableFrames.toList()
     }
 
-    constructor(obj: Svga.SpriteEntity) {
+    constructor(obj: SpriteEntity) {
         this.imageKey = obj.imageKey
         var lastFrame: SVGAVideoSpriteFrameEntity? = null
-        frames = obj.framesList.map {
+        frames = obj.frames?.map {
             val frameItem = SVGAVideoSpriteFrameEntity(it)
-            if (frameItem.shapes.size > 0) {
+            if (frameItem.shapes.isNotEmpty()) {
                 frameItem.shapes.first()?.let {
                     if (it.isKeep) {
                         lastFrame?.let {
@@ -53,7 +49,7 @@ class SVGAVideoSpriteEntity {
             }
             lastFrame = frameItem
             return@map frameItem
-        }
+        } ?: listOf()
 
     }
 

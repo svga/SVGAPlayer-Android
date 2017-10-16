@@ -4,6 +4,7 @@ import android.graphics.Color
 import android.graphics.Matrix
 import android.graphics.Path
 import android.os.Build
+import com.opensource.svgaplayer.proto.ShapeEntity
 
 import org.json.JSONArray
 import org.json.JSONException
@@ -69,7 +70,7 @@ class SVGAVideoShapeEntity {
         buildPath()
     }
 
-    constructor(obj: Svga.ShapeEntity) {
+    constructor(obj: ShapeEntity) {
         parseType(obj)
         parseArgs(obj)
         parseStyles(obj)
@@ -93,22 +94,22 @@ class SVGAVideoShapeEntity {
         }
     }
 
-    private fun parseType(obj: Svga.ShapeEntity) {
-        when (obj.type) {
-            Svga.ShapeEntity.ShapeType.SHAPE -> type = Type.shape
-            Svga.ShapeEntity.ShapeType.RECT -> type = Type.rect
-            Svga.ShapeEntity.ShapeType.ELLIPSE -> type = Type.ellipse
-            Svga.ShapeEntity.ShapeType.KEEP -> type = Type.keep
+    private fun parseType(obj: ShapeEntity) {
+        obj.type?.let {
+            type = when (it) {
+                ShapeEntity.ShapeType.SHAPE -> Type.shape
+                ShapeEntity.ShapeType.RECT -> Type.rect
+                ShapeEntity.ShapeType.ELLIPSE -> Type.ellipse
+                ShapeEntity.ShapeType.KEEP -> Type.keep
+            }
         }
     }
 
     private fun parseArgs(obj: JSONObject) {
         val args = HashMap<String, Any>()
-        obj.optJSONObject("args")?.let {
-            val values = it
-            it.keys().forEach {
-                val key = it
-                values.get(it)?.let {
+        obj.optJSONObject("args")?.let { values ->
+            values.keys().forEach { key ->
+                values.get(key)?.let {
                     args.put(key, it)
                 }
             }
@@ -116,29 +117,23 @@ class SVGAVideoShapeEntity {
         }
     }
 
-    private fun parseArgs(obj: Svga.ShapeEntity) {
+    private fun parseArgs(obj: ShapeEntity) {
         val args = HashMap<String, Any>()
-        when (obj.argsCase) {
-            Svga.ShapeEntity.ArgsCase.SHAPE -> {
-                obj.shape?.d?.let { args.put("d", it) }
-            }
-            Svga.ShapeEntity.ArgsCase.ELLIPSE -> {
-                obj.ellipse?.let {
-                    args.put("x", it.x)
-                    args.put("y", it.y)
-                    args.put("radiusX", it.radiusX)
-                    args.put("radiusY", it.radiusY)
-                }
-            }
-            Svga.ShapeEntity.ArgsCase.RECT -> {
-                obj.rect?.let {
-                    args.put("x", it.x)
-                    args.put("y", it.y)
-                    args.put("width", it.width)
-                    args.put("height", it.height)
-                    args.put("cornerRadius", it.cornerRadius)
-                }
-            }
+        obj.shape?.let {
+            it.d?.let { args.put("d", it) }
+        }
+        obj.ellipse?.let {
+            args.put("x", it.x ?: 0.0f)
+            args.put("y", it.y ?: 0.0f)
+            args.put("radiusX", it.radiusX ?: 0.0f)
+            args.put("radiusY", it.radiusY ?: 0.0f)
+        }
+        obj.rect?.let {
+            args.put("x", it.x ?: 0.0f)
+            args.put("y", it.y ?: 0.0f)
+            args.put("width", it.width ?: 0.0f)
+            args.put("height", it.height ?: 0.0f)
+            args.put("cornerRadius", it.cornerRadius ?: 0.0f)
         }
         this.args = args
     }
@@ -170,40 +165,36 @@ class SVGAVideoShapeEntity {
         }
     }
 
-    private fun parseStyles(obj: Svga.ShapeEntity) {
-        if (obj.hasStyles()) {
-            obj.styles?.let {
-                val styles = Styles()
-                if (it.hasFill()) {
-                    it.fill?.let {
-                        styles.fill = Color.argb((it.a * 255).toInt(), (it.r * 255).toInt(), (it.g * 255).toInt(), (it.b * 255).toInt())
-                    }
-                }
-                if (it.hasStroke()) {
-                    it.stroke?.let {
-                        styles.stroke = Color.argb((it.a * 255).toInt(), (it.r * 255).toInt(), (it.g * 255).toInt(), (it.b * 255).toInt())
-                    }
-                }
-                styles.strokeWidth = it.strokeWidth
-                when (it.lineCap) {
-                    Svga.ShapeEntity.ShapeStyle.LineCap.LineCap_BUTT -> styles.lineCap = "butt"
-                    Svga.ShapeEntity.ShapeStyle.LineCap.LineCap_ROUND -> styles.lineCap = "round"
-                    Svga.ShapeEntity.ShapeStyle.LineCap.LineCap_SQUARE -> styles.lineCap = "square"
-                    else -> styles.lineCap = "butt"
-                }
-                when (it.lineJoin) {
-                    Svga.ShapeEntity.ShapeStyle.LineJoin.LineJoin_BEVEL -> styles.lineJoin = "bevel"
-                    Svga.ShapeEntity.ShapeStyle.LineJoin.LineJoin_MITER -> styles.lineJoin = "miter"
-                    Svga.ShapeEntity.ShapeStyle.LineJoin.LineJoin_ROUND -> styles.lineJoin = "round"
-                    else -> styles.lineJoin = "miter"
-                }
-                styles.miterLimit = it.miterLimit.toInt()
-                styles.lineDash = kotlin.FloatArray(3)
-                styles.lineDash[0] = it.lineDashI
-                styles.lineDash[1] = it.lineDashII
-                styles.lineDash[2] = it.lineDashIII
-                this.styles = styles
+    private fun parseStyles(obj: ShapeEntity) {
+        obj.styles?.let {
+            val styles = Styles()
+            it.fill?.let {
+                styles.fill = Color.argb(((it.a ?: 0.0f) * 255).toInt(), ((it.r ?: 0.0f) * 255).toInt(), ((it.g ?: 0.0f) * 255).toInt(), ((it.b ?: 0.0f) * 255).toInt())
             }
+            it.stroke?.let {
+                styles.stroke = Color.argb(((it.a ?: 0.0f) * 255).toInt(), ((it.r ?: 0.0f) * 255).toInt(), ((it.g ?: 0.0f) * 255).toInt(), ((it.b ?: 0.0f) * 255).toInt())
+            }
+            styles.strokeWidth = it.strokeWidth ?: 0.0f
+            it.lineCap?.let {
+                when (it) {
+                    ShapeEntity.ShapeStyle.LineCap.LineCap_BUTT -> styles.lineCap = "butt"
+                    ShapeEntity.ShapeStyle.LineCap.LineCap_ROUND -> styles.lineCap = "round"
+                    ShapeEntity.ShapeStyle.LineCap.LineCap_SQUARE -> styles.lineCap = "square"
+                }
+            }
+            it.lineJoin?.let {
+                when (it) {
+                    ShapeEntity.ShapeStyle.LineJoin.LineJoin_BEVEL -> styles.lineJoin = "bevel"
+                    ShapeEntity.ShapeStyle.LineJoin.LineJoin_MITER -> styles.lineJoin = "miter"
+                    ShapeEntity.ShapeStyle.LineJoin.LineJoin_ROUND -> styles.lineJoin = "round"
+                }
+            }
+            styles.miterLimit = (it.miterLimit ?: 0.0f).toInt()
+            styles.lineDash = kotlin.FloatArray(3)
+            it.lineDashI?.let { styles.lineDash[0] = it }
+            it.lineDashII?.let { styles.lineDash[1] = it }
+            it.lineDashIII?.let { styles.lineDash[2] = it }
+            this.styles = styles
         }
     }
 
@@ -231,29 +222,27 @@ class SVGAVideoShapeEntity {
         }
     }
 
-    private fun parseTransform(obj: Svga.ShapeEntity) {
-        if (obj.hasTransform()) {
-            obj.transform?.let {
-                val transform = Matrix()
-                val arr = FloatArray(9)
-                val a = it.a
-                val b = it.b
-                val c = it.c
-                val d = it.d
-                val tx = it.tx
-                val ty = it.ty
-                arr[0] = a
-                arr[1] = c
-                arr[2] = tx
-                arr[3] = b
-                arr[4] = d
-                arr[5] = ty
-                arr[6] = 0.0f
-                arr[7] = 0.0f
-                arr[8] = 1.0f
-                transform.setValues(arr)
-                this.transform = transform
-            }
+    private fun parseTransform(obj: ShapeEntity) {
+        obj.transform?.let {
+            val transform = Matrix()
+            val arr = FloatArray(9)
+            val a = it.a ?: 1.0f
+            val b = it.b ?: 0.0f
+            val c = it.c ?: 0.0f
+            val d = it.d ?: 1.0f
+            val tx = it.tx ?: 0.0f
+            val ty = it.ty ?: 0.0f
+            arr[0] = a
+            arr[1] = c
+            arr[2] = tx
+            arr[3] = b
+            arr[4] = d
+            arr[5] = ty
+            arr[6] = 0.0f
+            arr[7] = 0.0f
+            arr[8] = 1.0f
+            transform.setValues(arr)
+            this.transform = transform
         }
     }
 

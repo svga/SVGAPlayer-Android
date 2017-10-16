@@ -3,6 +3,7 @@ package com.opensource.svgaplayer
 import android.app.Activity
 import android.content.Context
 import android.os.Handler
+import com.opensource.svgaplayer.proto.MovieEntity
 
 import org.json.JSONObject
 import java.io.*
@@ -113,7 +114,9 @@ class SVGAParser(private val context: Context) {
         if (bytes.size > 4 && bytes[0].toInt() == 80 && bytes[1].toInt() == 75 && bytes[2].toInt() == 3 && bytes[3].toInt() == 4) {
             synchronized(sharedLock, {
                 if (!cacheDir(cacheKey).exists()) {
-                    unzip(ByteArrayInputStream(bytes), cacheKey)
+                    try {
+                        unzip(ByteArrayInputStream(bytes), cacheKey)
+                    } catch (e: Exception) { e.printStackTrace() }
                 }
             })
             try {
@@ -121,7 +124,7 @@ class SVGAParser(private val context: Context) {
                 File(cacheDir, "movie.binary")?.takeIf { it.isFile }?.let { binaryFile ->
                     try {
                         FileInputStream(binaryFile)?.let {
-                            val videoItem = SVGAVideoEntity(Svga.MovieEntity.parseFrom(it), cacheDir)
+                            val videoItem = SVGAVideoEntity(MovieEntity.ADAPTER.decode(it), cacheDir)
                             it.close()
                             return videoItem
                         }
@@ -163,7 +166,7 @@ class SVGAParser(private val context: Context) {
         else {
             try {
                 inflate(bytes)?.let {
-                    return SVGAVideoEntity(Svga.MovieEntity.parseFrom(it), File(cacheKey))
+                    return SVGAVideoEntity(MovieEntity.ADAPTER.decode(it), File(cacheKey))
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -178,7 +181,7 @@ class SVGAParser(private val context: Context) {
             File(cacheDir, "movie.binary")?.takeIf { it.isFile }?.let { binaryFile ->
                 try {
                     FileInputStream(binaryFile)?.let {
-                        val videoItem = SVGAVideoEntity(Svga.MovieEntity.parseFrom(it), cacheDir)
+                        val videoItem = SVGAVideoEntity(MovieEntity.ADAPTER.decode(it), cacheDir)
                         it.close()
                         return videoItem
                     }
@@ -279,6 +282,9 @@ class SVGAParser(private val context: Context) {
         val zipInputStream = ZipInputStream(BufferedInputStream(inputStream))
         while (true) {
             val zipItem = zipInputStream.nextEntry ?: break
+            if (zipItem.name.contains("/")) {
+                continue
+            }
             val file = File(cacheDir, zipItem.name)
             val fileOutputStream = FileOutputStream(file)
             val buff = ByteArray(2048)

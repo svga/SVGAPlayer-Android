@@ -19,7 +19,7 @@ class SVGAPath(val strValue: String) {
         var argLast: String? = null
         val items = strValue.split("[,\\s+]".toRegex()).dropLastWhile(String::isEmpty).toTypedArray()
         for (item in items) {
-            if (item.length < 1) {
+            if (item.isEmpty()) {
                 continue
             }
             val firstLetter = item.substring(0, 1)
