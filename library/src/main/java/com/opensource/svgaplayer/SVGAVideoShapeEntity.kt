@@ -3,6 +3,7 @@ package com.opensource.svgaplayer
 import android.graphics.Color
 import android.graphics.Matrix
 import android.graphics.Path
+import android.graphics.RectF
 import android.os.Build
 import com.opensource.svgaplayer.proto.ShapeEntity
 
@@ -262,12 +263,7 @@ class SVGAVideoShapeEntity {
             val y = yv.toFloat()
             val rx = rxv.toFloat()
             val ry = ryv.toFloat()
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                aPath.addOval(x - rx, y - ry, x + rx, y + ry, Path.Direction.CW)
-            }
-            else if (Math.abs(rx - ry) < 0.1) {
-                aPath.addCircle(x, y, rx, Path.Direction.CW)
-            }
+            aPath.addOval(RectF(x - rx, y - ry, x + rx, y + ry), Path.Direction.CW)
         }
         else if (this.type == SVGAVideoShapeEntity.Type.rect) {
             val xv = this.args?.get("x") as? Number ?: return
@@ -280,12 +276,7 @@ class SVGAVideoShapeEntity {
             val width = wv.toFloat()
             val height = hv.toFloat()
             val cornerRadius = crv.toFloat()
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                aPath.addRoundRect(x, y, x + width, y + height, cornerRadius, cornerRadius, Path.Direction.CW)
-            }
-            else {
-                aPath.addRect(x, y, x + width, y + height, Path.Direction.CW)
-            }
+            aPath.addRoundRect(RectF(x, y, x + width, y + height), cornerRadius, cornerRadius, Path.Direction.CW)
         }
         this.shapePath = aPath
     }
