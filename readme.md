@@ -1,5 +1,7 @@
 # SVGAPlayer
 
+[![](https://jitpack.io/v/yyued/SVGAPlayer-Android.svg)](https://jitpack.io/#yyued/SVGAPlayer-Android)
+
 ## Version
 
 ### 2.0.0
@@ -39,7 +41,7 @@ allprojects {
 
 add dependency to build.gradle (Final Release https://jitpack.io/#yyued/SVGAPlayer-Android/ )
 ```
-compile 'com.github.yyued:SVGAPlayer-Android:1.2.7'
+compile 'com.github.yyued:SVGAPlayer-Android:1.2.10'
 compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:1.1.1"
 ```
 

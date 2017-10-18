@@ -17,6 +17,8 @@ import java.util.HashMap
  * Created by cuiminghui on 2017/2/22.
  */
 
+val sharedPath = Path()
+
 class SVGAVideoShapeEntity {
 
     enum class Type {
@@ -76,7 +78,6 @@ class SVGAVideoShapeEntity {
         parseArgs(obj)
         parseStyles(obj)
         parseTransform(obj)
-        buildPath()
     }
 
     val isKeep: Boolean
@@ -247,11 +248,15 @@ class SVGAVideoShapeEntity {
         }
     }
 
-    private fun buildPath() {
-        val aPath = Path()
+
+    fun buildPath() {
+        if (this.shapePath != null) {
+            return
+        }
+        sharedPath.reset()
         if (this.type == SVGAVideoShapeEntity.Type.shape) {
             (this.args?.get("d") as? String)?.let {
-                SVGAPath(it).buildPath(aPath)
+                SVGAPath(it).buildPath(sharedPath)
             }
         }
         else if (this.type == SVGAVideoShapeEntity.Type.ellipse) {
@@ -263,7 +268,7 @@ class SVGAVideoShapeEntity {
             val y = yv.toFloat()
             val rx = rxv.toFloat()
             val ry = ryv.toFloat()
-            aPath.addOval(RectF(x - rx, y - ry, x + rx, y + ry), Path.Direction.CW)
+            sharedPath.addOval(RectF(x - rx, y - ry, x + rx, y + ry), Path.Direction.CW)
         }
         else if (this.type == SVGAVideoShapeEntity.Type.rect) {
             val xv = this.args?.get("x") as? Number ?: return
@@ -276,9 +281,10 @@ class SVGAVideoShapeEntity {
             val width = wv.toFloat()
             val height = hv.toFloat()
             val cornerRadius = crv.toFloat()
-            aPath.addRoundRect(RectF(x, y, x + width, y + height), cornerRadius, cornerRadius, Path.Direction.CW)
+            sharedPath.addRoundRect(RectF(x, y, x + width, y + height), cornerRadius, cornerRadius, Path.Direction.CW)
         }
-        this.shapePath = aPath
+        this.shapePath = Path()
+        this.shapePath?.addPath(sharedPath)
     }
 
 }

@@ -176,6 +176,7 @@ class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
         sharedContentTransform.preConcat(sprite.frameEntity.transform)
         sprite.frameEntity.shapes.forEach { shape ->
             sharedPath.reset()
+            shape.buildPath()
             shape.shapePath?.let {
                 sharedPath.addPath(it)
             }
