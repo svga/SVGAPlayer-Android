@@ -7,9 +7,11 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.ColorFilter
 import android.graphics.drawable.Drawable
+import android.os.Build
 import android.text.TextPaint
 import android.util.AttributeSet
 import android.view.Choreographer
+import android.view.View
 import android.view.ViewPropertyAnimator
 import android.view.animation.LinearInterpolator
 import android.widget.ImageView
@@ -83,18 +85,29 @@ open class SVGAImageView : ImageView {
 
     private var animator: ValueAnimator? = null
 
-    constructor(context: Context?) : super(context) {}
+    constructor(context: Context?) : super(context) {
+        setSoftwareLayerType()
+    }
 
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs) {
+        setSoftwareLayerType()
         attrs?.let { loadAttrs(it) }
     }
 
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
+        setSoftwareLayerType()
         attrs?.let { loadAttrs(it) }
     }
 
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes) {
+        setSoftwareLayerType()
         attrs?.let { loadAttrs(it) }
+    }
+
+    private fun setSoftwareLayerType() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            this.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+        }
     }
 
     override fun onDetachedFromWindow() {

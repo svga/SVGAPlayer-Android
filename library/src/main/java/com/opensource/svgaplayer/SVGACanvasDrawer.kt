@@ -120,14 +120,11 @@ class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
             if (sprite.frameEntity.maskPath != null) {
                 val maskPath = sprite.frameEntity.maskPath ?: return@let
                 canvas.save()
-                canvas.concat(sharedContentTransform)
-                canvas.clipRect(0, 0, it.width, it.height)
-                val bitmapShader = BitmapShader(it, Shader.TileMode.REPEAT, Shader.TileMode.REPEAT)
-                sharedPaint.shader = bitmapShader
-                sharedPaint.isAntiAlias = true
                 sharedPath.reset()
                 maskPath.buildPath(sharedPath)
-                canvas.drawPath(sharedPath, sharedPaint)
+                sharedPath.transform(sharedContentTransform)
+                canvas.clipPath(sharedPath)
+                canvas.drawBitmap(it, sharedContentTransform, sharedPaint)
                 canvas.restore()
             }
             else {

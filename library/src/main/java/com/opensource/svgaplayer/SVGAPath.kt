@@ -3,10 +3,11 @@ package com.opensource.svgaplayer
 import android.graphics.Path
 import java.util.*
 
-class SVGAPath(val strValue: String) {
+val VALID_METHODS: List<String> = listOf("M", "L", "H", "V", "C", "S", "Q", "R", "A", "Z", "m", "l", "h", "v", "c", "s", "q", "r", "a", "z")
 
-    var cachedPath: Path? = null
-    val VALID_METHODS: List<String> = listOf("M", "L", "H", "V", "C", "S", "Q", "R", "A", "Z", "m", "l", "h", "v", "c", "s", "q", "r", "a", "z")
+class SVGAPath(private val strValue: String) {
+
+    private var cachedPath: Path? = null
 
     fun buildPath(toPath: Path) {
         cachedPath?.let {
@@ -32,15 +33,15 @@ class SVGAPath(val strValue: String) {
                 currentMethod = firstLetter
                 argLast = item.substring(1)
             } else {
-                if (null != argLast && argLast.trim { it <= ' ' }.length > 0) {
+                argLast = if (null != argLast && argLast.trim { it <= ' ' }.isNotEmpty()) {
                     args.add(SVGAPoint(try {
                         argLast.toFloat()
                     } catch (e: Exception) {0.0f}, try {
                         item.toFloat()
                     } catch (e: Exception) {0.0f}, 0.0f))
-                    argLast = null
+                    null
                 } else {
-                    argLast = item
+                    item
                 }
             }
         }
