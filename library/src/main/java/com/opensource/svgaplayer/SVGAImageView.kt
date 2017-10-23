@@ -46,12 +46,14 @@ class SVGADrawable(val videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
 
     var scaleType: ImageView.ScaleType = ImageView.ScaleType.MATRIX
 
+    internal val drawer = SVGACanvasDrawer(videoItem, dynamicItem)
+
     override fun draw(canvas: Canvas?) {
         if (cleared) {
             return
         }
         canvas?.let {
-            val drawer = SVGACanvasDrawer(videoItem, dynamicItem, it)
+            drawer.canvas = it
             drawer.drawFrame(currentFrame, scaleType)
         }
     }
