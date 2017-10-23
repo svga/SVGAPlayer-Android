@@ -1,24 +1,16 @@
 package com.opensource.svgaplayer
 
-import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.drawable.BitmapDrawable
-import android.util.Log
-
-import org.json.JSONArray
-import org.json.JSONException
+import com.opensource.svgaplayer.proto.MovieEntity
 import org.json.JSONObject
-
 import java.io.File
-import java.io.Serializable
-import java.util.ArrayList
-import java.util.HashMap
+import java.util.*
 
 /**
  * Created by PonyCui_Home on 16/6/18.
  */
-class SVGAVideoEntity(obj: JSONObject, val cacheDir: File) {
+class SVGAVideoEntity {
 
     var antiAlias = false
 
@@ -37,7 +29,10 @@ class SVGAVideoEntity(obj: JSONObject, val cacheDir: File) {
     var images = HashMap<String, Bitmap>()
         private set
 
-    init {
+    private var cacheDir: File
+
+    constructor(obj: JSONObject, cacheDir: File) {
+        this.cacheDir = cacheDir
         obj.optJSONObject("movie")?.let {
             it.optJSONObject("viewBox")?.let {
                 videoSize = SVGARect(0.0, 0.0, it.optDouble("width", 0.0), it.optDouble("height", 0.0))
@@ -49,37 +44,78 @@ class SVGAVideoEntity(obj: JSONObject, val cacheDir: File) {
         resetSprites(obj)
     }
 
-    internal fun resetImages(obj: JSONObject) {
-        obj.optJSONObject("images")?.let {
-            val imgObjects = it
-            it.keys().forEach {
-                val imageKey = it
+    constructor(obj: MovieEntity, cacheDir: File) {
+        this.cacheDir = cacheDir
+        obj.params?.let { movieParams ->
+            videoSize = SVGARect(0.0, 0.0, (movieParams.viewBoxWidth ?: 0.0f).toDouble(), (movieParams.viewBoxHeight ?: 0.0f).toDouble())
+            FPS = movieParams.fps ?: 20
+            frames = movieParams.frames ?: 0
+        }
+        resetImages(obj)
+        resetSprites(obj)
+    }
+
+    private fun resetImages(obj: JSONObject) {
+        obj.optJSONObject("images")?.let { imgObjects ->
+            imgObjects.keys().forEach { imageKey ->
                 var filePath = cacheDir.absolutePath + "/" + imgObjects[imageKey]
                 var bitmap = if (File(filePath).exists()) BitmapFactory.decodeFile(filePath) else null
                 if (bitmap != null) {
                     images.put(imageKey, bitmap)
                 }
                 else {
-                    filePath = cacheDir.absolutePath + "/" + imageKey + ".png"
-                    bitmap = if (File(filePath).exists()) BitmapFactory.decodeFile(filePath) else null
-                    if (bitmap != null) {
-                        images.put(imageKey, bitmap)
+                    (cacheDir.absolutePath + "/" + imageKey + ".png")?.takeIf { File(it).exists() }?.let { it
+                        BitmapFactory.decodeFile(it)?.let {
+                            images.put(imageKey, it)
+                        }
                     }
                 }
             }
         }
     }
 
-    internal fun resetSprites(obj: JSONObject) {
+    private fun resetImages(obj: MovieEntity) {
+        obj.images?.entries?.forEach {
+            val imageKey = it.key
+            val bitmap = BitmapFactory.decodeByteArray(it.value.toByteArray(), 0, it.value.size())
+            if (bitmap != null) {
+                images.put(imageKey, bitmap)
+            }
+            else {
+                it.value.utf8()?.let {
+                    var filePath = cacheDir.absolutePath + "/" + it
+                    var bitmap = if (File(filePath).exists()) BitmapFactory.decodeFile(filePath) else null
+                    if (bitmap != null) {
+                        images.put(imageKey, bitmap)
+                    }
+                    else {
+                        (cacheDir.absolutePath + "/" + imageKey + ".png")?.takeIf { File(it).exists() }?.let { it
+                            BitmapFactory.decodeFile(it)?.let {
+                                images.put(imageKey, it)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun resetSprites(obj: JSONObject) {
         val mutableList: MutableList<SVGAVideoSpriteEntity> = mutableListOf()
         obj.optJSONArray("sprites")?.let {
-            for (i in 0..it.length() - 1) {
+            for (i in 0 until it.length()) {
                 it.optJSONObject(i)?.let {
                     mutableList.add(SVGAVideoSpriteEntity(it))
                 }
             }
         }
         sprites = mutableList.toList()
+    }
+
+    private fun resetSprites(obj: MovieEntity) {
+        sprites = obj.sprites?.map {
+            return@map SVGAVideoSpriteEntity(it)
+        } ?: listOf()
     }
 
 }

@@ -10,7 +10,7 @@
         android:layout_height="match_parent"
         android:layout_width="match_parent"
         android:scaleType="fitCenter"
-        app:source="750x80.svga"
+        app:source="rose_2.0.0.svga"
         app:antiAlias="true"/>
 
 </RelativeLayout>

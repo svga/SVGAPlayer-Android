@@ -1,40 +1,35 @@
 # SVGAPlayer
 
+[![](https://jitpack.io/v/yyued/SVGAPlayer-Android.svg)](https://jitpack.io/#yyued/SVGAPlayer-Android)
+
 ## Version
+
+### 2.0.0
+
+Add SVGA-Format 2.0.0 support.
+
+### 1.2.7
+
+* add ScaleType support.
+* bug-fix: crash on layout.xml, view removing.
 
 ### 1.2.6
 
-复用 Path 以减少 GC 触发，提升矢量动画性能。
-
-### 1.2.2
-
-修正路径导致的 crash 问题
-
-### 1.2.0
-
-SVGAPlayer 的第 3 个版本，使用 Kotlin 重写整个 SVGAPlayer，修正 beta1 的 CPU 消耗过高问题，修正 beta2 Crash 的问题，并且当 View 被移出视图层级时，会自动停止动画，修正 beta4 前 sDurationScale 在 Android 4.0 中报错的问题。
-
-### 1.1.0
-
-SVGAPlayer 的第 2 个版本，对应 SVGA-1.1.0 协议，支持矢量动画，向下兼容 SVGA-1.0.0 协议。
-
-### 0.1.0
-
-SVGAPlayer 的第 1 个版本，对应 SVGA-1.0.0 协议，支持位图（位移、旋转、拉伸、透明度）动画。
+* reuse Path, decrease GC trigger, improves vector animation performance.
 
 ## SVGA Format
 
-* SVGA 是一个私有的动画格式，由 YY UED 主导开发。
-* SVGA 由 SVG 演进而成，与 SVG 不兼容。
-* SVGA 可以在 iOS / Android / Web(PC/移动端) 实现高性能的动画播放。
+* SVGA is an opensource animation library, develop by YY UED.
+* SVGA base on SVG's concept, but not compatible to SVG.
+* SVGA can play on iOS/Android/Web.
 
-@see http://code.yy.com/ued/SVGA-Format
+@see https://github.com/yyued/SVGA-Format
 
-## 安装
+## Install
 
 ### Gradle 
 
-添加 JitPack.io 到 root build.gradle 中
+add JitPack.io repo build.gradle
 ```
 allprojects {
     repositories {
@@ -44,17 +39,17 @@ allprojects {
 }
 ```
 
-添加以下依赖，请根据需要修改版本号，要获取最新的版本请点入 https://jitpack.io/#yyued/SVGAPlayer-Android/
+add dependency to build.gradle (Final Release https://jitpack.io/#yyued/SVGAPlayer-Android/ )
 ```
-compile 'com.github.yyued:SVGAPlayer-Android:1.2.4'
+compile 'com.github.yyued:SVGAPlayer-Android:1.2.10'
 compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:1.1.1"
 ```
 
-## 使用
+## Usage
 
 ### Layout.xml
 
-你可以使用 layout.xml 添加 SVGAImageView 用以播放动画。
+use layout.xml.
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -74,23 +69,23 @@ compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:1.1.1"
 </RelativeLayout>
 ```
 
-* source - SVGA 动画文件的路径，相对 assets 目录。
-* autoPlay - 默认值为 true，为 true 时，动画加载完毕后，开始播放动画。
-* loopCount - 默认值为 0，用于指定动画循环次数，0 = 无限循环。
-* clearsAfterStop - 默认值为 true，动画播放完成后，是否清空画布。
-* fillMode - 默认值为 Forward，可选值为 Forward / Backward，fillMode = Forward时，动画播放结束后会停留在最后一帧，fillMode = Backward 时，动画播放结束后会停留在第一帧。
+* source - SVGA file path，relative assets directory。
+* autoPlay - defaults to true，play after load automatically。
+* loopCount - defaults to 0，Loop Count, 0 = Infinity Loop。
+* clearsAfterStop - Clears Canvas After Animation Stop
+* fillMode - defaults to Forward，optional Forward / Backward，fillMode = Forward，Animation will pause on last frame while finished，fillMode = Backward , Animation will pause on first frame.
 
-### 代码方式
+### Code
 
-也可以使用纯代码方式加载动画文件，并添加 SVGAImageView 至界面。
+Add SVGAImageView via code.
 
-#### 初始化 ImageView
+#### Init ImageView
 
 ```
 SVGAImageView imageView = new SVGAImageView(this);
 ```
 
-### 初始化 Parser 并加载资源文件
+#### Init Parser & Load File
 
 ```
 parser = new SVGAParser(this);
@@ -112,46 +107,46 @@ parser.parse(new URL("http://legox.yy.com/svga/svga-me/angel.svga"), new SVGAPar
 
 ### Properties Setter
 
-* setLoops(int loops); - 循环次数，0 = 无限循环
-* setClearsAfterStop(boolean clearsAfterStop); - 是否在结束播放时清空画布。
-* setFillMode(FillMode fillMode); - 可选值为 Forward / Backward，fillMode = Forward时，动画播放结束后会停留在最后一帧，fillMode = Backward 时，动画播放结束后会停留在第一帧。
-* setCallback(SVGAPlayerCallback callback) - 设置动画播放回调
-* setVideoItem(SVGAVideoEntity videoItem) - 设置当前动画实例
+* setLoops(int loops); - Loop Count，0 = Infinity Loop
+* setClearsAfterStop(boolean clearsAfterStop); - Clears Canvas After Animation Stop
+* setFillMode(FillMode fillMode); - Optional Forward / Backward，fillMode = Forward，Animation will pause on last frame while finished，fillMode = Backward , Animation will pause on first frame.
+* setCallback(SVGAPlayerCallback callback) - SET Callbacks
+* setVideoItem(SVGAVideoEntity videoItem) - SET animation instance
 
 ### Methods
-* startAnimation() - 从 0 帧开始播放动画
-* pauseAnimation() - 在当前帧暂停动画
-* stopAnimation() - 停止播放动画，如果 clearsAfterStop == YES，则同时清空画布
-* stepToFrame(int frame, boolean andPlay) - 跳到第 N 帧 (frame 0 = 第 1 帧)，然后 andPlay == YES 时播放动画
-* stepToPercentage(float percentage, boolean andPlay) - 跳到动画对应百分比的帧，然后 andPlay == YES 时播放动画
+* startAnimation() - Play Animation from 0 frame.
+* pauseAnimation() - Pause Animation and keep on current frame.
+* stopAnimation() - Stop Animation，Clears Canvas while clearsAfterStop == YES.
+* stepToFrame(int frame, boolean andPlay) - Step to N frame, and then Play Animation if andPlay === true.
+* stepToPercentage(float percentage, boolean andPlay) - Step to x%, and then Play Animation if andPlay === true.
 
 ### SVGAPlayerCallback
 
-* void onPause() - 在暂停时调用
-* void onFinished() - 在动画结束时调用
-* void onRepeat() - 在动画重复播放开始时调用
-* void onStep(int frame, float percentage) - 在播放完某帧时调用
+* void onPause() - Call after animation paused.
+* void onFinished() - Call after animation finished.
+* void onRepeat() - Call while animation repeat.
+* void onStep(int frame, float percentage) - Call after animation play to specific frame.
 
-## 动态对象
+## Dynamic Object
 
-SVGAPlayer 支持动态图像和动态文本，要添加动态图像和动态文本，你需要创建一个 SVGADynamicEntity 对象，并传入 SVGDrawable 初始化方法。
+You may replace Image or Text dynamically. To do this, you need to create a SVGADynamicEntity instance. (SVGAPlayer 支持动态图像和动态文本，要添加动态图像和动态文本，你需要创建一个 SVGADynamicEntity 对象，并传入 SVGDrawable 初始化方法。)
 
 ```
 SVGADynamicEntity dynamicItem = new SVGADynamicEntity();
 SVGADrawable drawable = new SVGADrawable(videoItem, dynamicItem);
 ```
 
-### 添加动态图像
+### Dynamic Image
 
-你需要自行生成一个 Bitmap 对象，然后执行 SVGADynamicEntity 中的方法，其中 forKey 是由设计师提供的。
+You need to create a bitmap instance, use setDynamicImage method, to replace specific image. Ask your designer to provide imageKey(or unzip the svga file, find it).
 
 ```
 dynamicItem.setDynamicImage(bitmapDrawable, "99");
 ```
 
-### 添加动态文本
+### Dynamic Text
 
-执行 SVGADynamicEntity 中的方法，其中 forKey 是由设计师提供的。
+Use setDynamicText method, to add text on specific image. Ask your designer to provide imageKey(or unzip the svga file, find it).
 
 ```
 TextPaint textPaint = new TextPaint();
