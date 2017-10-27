@@ -102,6 +102,21 @@ parser.parse(new URL("http://legox.yy.com/svga/svga-me/angel.svga"), new SVGAPar
 });
 ```
 
+### Cache
+
+Parser will not manage cache, you need to cache by yourself.
+
+#### Install HttpResponseCache
+
+Because SVGAParser depends URLConnection, and URLConnection uses HttpResponseCache.
+
+Add following code to Application.java:onCreate is Okey to handle SVGA caches.
+
+```kotlin
+val cacheDir = File(context.applicationContext.cacheDir, "http")
+HttpResponseCache.install(cacheDir, 1024 * 1024 * 128)
+```
+
 ## API
 
 ### Properties Setter
