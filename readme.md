@@ -2,6 +2,12 @@
 
 [![](https://jitpack.io/v/yyued/SVGAPlayer-Android.svg)](https://jitpack.io/#yyued/SVGAPlayer-Android)
 
+We Recommend You Upgrade [Android Studio 3.0.0](https://developer.android.com/studio/index.html?hl=zh-cn).
+
+Sample Project Will Not Support Android Studio 2.3.2 Now (You may change build tool version to 25.0.3, remove google() repo by your self).
+
+我们推荐你将 Android Studio 升级到 3.0.0 版本，示例工程不能在 2.3.2 中开启（除非，你自行修改 Gradle 配置）。
+
 ## Version
 
 ### 2.0.0
