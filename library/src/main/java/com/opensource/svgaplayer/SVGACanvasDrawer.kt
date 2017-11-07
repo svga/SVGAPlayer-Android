@@ -8,6 +8,8 @@ import android.widget.ImageView
  * Created by cuiminghui on 2017/3/29.
  */
 
+private var sharedDrawFilter = PaintFlagsDrawFilter(0, Paint.FILTER_BITMAP_FLAG or Paint.ANTI_ALIAS_FLAG)
+
 class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicEntity) : SGVADrawer(videoItem) {
 
     var canvas: Canvas? = null
@@ -23,7 +25,7 @@ class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
         var originalFilter: DrawFilter? = null
         if (videoItem.antiAlias) {
             originalFilter = this.canvas?.drawFilter
-            this.canvas?.drawFilter = PaintFlagsDrawFilter(0, Paint.FILTER_BITMAP_FLAG or Paint.ANTI_ALIAS_FLAG)
+            this.canvas?.drawFilter = sharedDrawFilter
         }
         val sprites = requestFrameSprites(frameIndex)
         sprites.forEach {

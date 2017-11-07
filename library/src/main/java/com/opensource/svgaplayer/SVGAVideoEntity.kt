@@ -12,7 +12,7 @@ import java.util.*
  */
 class SVGAVideoEntity {
 
-    var antiAlias = false
+    var antiAlias = true
 
     var videoSize = SVGARect(0.0, 0.0, 0.0, 0.0)
         private set
