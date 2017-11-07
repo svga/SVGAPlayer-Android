@@ -77,6 +77,9 @@ open class SVGAImageView : ImageView {
         Forward,
     }
 
+    var isAnimating = false
+        private set
+
     var loops = 0
 
     var clearsAfterStop = true
@@ -196,6 +199,7 @@ open class SVGAImageView : ImageView {
                     callback?.onRepeat()
                 }
                 override fun onAnimationEnd(animation: Animator?) {
+                    isAnimating = false
                     stopAnimation()
                     if (!clearsAfterStop) {
                         if (fillMode == FillMode.Backward) {
@@ -204,8 +208,12 @@ open class SVGAImageView : ImageView {
                     }
                     callback?.onFinished()
                 }
-                override fun onAnimationCancel(animation: Animator?) {}
-                override fun onAnimationStart(animation: Animator?) {}
+                override fun onAnimationCancel(animation: Animator?) {
+                    isAnimating = false
+                }
+                override fun onAnimationStart(animation: Animator?) {
+                    isAnimating = true
+                }
             })
             animator.start()
             this.animator = animator
