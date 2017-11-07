@@ -14,6 +14,12 @@ If you want to run Sample Project on Android Studio 2.3.2, Download this [commit
 
 ## Version
 
+### 2.0.1
+
+Let antiAlias defaults to true, add DrawFilter to Canvas.
+
+Add isAnimating props to SVGAImageView.
+
 ### 2.0.0
 
 Add SVGA-Format 2.0.0 support.
@@ -51,7 +57,7 @@ allprojects {
 
 add dependency to build.gradle (Final Release https://jitpack.io/#yyued/SVGAPlayer-Android/ )
 ```
-compile 'com.github.yyued:SVGAPlayer-Android:2.0.0'
+compile 'com.github.yyued:SVGAPlayer-Android:2.0.1'
 ```
 
 ## Usage
