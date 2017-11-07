@@ -20,9 +20,17 @@ class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
 
     override fun drawFrame(frameIndex: Int, scaleType: ImageView.ScaleType) {
         super.drawFrame(frameIndex, scaleType)
+        var originalFilter: DrawFilter? = null
+        if (videoItem.antiAlias) {
+            originalFilter = this.canvas?.drawFilter
+            this.canvas?.drawFilter = PaintFlagsDrawFilter(0, Paint.FILTER_BITMAP_FLAG or Paint.ANTI_ALIAS_FLAG)
+        }
         val sprites = requestFrameSprites(frameIndex)
         sprites.forEach {
             drawSprite(it, scaleType)
+        }
+        if (videoItem.antiAlias) {
+            this.canvas?.drawFilter = originalFilter
         }
     }
 
