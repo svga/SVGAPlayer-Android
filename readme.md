@@ -171,7 +171,7 @@ SVGADrawable drawable = new SVGADrawable(videoItem, dynamicItem);
 You need to create a bitmap instance, use setDynamicImage method, to replace specific image. Ask your designer to provide imageKey(or unzip the svga file, find it).
 
 ```
-dynamicItem.setDynamicImage(bitmapDrawable, "99");
+dynamicItem.setDynamicImage(bitmap or url, "99");
 ```
 
 ### Dynamic Text
