@@ -109,7 +109,7 @@ class SVGAParser(private val context: Context) {
         }).start()
     }
 
-    private fun parse(inputStream: InputStream, cacheKey: String): SVGAVideoEntity? {
+    fun parse(inputStream: InputStream, cacheKey: String): SVGAVideoEntity? {
         val bytes = readAsBytes(inputStream)
         if (bytes.size > 4 && bytes[0].toInt() == 80 && bytes[1].toInt() == 75 && bytes[2].toInt() == 3 && bytes[3].toInt() == 4) {
             synchronized(sharedLock, {

@@ -6,6 +6,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.ColorFilter
+import android.graphics.PixelFormat
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.text.TextPaint
@@ -46,7 +47,7 @@ class SVGADrawable(val videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
 
     var scaleType: ImageView.ScaleType = ImageView.ScaleType.MATRIX
 
-    internal val drawer = SVGACanvasDrawer(videoItem, dynamicItem)
+    private val drawer = SVGACanvasDrawer(videoItem, dynamicItem)
 
     override fun draw(canvas: Canvas?) {
         if (cleared) {
@@ -61,7 +62,7 @@ class SVGADrawable(val videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
     override fun setAlpha(alpha: Int) { }
 
     override fun getOpacity(): Int {
-        return 255
+        return PixelFormat.TRANSPARENT
     }
 
     override fun setColorFilter(colorFilter: ColorFilter?) {
@@ -121,7 +122,7 @@ open class SVGAImageView : ImageView {
         animator?.removeAllUpdateListeners()
     }
 
-    fun loadAttrs(attrs: AttributeSet) {
+    private fun loadAttrs(attrs: AttributeSet) {
         val typedArray = context.theme.obtainStyledAttributes(attrs, R.styleable.SVGAImageView, 0, 0)
         loops = typedArray.getInt(R.styleable.SVGAImageView_loopCount, 0)
         clearsAfterStop = typedArray.getBoolean(R.styleable.SVGAImageView_clearsAfterStop, true)
@@ -161,10 +162,10 @@ open class SVGAImageView : ImageView {
             }).start()
         }
         typedArray.getString(R.styleable.SVGAImageView_fillMode)?.let {
-            if (it.equals("0")) {
+            if (it == "0") {
                 fillMode = FillMode.Backward
             }
-            else if (it.equals("1")) {
+            else if (it == "1") {
                 fillMode = FillMode.Forward
             }
         }
