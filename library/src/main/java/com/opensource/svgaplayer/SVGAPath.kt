@@ -4,11 +4,10 @@ import android.graphics.Path
 import java.util.*
 
 private val VALID_METHODS: Set<String> = setOf("M", "L", "H", "V", "C", "S", "Q", "R", "A", "Z", "m", "l", "h", "v", "c", "s", "q", "r", "a", "z")
-private val regex = "([a-zA-Z])".toRegex()
 
 class SVGAPath(originValue: String) {
 
-    private val replacedValue: String = originValue.replace(regex, "|||$1 ").replace(",", " ")
+    private val replacedValue: String = if (originValue.contains(",")) originValue.replace(",", " ") else originValue
 
     private var cachedPath: Path? = null
 
@@ -18,13 +17,17 @@ class SVGAPath(originValue: String) {
             return
         }
         val cachedPath = Path()
-        val segments = StringTokenizer(this.replacedValue, "|||")
+        val segments = StringTokenizer(this.replacedValue, "MLHVCSQRAZmlhvcsqraz", true)
+        var currentMethod = ""
         while (segments.hasMoreTokens()) {
             val segment = segments.nextToken()
             if (segment.isEmpty()) { continue }
-            val firstLetter = segment.substring(0, 1)
-            if (VALID_METHODS.contains(firstLetter)) {
-                operate(cachedPath, firstLetter, StringTokenizer(segment.substring(1).trim(), " "))
+            if (VALID_METHODS.contains(segment)) {
+                currentMethod = segment
+                if (currentMethod == "Z" || currentMethod == "z") { operate(cachedPath, currentMethod, StringTokenizer("", "")) }
+            }
+            else {
+                operate(cachedPath, currentMethod, StringTokenizer(segment, " "))
             }
         }
         this.cachedPath = cachedPath
@@ -42,6 +45,7 @@ class SVGAPath(originValue: String) {
             var index = 0
             while (args.hasMoreTokens()) {
                 val s = args.nextToken()
+                if (s.isEmpty()) {continue}
                 if (index == 0) { x0 = s.toFloat() }
                 if (index == 1) { y0 = s.toFloat() }
                 if (index == 2) { x1 = s.toFloat() }
