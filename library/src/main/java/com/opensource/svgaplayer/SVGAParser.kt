@@ -129,9 +129,9 @@ class SVGAParser(private val context: Context) {
             })
             try {
                 val cacheDir = File(context.cacheDir.absolutePath + "/" + cacheKey + "/")
-                File(cacheDir, "movie.binary")?.takeIf { it.isFile }?.let { binaryFile ->
+                File(cacheDir, "movie.binary").takeIf { it.isFile }?.let { binaryFile ->
                     try {
-                        FileInputStream(binaryFile)?.let {
+                        FileInputStream(binaryFile).let {
                             val videoItem = SVGAVideoEntity(MovieEntity.ADAPTER.decode(it), cacheDir)
                             it.close()
                             return videoItem
@@ -142,9 +142,9 @@ class SVGAParser(private val context: Context) {
                         throw e
                     }
                 }
-                File(cacheDir, "movie.spec")?.takeIf { it.isFile }?.let { jsonFile ->
+                File(cacheDir, "movie.spec").takeIf { it.isFile }?.let { jsonFile ->
                     try {
-                        FileInputStream(jsonFile)?.let { fileInputStream ->
+                        FileInputStream(jsonFile).let { fileInputStream ->
                             val byteArrayOutputStream = ByteArrayOutputStream()
                             val buffer = ByteArray(2048)
                             while (true) {
@@ -154,8 +154,8 @@ class SVGAParser(private val context: Context) {
                                 }
                                 byteArrayOutputStream.write(buffer, 0, size)
                             }
-                            byteArrayOutputStream.toString()?.let {
-                                JSONObject(it)?.let {
+                            byteArrayOutputStream.toString().let {
+                                JSONObject(it).let {
                                     fileInputStream.close()
                                     return SVGAVideoEntity(it, cacheDir)
                                 }
@@ -186,9 +186,9 @@ class SVGAParser(private val context: Context) {
     private fun parseWithCacheKey(cacheKey: String): SVGAVideoEntity? {
         try {
             val cacheDir = File(context.cacheDir.absolutePath + "/" + cacheKey + "/")
-            File(cacheDir, "movie.binary")?.takeIf { it.isFile }?.let { binaryFile ->
+            File(cacheDir, "movie.binary").takeIf { it.isFile }?.let { binaryFile ->
                 try {
-                    FileInputStream(binaryFile)?.let {
+                    FileInputStream(binaryFile).let {
                         val videoItem = SVGAVideoEntity(MovieEntity.ADAPTER.decode(it), cacheDir)
                         it.close()
                         return videoItem
@@ -199,9 +199,9 @@ class SVGAParser(private val context: Context) {
                     throw e
                 }
             }
-            File(cacheDir, "movie.spec")?.takeIf { it.isFile }?.let { jsonFile ->
+            File(cacheDir, "movie.spec").takeIf { it.isFile }?.let { jsonFile ->
                 try {
-                    FileInputStream(jsonFile)?.let { fileInputStream ->
+                    FileInputStream(jsonFile).let { fileInputStream ->
                         val byteArrayOutputStream = ByteArrayOutputStream()
                         val buffer = ByteArray(2048)
                         while (true) {
@@ -211,8 +211,8 @@ class SVGAParser(private val context: Context) {
                             }
                             byteArrayOutputStream.write(buffer, 0, size)
                         }
-                        byteArrayOutputStream.toString()?.let {
-                            JSONObject(it)?.let {
+                        byteArrayOutputStream.toString().let {
+                            JSONObject(it).let {
                                 fileInputStream.close()
                                 return SVGAVideoEntity(it, cacheDir)
                             }
