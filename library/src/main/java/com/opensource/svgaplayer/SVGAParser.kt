@@ -2,7 +2,9 @@ package com.opensource.svgaplayer
 
 import android.app.Activity
 import android.content.Context
+import android.net.http.HttpResponseCache
 import android.os.Handler
+import android.util.Log
 import com.opensource.svgaplayer.proto.MovieEntity
 
 import org.json.JSONObject
@@ -31,9 +33,15 @@ class SVGAParser(private val context: Context) {
 
     open class FileDownloader {
 
+        var noCache = false
+
         open fun resume(url: URL, complete: (inputStream: InputStream) -> Unit, failure: (e: Exception) -> Unit) {
             Thread({
                 try {
+                    if (HttpResponseCache.getInstalled() == null && !noCache) {
+                        Log.e("SVGAParser", "SVGAParser can not handle cache before install HttpResponseCache. see https://github.com/yyued/SVGAPlayer-Android#cache")
+                        Log.e("SVGAParser", "在配置 HttpResponseCache 前 SVGAParser 无法缓存. 查看 https://github.com/yyued/SVGAPlayer-Android#cache ")
+                    }
                     (url.openConnection() as? HttpURLConnection)?.let {
                         it.connectTimeout = 20 * 1000
                         it.requestMethod = "GET"
@@ -121,9 +129,9 @@ class SVGAParser(private val context: Context) {
             })
             try {
                 val cacheDir = File(context.cacheDir.absolutePath + "/" + cacheKey + "/")
-                File(cacheDir, "movie.binary")?.takeIf { it.isFile }?.let { binaryFile ->
+                File(cacheDir, "movie.binary").takeIf { it.isFile }?.let { binaryFile ->
                     try {
-                        FileInputStream(binaryFile)?.let {
+                        FileInputStream(binaryFile).let {
                             val videoItem = SVGAVideoEntity(MovieEntity.ADAPTER.decode(it), cacheDir)
                             it.close()
                             return videoItem
@@ -134,9 +142,9 @@ class SVGAParser(private val context: Context) {
                         throw e
                     }
                 }
-                File(cacheDir, "movie.spec")?.takeIf { it.isFile }?.let { jsonFile ->
+                File(cacheDir, "movie.spec").takeIf { it.isFile }?.let { jsonFile ->
                     try {
-                        FileInputStream(jsonFile)?.let { fileInputStream ->
+                        FileInputStream(jsonFile).let { fileInputStream ->
                             val byteArrayOutputStream = ByteArrayOutputStream()
                             val buffer = ByteArray(2048)
                             while (true) {
@@ -146,8 +154,8 @@ class SVGAParser(private val context: Context) {
                                 }
                                 byteArrayOutputStream.write(buffer, 0, size)
                             }
-                            byteArrayOutputStream.toString()?.let {
-                                JSONObject(it)?.let {
+                            byteArrayOutputStream.toString().let {
+                                JSONObject(it).let {
                                     fileInputStream.close()
                                     return SVGAVideoEntity(it, cacheDir)
                                 }
@@ -178,9 +186,9 @@ class SVGAParser(private val context: Context) {
     private fun parseWithCacheKey(cacheKey: String): SVGAVideoEntity? {
         try {
             val cacheDir = File(context.cacheDir.absolutePath + "/" + cacheKey + "/")
-            File(cacheDir, "movie.binary")?.takeIf { it.isFile }?.let { binaryFile ->
+            File(cacheDir, "movie.binary").takeIf { it.isFile }?.let { binaryFile ->
                 try {
-                    FileInputStream(binaryFile)?.let {
+                    FileInputStream(binaryFile).let {
                         val videoItem = SVGAVideoEntity(MovieEntity.ADAPTER.decode(it), cacheDir)
                         it.close()
                         return videoItem
@@ -191,9 +199,9 @@ class SVGAParser(private val context: Context) {
                     throw e
                 }
             }
-            File(cacheDir, "movie.spec")?.takeIf { it.isFile }?.let { jsonFile ->
+            File(cacheDir, "movie.spec").takeIf { it.isFile }?.let { jsonFile ->
                 try {
-                    FileInputStream(jsonFile)?.let { fileInputStream ->
+                    FileInputStream(jsonFile).let { fileInputStream ->
                         val byteArrayOutputStream = ByteArrayOutputStream()
                         val buffer = ByteArray(2048)
                         while (true) {
@@ -203,8 +211,8 @@ class SVGAParser(private val context: Context) {
                             }
                             byteArrayOutputStream.write(buffer, 0, size)
                         }
-                        byteArrayOutputStream.toString()?.let {
-                            JSONObject(it)?.let {
+                        byteArrayOutputStream.toString().let {
+                            JSONObject(it).let {
                                 fileInputStream.close()
                                 return SVGAVideoEntity(it, cacheDir)
                             }
@@ -226,20 +234,16 @@ class SVGAParser(private val context: Context) {
         val messageDigest = MessageDigest.getInstance("MD5")
         messageDigest.update(str.toByteArray(charset("UTF-8")))
         val digest = messageDigest.digest()
-        val sb = StringBuffer()
+        var sb = ""
         for (b in digest) {
-            sb.append(String.format("%02x", b))
+            sb += String.format("%02x", b)
         }
-        return sb.toString()
+        return sb
     }
 
-    private fun cacheKey(url: URL): String {
-        return cacheKey(url.toString())
-    }
+    private fun cacheKey(url: URL): String = cacheKey(url.toString())
 
-    private fun cacheDir(cacheKey: String): File {
-        return File(context.cacheDir.absolutePath + "/" + cacheKey + "/")
-    }
+    private fun cacheDir(cacheKey: String): File = File(context.cacheDir.absolutePath + "/" + cacheKey + "/")
 
     private fun readAsBytes(inputStream: InputStream): ByteArray {
         val byteArrayOutputStream = ByteArrayOutputStream()
