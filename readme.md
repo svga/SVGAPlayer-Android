@@ -149,6 +149,7 @@ HttpResponseCache.install(cacheDir, 1024 * 1024 * 128)
 
 ### Methods
 * startAnimation() - Play Animation from 0 frame.
+* startAnimation(range: SVGARange?, reverse: Boolean = false) - Play Animation in [location, location + length] range, and reverse or not.
 * pauseAnimation() - Pause Animation and keep on current frame.
 * stopAnimation() - Stop Animation，Clears Canvas while clearsAfterStop == YES.
 * stepToFrame(int frame, boolean andPlay) - Step to N frame, and then Play Animation if andPlay === true.

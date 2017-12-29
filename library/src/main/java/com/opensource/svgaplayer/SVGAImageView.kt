@@ -172,12 +172,18 @@ open class SVGAImageView : ImageView {
     }
 
     fun startAnimation() {
+        startAnimation(null, false)
+    }
+
+    fun startAnimation(range: SVGARange?, reverse: Boolean = false) {
         val drawable = drawable as? SVGADrawable ?: return
         drawable.cleared = false
         drawable.scaleType = scaleType
         drawable.videoItem?.let {
             var durationScale = 1.0
-            val animator = ValueAnimator.ofInt(0, it.frames - 1)
+            val startFrame = Math.max(0, range?.location ?: 0)
+            val endFrame = Math.min(it.frames - 1, ((range?.location ?: 0) + (range?.length ?: Int.MAX_VALUE) - 1))
+            val animator = ValueAnimator.ofInt(startFrame, endFrame)
             try {
                 Class.forName("android.animation.ValueAnimator")?.let {
                     it.getDeclaredField("sDurationScale")?.let {
@@ -189,7 +195,7 @@ open class SVGAImageView : ImageView {
                 }
             } catch (e: Exception) {}
             animator.interpolator = LinearInterpolator()
-            animator.duration = (it.frames * (1000 / it.FPS) / durationScale).toLong()
+            animator.duration = ((endFrame - startFrame + 1) * (1000 / it.FPS) / durationScale).toLong()
             animator.repeatCount = if (loops <= 0) 99999 else loops - 1
             animator.addUpdateListener {
                 drawable.currentFrame = animator.animatedValue as Int
@@ -204,7 +210,10 @@ open class SVGAImageView : ImageView {
                     stopAnimation()
                     if (!clearsAfterStop) {
                         if (fillMode == FillMode.Backward) {
-                            drawable.currentFrame = 0
+                            drawable.currentFrame = startFrame
+                        }
+                        else if (fillMode == FillMode.Forward) {
+                            drawable.currentFrame = endFrame
                         }
                     }
                     callback?.onFinished()
@@ -216,7 +225,12 @@ open class SVGAImageView : ImageView {
                     isAnimating = true
                 }
             })
-            animator.start()
+            if (reverse) {
+                animator.reverse()
+            }
+            else {
+                animator.start()
+            }
             this.animator = animator
         }
     }
