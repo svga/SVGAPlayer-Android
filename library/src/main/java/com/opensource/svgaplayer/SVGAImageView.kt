@@ -226,6 +226,11 @@ open class SVGAImageView : ImageView {
                     isAnimating = true
                 }
             })
+            
+            if(isAnimating){
+                 stopAnimation(false)
+            }
+            
             if (reverse) {
                 animator.reverse()
             }
