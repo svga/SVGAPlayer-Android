@@ -176,6 +176,7 @@ open class SVGAImageView : ImageView {
     }
 
     fun startAnimation(range: SVGARange?, reverse: Boolean = false) {
+        animator?.cancel()
         val drawable = drawable as? SVGADrawable ?: return
         drawable.cleared = false
         drawable.scaleType = scaleType

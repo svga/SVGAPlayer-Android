@@ -14,6 +14,11 @@ If you want to run Sample Project on Android Studio 2.3.2, Download this [commit
 
 ## Version
 
+### NEXT
+
+Bugfix: SVGAImageView may leaks while startAnimation call multiple times. Thanks @andyliumstar
+Feature: Add range mode and reverse mode.
+
 ### 2.0.3
 
 Improve: SVGAPath parsing faster then before.
