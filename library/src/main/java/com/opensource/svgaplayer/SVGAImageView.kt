@@ -231,6 +231,11 @@ open class SVGAImageView : ImageView {
             else {
                 animator.start()
             }
+            
+            if(isAnimating){
+                 stopAnimation(false)
+            }
+           
             this.animator = animator
         }
     }
