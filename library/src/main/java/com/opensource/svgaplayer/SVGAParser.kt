@@ -102,8 +102,7 @@ class SVGAParser(private val context: Context) {
     fun parse(inputStream: InputStream, cacheKey: String, callback: ParseCompletion) {
         Thread({
             val videoItem = parse(inputStream, cacheKey)
-            Thread({
-                if (videoItem != null) {
+            if (videoItem != null) {
                     Handler(context.mainLooper).post {
                         callback.onComplete(videoItem)
                     }
@@ -113,7 +112,6 @@ class SVGAParser(private val context: Context) {
                         callback.onError()
                     }
                 }
-            }).start()
         }).start()
     }
 
