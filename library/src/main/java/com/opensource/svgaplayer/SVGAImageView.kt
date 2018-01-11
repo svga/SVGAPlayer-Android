@@ -176,7 +176,7 @@ open class SVGAImageView : ImageView {
     }
 
     fun startAnimation(range: SVGARange?, reverse: Boolean = false) {
-        animator?.cancel()
+        stopAnimation(false)
         val drawable = drawable as? SVGADrawable ?: return
         drawable.cleared = false
         drawable.scaleType = scaleType
@@ -247,6 +247,7 @@ open class SVGAImageView : ImageView {
 
     fun stopAnimation(clear: Boolean) {
         animator?.cancel()
+        animator?.removeAllListeners()
         animator?.removeAllUpdateListeners()
         (drawable as? SVGADrawable)?.let {
             it.cleared = clear
