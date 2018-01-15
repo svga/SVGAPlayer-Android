@@ -14,7 +14,7 @@ If you want to run Sample Project on Android Studio 2.3.2, Download this [commit
 
 ## Version
 
-### NEXT
+### 2.1.0
 
 Bugfix: SVGAImageView may leaks while startAnimation call multiple times. Thanks @andyliumstar
 
