@@ -321,7 +321,7 @@ class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
             sharedPaint.strokeMiter = it.toFloat() * requestScale()
         }
         shape.styles?.lineDash?.let {
-            if (it.size == 3) {
+            if (it.size == 3 && it[0] > 0 && it[1] > 0) {
                 sharedPaint.pathEffect = DashPathEffect(floatArrayOf(
                         (if (it[0] < 1.0f) 1.0f else it[0]) * requestScale(),
                         (if (it[1] < 0.1f) 0.1f else it[1]) * requestScale()
