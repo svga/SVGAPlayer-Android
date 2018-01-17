@@ -123,6 +123,14 @@ open class SVGAImageView : ImageView {
         clearsAfterStop = typedArray.getBoolean(R.styleable.SVGAImageView_clearsAfterStop, true)
         val antiAlias = typedArray.getBoolean(R.styleable.SVGAImageView_antiAlias, true)
         val autoPlay = typedArray.getBoolean(R.styleable.SVGAImageView_autoPlay, true)
+        typedArray.getString(R.styleable.SVGAImageView_fillMode)?.let {
+            if (it == "0") {
+                fillMode = FillMode.Backward
+            }
+            else if (it == "1") {
+                fillMode = FillMode.Forward
+            }
+        }
         typedArray.getString(R.styleable.SVGAImageView_source)?.let {
             val parser = SVGAParser(context)
             Thread({
@@ -145,14 +153,6 @@ open class SVGAImageView : ImageView {
                     parser.parse(it, callback)
                 }
             }).start()
-        }
-        typedArray.getString(R.styleable.SVGAImageView_fillMode)?.let {
-            if (it == "0") {
-                fillMode = FillMode.Backward
-            }
-            else if (it == "1") {
-                fillMode = FillMode.Forward
-            }
         }
         typedArray.recycle()
     }
@@ -183,7 +183,7 @@ open class SVGAImageView : ImageView {
                 }
             } catch (e: Exception) {}
             animator.interpolator = LinearInterpolator()
-            animator.duration = ((endFrame - startFrame + 1) * (1000 / it.FPS) / durationScale).toLong()
+            animator.duration = ((endFrame - startFrame + 1) * (1000 / it.FPS) / durationScale).toLong() * 4
             animator.repeatCount = if (loops <= 0) 99999 else loops - 1
             animator.addUpdateListener {
                 drawable.currentFrame = animator.animatedValue as Int
