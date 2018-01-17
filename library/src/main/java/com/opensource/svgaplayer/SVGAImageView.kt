@@ -3,21 +3,16 @@ package com.opensource.svgaplayer
 import android.animation.Animator
 import android.animation.ValueAnimator
 import android.content.Context
-import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.ColorFilter
 import android.graphics.PixelFormat
 import android.graphics.drawable.Drawable
 import android.os.Build
-import android.text.TextPaint
 import android.util.AttributeSet
-import android.view.Choreographer
 import android.view.View
-import android.view.ViewPropertyAnimator
 import android.view.animation.LinearInterpolator
 import android.widget.ImageView
 import java.net.URL
-import java.util.*
 
 /**
  * Created by cuiminghui on 2017/3/29.
@@ -127,38 +122,28 @@ open class SVGAImageView : ImageView {
         loops = typedArray.getInt(R.styleable.SVGAImageView_loopCount, 0)
         clearsAfterStop = typedArray.getBoolean(R.styleable.SVGAImageView_clearsAfterStop, true)
         val antiAlias = typedArray.getBoolean(R.styleable.SVGAImageView_antiAlias, true)
+        val autoPlay = typedArray.getBoolean(R.styleable.SVGAImageView_autoPlay, true)
         typedArray.getString(R.styleable.SVGAImageView_source)?.let {
             val parser = SVGAParser(context)
             Thread({
-                if(it.startsWith("http://") || it.startsWith("https://")) {
-                    URL(it)?.let {
-                        parser.parse(it, object : SVGAParser.ParseCompletion {
-                            override fun onComplete(videoItem: SVGAVideoEntity) {
-                                handler?.post {
-                                    videoItem.antiAlias = antiAlias
-                                    setVideoItem(videoItem)
-                                    if (typedArray.getBoolean(R.styleable.SVGAImageView_autoPlay, true)) {
-                                        startAnimation()
-                                    }
-                                }
-                            }
-                            override fun onError() { }
-                        })
-                        return@Thread
-                    }
-                }
-                parser.parse(it, object : SVGAParser.ParseCompletion {
+                val callback: SVGAParser.ParseCompletion = object : SVGAParser.ParseCompletion {
                     override fun onComplete(videoItem: SVGAVideoEntity) {
                         handler?.post {
                             videoItem.antiAlias = antiAlias
                             setVideoItem(videoItem)
-                            if (typedArray.getBoolean(R.styleable.SVGAImageView_autoPlay, true)) {
+                            if (autoPlay) {
                                 startAnimation()
                             }
                         }
                     }
-                    override fun onError() { }
-                })
+
+                    override fun onError() {}
+                }
+                if(it.startsWith("http://") || it.startsWith("https://")) {
+                    parser.parse(URL(it), callback)
+                } else {
+                    parser.parse(it, callback)
+                }
             }).start()
         }
         typedArray.getString(R.styleable.SVGAImageView_fillMode)?.let {
@@ -169,6 +154,7 @@ open class SVGAImageView : ImageView {
                 fillMode = FillMode.Forward
             }
         }
+        typedArray.recycle()
     }
 
     fun startAnimation() {
@@ -186,10 +172,11 @@ open class SVGAImageView : ImageView {
             val endFrame = Math.min(it.frames - 1, ((range?.location ?: 0) + (range?.length ?: Int.MAX_VALUE) - 1))
             val animator = ValueAnimator.ofInt(startFrame, endFrame)
             try {
-                Class.forName("android.animation.ValueAnimator")?.let {
+                val animatorClass = Class.forName("android.animation.ValueAnimator")
+                animatorClass?.let {
                     it.getDeclaredField("sDurationScale")?.let {
                         it.isAccessible = true
-                        it.getFloat(Class.forName("android.animation.ValueAnimator"))?.let {
+                        it.getFloat(animatorClass).let {
                             durationScale = it.toDouble()
                         }
                     }
