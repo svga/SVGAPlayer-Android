@@ -127,40 +127,34 @@ open class SVGAImageView : ImageView {
         loops = typedArray.getInt(R.styleable.SVGAImageView_loopCount, 0)
         clearsAfterStop = typedArray.getBoolean(R.styleable.SVGAImageView_clearsAfterStop, true)
         val antiAlias = typedArray.getBoolean(R.styleable.SVGAImageView_antiAlias, true)
+        val autoPlay = typedArray.getBoolean(R.styleable.SVGAImageView_autoPlay, true)
         typedArray.getString(R.styleable.SVGAImageView_source)?.let {
             val parser = SVGAParser(context)
             Thread({
-                if(it.startsWith("http://") || it.startsWith("https://")) {
-                    URL(it)?.let {
-                        parser.parse(it, object : SVGAParser.ParseCompletion {
-                            override fun onComplete(videoItem: SVGAVideoEntity) {
-                                handler?.post {
-                                    videoItem.antiAlias = antiAlias
-                                    setVideoItem(videoItem)
-                                    if (typedArray.getBoolean(R.styleable.SVGAImageView_autoPlay, true)) {
-                                        startAnimation()
-                                    }
-                                }
-                            }
-                            override fun onError() { }
-                        })
-                        return@Thread
-                    }
-                }
-                parser.parse(it, object : SVGAParser.ParseCompletion {
+                val parseCompletion =  object : SVGAParser.ParseCompletion {
                     override fun onComplete(videoItem: SVGAVideoEntity) {
                         handler?.post {
                             videoItem.antiAlias = antiAlias
                             setVideoItem(videoItem)
-                            if (typedArray.getBoolean(R.styleable.SVGAImageView_autoPlay, true)) {
+                            if (autoPlay) {
                                 startAnimation()
                             }
                         }
                     }
                     override fun onError() { }
-                })
+                }
+
+                if(it.startsWith("http://") || it.startsWith("https://")) {
+                    URL(it)?.let {
+                        parser.parse(it,parseCompletion)
+                        return@Thread
+                    }
+                }
+
+                parser.parse(it, parseCompletion)
             }).start()
         }
+
         typedArray.getString(R.styleable.SVGAImageView_fillMode)?.let {
             if (it == "0") {
                 fillMode = FillMode.Backward
@@ -169,6 +163,8 @@ open class SVGAImageView : ImageView {
                 fillMode = FillMode.Forward
             }
         }
+
+        typedArray.recycle()
     }
 
     fun startAnimation() {
