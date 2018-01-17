@@ -9,8 +9,8 @@
     <com.opensource.svgaplayer.SVGAImageView
         android:layout_height="match_parent"
         android:layout_width="match_parent"
-        android:scaleType="fitCenter"
-        app:source="rose_2.0.0.svga"
+        android:scaleType="centerCrop"
+        app:source="love_x.svga"
         app:antiAlias="true"/>
 
 </RelativeLayout>
