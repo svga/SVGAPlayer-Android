@@ -145,12 +145,8 @@ open class SVGAImageView : ImageView {
                 }
 
                 if(it.startsWith("http://") || it.startsWith("https://")) {
-                    URL(it)?.let {
-                        parser.parse(it,parseCompletion)
-                        return@Thread
-                    }
+                    parser.parse(URL(it),parseCompletion)
                 }
-
                 parser.parse(it, parseCompletion)
             }).start()
         }
