@@ -11,8 +11,8 @@ import android.widget.ImageView
 class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicEntity) : SGVADrawer(videoItem) {
 
     var canvas: Canvas? = null
-    private var ratio = 1.0f
-    private var ratioX = false
+    var scaleEntity:ScaleEntity = ScaleEntity()
+
     private val sharedPaint = Paint()
     private val sharedPath = Path()
     private val sharedPath2 = Path()
@@ -21,130 +21,36 @@ class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
     override fun drawFrame(frameIndex: Int, scaleType: ImageView.ScaleType) {
         super.drawFrame(frameIndex, scaleType)
         val sprites = requestFrameSprites(frameIndex)
+        performScaleType(scaleType)
         sprites.forEach {
-            drawSprite(it, scaleType)
+            drawSprite(it)
         }
+    }
+
+    private fun enableScaleEntity(){
+        sharedContentTransform.reset()
+        sharedContentTransform.postScale(scaleEntity.scaleFx, scaleEntity.scaleFy)
+        sharedContentTransform.postTranslate(scaleEntity.tranFx, scaleEntity.tranFy)
     }
 
     private fun performScaleType(scaleType: ImageView.ScaleType) {
         val canvas = this.canvas ?: return
-        if (canvas.width == 0 || canvas.height == 0 || videoItem.videoSize.width == 0.0 || videoItem.videoSize.height == 0.0) {
-            return
-        }
-        when (scaleType) {
-            ImageView.ScaleType.CENTER -> {
-                sharedContentTransform.postTranslate(((canvas.width - videoItem.videoSize.width) / 2.0).toFloat(), ((canvas.height - videoItem.videoSize.height) / 2.0).toFloat())
-            }
-            ImageView.ScaleType.CENTER_CROP -> {
-                val videoRatio = (videoItem.videoSize.width / videoItem.videoSize.height)
-                val canvasRatio = canvas.width.toFloat() / canvas.height.toFloat()
-                if (videoRatio > canvasRatio) {
-                    ratio = (canvas.height / videoItem.videoSize.height).toFloat()
-                    ratioX = false
-                    sharedContentTransform.postScale((canvas.height / videoItem.videoSize.height).toFloat(), (canvas.height / videoItem.videoSize.height).toFloat())
-                    sharedContentTransform.postTranslate(((canvas.width - videoItem.videoSize.width * (canvas.height / videoItem.videoSize.height)) / 2.0).toFloat(), 0.0f)
-                }
-                else {
-                    ratio = (canvas.width / videoItem.videoSize.width).toFloat()
-                    ratioX = true
-                    sharedContentTransform.postScale((canvas.width / videoItem.videoSize.width).toFloat(), (canvas.width / videoItem.videoSize.width).toFloat())
-                    sharedContentTransform.postTranslate(0.0f, ((canvas.height - videoItem.videoSize.height * (canvas.width / videoItem.videoSize.width)) / 2.0).toFloat())
-                }
-            }
-            ImageView.ScaleType.CENTER_INSIDE -> {
-                if (videoItem.videoSize.width < canvas.width && videoItem.videoSize.height < canvas.height) {
-                    sharedContentTransform.postTranslate(((canvas.width - videoItem.videoSize.width) / 2.0).toFloat(), ((canvas.height - videoItem.videoSize.height) / 2.0).toFloat())
-                }
-                else {
-                    val videoRatio = (videoItem.videoSize.width / videoItem.videoSize.height)
-                    val canvasRatio = canvas.width.toFloat() / canvas.height.toFloat()
-                    if (videoRatio > canvasRatio) {
-                        ratio = (canvas.width / videoItem.videoSize.width).toFloat()
-                        ratioX = true
-                        sharedContentTransform.postScale((canvas.width / videoItem.videoSize.width).toFloat(), (canvas.width / videoItem.videoSize.width).toFloat())
-                        sharedContentTransform.postTranslate(0.0f, ((canvas.height - videoItem.videoSize.height * (canvas.width / videoItem.videoSize.width)) / 2.0).toFloat())
-                    }
-                    else {
-                        ratio = (canvas.height / videoItem.videoSize.height).toFloat()
-                        ratioX = false
-                        sharedContentTransform.postScale((canvas.height / videoItem.videoSize.height).toFloat(), (canvas.height / videoItem.videoSize.height).toFloat())
-                        sharedContentTransform.postTranslate(((canvas.width - videoItem.videoSize.width * (canvas.height / videoItem.videoSize.height)) / 2.0).toFloat(), 0.0f)
-                    }
-                }
-            }
-            ImageView.ScaleType.FIT_CENTER -> {
-                val videoRatio = (videoItem.videoSize.width / videoItem.videoSize.height)
-                val canvasRatio = canvas.width.toFloat() / canvas.height.toFloat()
-                if (videoRatio > canvasRatio) {
-                    ratio = (canvas.width / videoItem.videoSize.width).toFloat()
-                    ratioX = true
-                    sharedContentTransform.postScale((canvas.width / videoItem.videoSize.width).toFloat(), (canvas.width / videoItem.videoSize.width).toFloat())
-                    sharedContentTransform.postTranslate(0.0f, ((canvas.height - videoItem.videoSize.height * (canvas.width / videoItem.videoSize.width)) / 2.0).toFloat())
-                }
-                else {
-                    ratio = (canvas.height / videoItem.videoSize.height).toFloat()
-                    ratioX = false
-                    sharedContentTransform.postScale((canvas.height / videoItem.videoSize.height).toFloat(), (canvas.height / videoItem.videoSize.height).toFloat())
-                    sharedContentTransform.postTranslate(((canvas.width - videoItem.videoSize.width * (canvas.height / videoItem.videoSize.height)) / 2.0).toFloat(), 0.0f)
-                }
-            }
-            ImageView.ScaleType.FIT_START -> {
-                val videoRatio = (videoItem.videoSize.width / videoItem.videoSize.height)
-                val canvasRatio = canvas.width.toFloat() / canvas.height.toFloat()
-                if (videoRatio > canvasRatio) {
-                    ratio = (canvas.width / videoItem.videoSize.width).toFloat()
-                    ratioX = true
-                    sharedContentTransform.postScale((canvas.width / videoItem.videoSize.width).toFloat(), (canvas.width / videoItem.videoSize.width).toFloat())
-                }
-                else {
-                    ratio = (canvas.height / videoItem.videoSize.height).toFloat()
-                    ratioX = false
-                    sharedContentTransform.postScale((canvas.height / videoItem.videoSize.height).toFloat(), (canvas.height / videoItem.videoSize.height).toFloat())
-                }
-            }
-            ImageView.ScaleType.FIT_END -> {
-                val videoRatio = (videoItem.videoSize.width / videoItem.videoSize.height)
-                val canvasRatio = canvas.width.toFloat() / canvas.height.toFloat()
-                if (videoRatio > canvasRatio) {
-                    ratio = (canvas.width / videoItem.videoSize.width).toFloat()
-                    ratioX = true
-                    sharedContentTransform.postScale((canvas.width / videoItem.videoSize.width).toFloat(), (canvas.width / videoItem.videoSize.width).toFloat())
-                    sharedContentTransform.postTranslate(0.0f, (canvas.height - videoItem.videoSize.height * (canvas.width / videoItem.videoSize.width)).toFloat())
-                }
-                else {
-                    ratio = (canvas.height / videoItem.videoSize.height).toFloat()
-                    ratioX = false
-                    sharedContentTransform.postScale((canvas.height / videoItem.videoSize.height).toFloat(), (canvas.height / videoItem.videoSize.height).toFloat())
-                    sharedContentTransform.postTranslate((canvas.width - videoItem.videoSize.width * (canvas.height / videoItem.videoSize.height)).toFloat(), 0.0f)
-                }
-            }
-            ImageView.ScaleType.FIT_XY -> {
-                ratio = Math.max((canvas.width / videoItem.videoSize.width).toFloat(), (canvas.height / videoItem.videoSize.height).toFloat())
-                ratioX = (canvas.width / videoItem.videoSize.width).toFloat() > (canvas.height / videoItem.videoSize.height).toFloat()
-                sharedContentTransform.postScale((canvas.width / videoItem.videoSize.width).toFloat(), (canvas.height / videoItem.videoSize.height).toFloat())
-            }
-            else -> {
-                ratio = (canvas.width / videoItem.videoSize.width).toFloat()
-                ratioX = true
-                sharedContentTransform.postScale((canvas.width / videoItem.videoSize.width).toFloat(), (canvas.width / videoItem.videoSize.width).toFloat())
-            }
-        }
+        scaleEntity.performScaleType(canvas.width.toFloat(),canvas.height.toFloat(),videoItem.videoSize.width.toFloat(),videoItem.videoSize.height.toFloat(),scaleType)
     }
 
-    private fun drawSprite(sprite: SVGADrawerSprite, scaleType: ImageView.ScaleType) {
-        drawImage(sprite, scaleType)
-        drawShape(sprite, scaleType)
+    private fun drawSprite(sprite: SVGADrawerSprite) {
+        drawImage(sprite)
+        drawShape(sprite)
     }
 
-    private fun drawImage(sprite: SVGADrawerSprite, scaleType: ImageView.ScaleType) {
+    private fun drawImage(sprite: SVGADrawerSprite) {
         val canvas = this.canvas ?: return
         (dynamicItem.dynamicImage[sprite.imageKey] ?: videoItem.images[sprite.imageKey])?.let {
             sharedPaint.reset()
-            sharedContentTransform.reset()
             sharedPaint.isAntiAlias = videoItem.antiAlias
             sharedPaint.isFilterBitmap = videoItem.antiAlias
             sharedPaint.alpha = (sprite.frameEntity.alpha * 255).toInt()
-            performScaleType(scaleType)
+            enableScaleEntity()
             sharedContentTransform.preConcat(sprite.frameEntity.transform)
             if (sprite.frameEntity.maskPath != null) {
                 val maskPath = sprite.frameEntity.maskPath ?: return@let
@@ -202,10 +108,9 @@ class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
         }
     }
 
-    private fun drawShape(sprite: SVGADrawerSprite, scaleType: ImageView.ScaleType) {
+    private fun drawShape(sprite: SVGADrawerSprite) {
         val canvas = this.canvas ?: return
-        sharedContentTransform.reset()
-        performScaleType(scaleType)
+        enableScaleEntity()
         sharedContentTransform.preConcat(sprite.frameEntity.transform)
         sprite.frameEntity.shapes.forEach { shape ->
             sharedPath.reset()
@@ -280,7 +185,7 @@ class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
         if ( A * D < B * C ) {
             scaleX = -scaleX
         }
-        return if (this.ratioX) ratio / Math.abs(scaleX.toFloat()) else ratio / Math.abs(scaleY.toFloat())
+        return if (scaleEntity.ratioX) scaleEntity.ratio / Math.abs(scaleX.toFloat()) else scaleEntity.ratio / Math.abs(scaleY.toFloat())
     }
 
     private fun resetShapeStrokePaint(shape: SVGAVideoShapeEntity) {
