@@ -8,8 +8,6 @@ import android.widget.ImageView
  * Created by cuiminghui on 2017/3/29.
  */
 
-private var sharedDrawFilter = PaintFlagsDrawFilter(0, Paint.FILTER_BITMAP_FLAG or Paint.ANTI_ALIAS_FLAG)
-
 class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicEntity) : SGVADrawer(videoItem) {
 
     var canvas: Canvas? = null
@@ -22,17 +20,9 @@ class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
 
     override fun drawFrame(frameIndex: Int, scaleType: ImageView.ScaleType) {
         super.drawFrame(frameIndex, scaleType)
-        var originalFilter: DrawFilter? = null
-        if (videoItem.antiAlias) {
-            originalFilter = this.canvas?.drawFilter
-            this.canvas?.drawFilter = sharedDrawFilter
-        }
         val sprites = requestFrameSprites(frameIndex)
         sprites.forEach {
             drawSprite(it, scaleType)
-        }
-        if (videoItem.antiAlias) {
-            this.canvas?.drawFilter = originalFilter
         }
     }
 
@@ -189,6 +179,9 @@ class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
                 val targetRectBottom = drawingBitmap.height
                 val y = (targetRectBottom + targetRectTop - drawingTextPaint.fontMetrics.bottom - drawingTextPaint.fontMetrics.top) / 2
                 textCanvas.drawText(drawingText, x.toFloat(), y, drawingTextPaint)
+
+                sharedPaint.reset()
+                sharedPaint.isAntiAlias = videoItem.antiAlias
                 if (sprite.frameEntity.maskPath != null) {
                     val maskPath = sprite.frameEntity.maskPath ?: return@let
                     canvas.save()
@@ -196,13 +189,13 @@ class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
                     canvas.clipRect(0, 0, drawingBitmap.width, drawingBitmap.height)
                     val bitmapShader = BitmapShader(textBitmap, Shader.TileMode.REPEAT, Shader.TileMode.REPEAT)
                     sharedPaint.shader = bitmapShader
-                    sharedPaint.isAntiAlias = true
                     sharedPath.reset()
                     maskPath.buildPath(sharedPath)
                     canvas.drawPath(sharedPath, sharedPaint)
                     canvas.restore()
                 }
                 else {
+                    sharedPaint.isFilterBitmap = videoItem.antiAlias
                     canvas.drawBitmap(textBitmap, sharedContentTransform, sharedPaint)
                 }
             }
@@ -226,13 +219,13 @@ class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
                     thisTransform.postConcat(it)
                 }
                 thisTransform.postConcat(sharedContentTransform)
-                sharedPath.transform(thisTransform)
+                sharedPath.transform(sharedContentTransform)
+                sharedPaint.reset()
+                sharedPaint.isAntiAlias = videoItem.antiAlias
+                sharedPaint.alpha = (sprite.frameEntity.alpha * 255).toInt()
                 shape.styles?.fill?.let {
                     if (it != 0x00000000) {
-                        sharedPaint.reset()
                         sharedPaint.color = it
-                        sharedPaint.alpha = (sprite.frameEntity.alpha * 255).toInt()
-                        sharedPaint.isAntiAlias = true
                         if (sprite.frameEntity.maskPath !== null) canvas.save()
                         sprite.frameEntity.maskPath?.let { maskPath ->
                             sharedPath2.reset()
@@ -246,8 +239,6 @@ class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
                 }
                 shape.styles?.strokeWidth?.let {
                     if (it > 0) {
-                        sharedPaint.reset()
-                        sharedPaint.alpha = (sprite.frameEntity.alpha * 255).toInt()
                         resetShapeStrokePaint(shape)
                         if (sprite.frameEntity.maskPath !== null) canvas.save()
                         sprite.frameEntity.maskPath?.let { maskPath ->
@@ -293,9 +284,8 @@ class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
     }
 
     private fun resetShapeStrokePaint(shape: SVGAVideoShapeEntity) {
-
         sharedPaint.reset()
-        sharedPaint.isAntiAlias = true
+        sharedPaint.isAntiAlias = videoItem.antiAlias
         sharedPaint.style = Paint.Style.STROKE
         shape.styles?.stroke?.let {
             sharedPaint.color = it
