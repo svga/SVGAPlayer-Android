@@ -118,12 +118,7 @@ class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
             shape.shapePath?.let {
                 sharedPath.addPath(it)
             }
-            if (!sharedPath.isEmpty) {
-                val thisTransform = Matrix()
-                shape.transform?.let {
-                    thisTransform.postConcat(it)
-                }
-                thisTransform.postConcat(sharedContentTransform)
+            if (!sharedPath.isEmpty) {             
                 sharedPath.transform(sharedContentTransform)
                 sharedPaint.reset()
                 sharedPaint.isAntiAlias = videoItem.antiAlias
@@ -195,8 +190,10 @@ class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
         shape.styles?.stroke?.let {
             sharedPaint.color = it
         }
+        
+        val scale = requestScale()
         shape.styles?.strokeWidth?.let {
-            sharedPaint.strokeWidth = it * requestScale()
+            sharedPaint.strokeWidth = it * scale
         }
         shape.styles?.lineCap?.let {
             when {
@@ -213,14 +210,14 @@ class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
             }
         }
         shape.styles?.miterLimit?.let {
-            sharedPaint.strokeMiter = it.toFloat() * requestScale()
+            sharedPaint.strokeMiter = it.toFloat() * scale
         }
         shape.styles?.lineDash?.let {
             if (it.size == 3 && it[0] > 0 && it[1] > 0) {
                 sharedPaint.pathEffect = DashPathEffect(floatArrayOf(
-                        (if (it[0] < 1.0f) 1.0f else it[0]) * requestScale(),
-                        (if (it[1] < 0.1f) 0.1f else it[1]) * requestScale()
-                ), it[2] * requestScale())
+                        (if (it[0] < 1.0f) 1.0f else it[0]) * scale,
+                        (if (it[1] < 0.1f) 0.1f else it[1]) * scale
+                ), it[2] * scale)
             }
         }
     }
