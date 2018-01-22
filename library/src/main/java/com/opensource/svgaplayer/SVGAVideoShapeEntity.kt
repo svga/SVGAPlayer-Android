@@ -70,7 +70,6 @@ class SVGAVideoShapeEntity {
         parseArgs(obj)
         parseStyles(obj)
         parseTransform(obj)
-        buildPath()
     }
 
     constructor(obj: ShapeEntity) {
