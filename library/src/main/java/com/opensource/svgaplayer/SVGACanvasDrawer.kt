@@ -10,20 +10,27 @@ import android.widget.ImageView
 
 class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicEntity) : SGVADrawer(videoItem) {
 
-    var canvas: Canvas? = null
-    var scaleEntity:ScaleEntity = ScaleEntity()
-
+    private val scaleEntity = ScaleEntity()
     private val sharedPaint = Paint()
     private val sharedPath = Path()
     private val sharedPath2 = Path()
     private val sharedContentTransform = Matrix()
+    private val sharedPathMap = HashMap<SVGAVideoShapeEntity,Path>()
 
-    override fun drawFrame(frameIndex: Int, scaleType: ImageView.ScaleType) {
-        super.drawFrame(frameIndex, scaleType)
-        val sprites = requestFrameSprites(frameIndex)
+    override fun drawFrame(canvas :Canvas, frameIndex: Int, scaleType: ImageView.ScaleType) {
+        super.drawFrame(canvas,frameIndex, scaleType)
         performScaleType(scaleType)
+        resetCachePath()
+
+        val sprites = requestFrameSprites(frameIndex)
         sprites.forEach {
             drawSprite(it)
+        }
+    }
+
+    private fun resetCachePath(){
+        if(canvasSizeChange){
+            sharedPathMap.clear()
         }
     }
 
@@ -112,17 +119,21 @@ class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
         val canvas = this.canvas ?: return
         enableScaleEntity()
         sharedContentTransform.preConcat(sprite.frameEntity.transform)
+
         sprite.frameEntity.shapes.forEach { shape ->
-            sharedPath.reset()
             shape.buildPath()
             shape.shapePath?.let {
-                sharedPath.addPath(it)
-            }
-            if (!sharedPath.isEmpty) {             
-                sharedPath.transform(sharedContentTransform)
                 sharedPaint.reset()
                 sharedPaint.isAntiAlias = videoItem.antiAlias
                 sharedPaint.alpha = (sprite.frameEntity.alpha * 255).toInt()
+
+                if(!sharedPathMap.containsKey(shape)){
+                    val path = Path()
+                    path.set(shape.shapePath)
+                    path.transform(sharedContentTransform)
+                    sharedPathMap.put(shape,path)
+                }
+
                 shape.styles?.fill?.let {
                     if (it != 0x00000000) {
                         sharedPaint.color = it
@@ -133,10 +144,11 @@ class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
                             sharedPath2.transform(this.sharedContentTransform)
                             canvas.clipPath(sharedPath2)
                         }
-                        canvas.drawPath(sharedPath, sharedPaint)
+                        canvas.drawPath(sharedPathMap.get(shape), sharedPaint)
                         if (sprite.frameEntity.maskPath !== null) canvas.restore()
                     }
                 }
+
                 shape.styles?.strokeWidth?.let {
                     if (it > 0) {
                         resetShapeStrokePaint(shape)
@@ -147,11 +159,12 @@ class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
                             sharedPath2.transform(this.sharedContentTransform)
                             canvas.clipPath(sharedPath2)
                         }
-                        canvas.drawPath(sharedPath, sharedPaint)
+                        canvas.drawPath(sharedPathMap.get(shape), sharedPaint)
                         if (sprite.frameEntity.maskPath !== null) canvas.restore()
                     }
                 }
             }
+
         }
     }
 
@@ -190,7 +203,7 @@ class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
         shape.styles?.stroke?.let {
             sharedPaint.color = it
         }
-        
+
         val scale = requestScale()
         shape.styles?.strokeWidth?.let {
             sharedPaint.strokeWidth = it * scale
