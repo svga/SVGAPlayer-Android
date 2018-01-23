@@ -1,5 +1,6 @@
 package com.opensource.svgaplayer
 
+import android.graphics.Canvas
 import android.widget.ImageView
 
 /**
@@ -7,6 +8,9 @@ import android.widget.ImageView
  */
 
 open class SGVADrawer(val videoItem: SVGAVideoEntity) {
+
+    var canvas: Canvas? = null
+    var canvasSizeChange = false
 
     inner class SVGADrawerSprite(val imageKey: String?, val frameEntity: SVGAVideoSpriteFrameEntity)
 
@@ -22,8 +26,12 @@ open class SGVADrawer(val videoItem: SVGAVideoEntity) {
         }
     }
 
-    open fun drawFrame(frameIndex: Int, scaleType: ImageView.ScaleType) {
-
+    open fun drawFrame(canvas : Canvas, frameIndex: Int, scaleType: ImageView.ScaleType) {
+        canvasSizeChange = true
+        this.canvas?.let {
+            canvasSizeChange = !(it.width == canvas.width && it.height == canvas.height)
+        }
+        this.canvas = canvas
     }
 
 }

@@ -49,8 +49,7 @@ class SVGADrawable(val videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
             return
         }
         canvas?.let {
-            drawer.canvas = it
-            drawer.drawFrame(currentFrame, scaleType)
+            drawer.drawFrame(it,currentFrame, scaleType)
         }
     }
 
