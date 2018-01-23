@@ -10,8 +10,6 @@ import android.widget.ImageView
 
 class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicEntity) : SGVADrawer(videoItem) {
 
-    var canvas: Canvas? = null
-
     private val scaleEntity = ScaleEntity()
     private val sharedPaint = Paint()
     private val sharedPath = Path()
@@ -19,12 +17,20 @@ class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
     private val sharedContentTransform = Matrix()
     private val sharedPathMap = HashMap<SVGAVideoShapeEntity,Path>()
 
-    override fun drawFrame(frameIndex: Int, scaleType: ImageView.ScaleType) {
-        super.drawFrame(frameIndex, scaleType)
-        val sprites = requestFrameSprites(frameIndex)
+    override fun drawFrame(canvas :Canvas, frameIndex: Int, scaleType: ImageView.ScaleType) {
+        super.drawFrame(canvas,frameIndex, scaleType)
         performScaleType(scaleType)
+        resetCachePath()
+
+        val sprites = requestFrameSprites(frameIndex)
         sprites.forEach {
             drawSprite(it)
+        }
+    }
+
+    private fun resetCachePath(){
+        if(canvasSizeChange){
+            sharedPathMap.clear()
         }
     }
 
