@@ -10,7 +10,8 @@ import android.widget.ImageView
 
 class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicEntity) : SGVADrawer(videoItem) {
 
-    private val scaleEntity = ScaleEntity()
+    private val canvasW = 0
+    private val canvasH = 0
     private val sharedPaint = Paint()
     private val sharedPath = Path()
     private val sharedPath2 = Path()
@@ -19,46 +20,41 @@ class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
 
     override fun drawFrame(canvas :Canvas, frameIndex: Int, scaleType: ImageView.ScaleType) {
         super.drawFrame(canvas,frameIndex, scaleType)
-        performScaleType(scaleType)
-        resetCachePath()
+        resetCachePath(canvas)
 
         val sprites = requestFrameSprites(frameIndex)
         sprites.forEach {
-            drawSprite(it)
+            drawSprite(it,canvas)
         }
     }
 
-    private fun resetCachePath(){
-        if(canvasSizeChange){
+    private fun resetCachePath(canvas :Canvas){
+        if(canvasW != canvas.width || canvasH != canvas.height){
             sharedPathMap.clear()
         }
     }
 
-    private fun enableScaleEntity(){
+    private fun resetShareMatrix(transform :Matrix){
         sharedContentTransform.reset()
         sharedContentTransform.postScale(scaleEntity.scaleFx, scaleEntity.scaleFy)
         sharedContentTransform.postTranslate(scaleEntity.tranFx, scaleEntity.tranFy)
+        sharedContentTransform.preConcat(transform)
     }
 
-    private fun performScaleType(scaleType: ImageView.ScaleType) {
-        val canvas = this.canvas ?: return
-        scaleEntity.performScaleType(canvas.width.toFloat(),canvas.height.toFloat(),videoItem.videoSize.width.toFloat(),videoItem.videoSize.height.toFloat(),scaleType)
+    private fun drawSprite(sprite: SVGADrawerSprite,canvas :Canvas) {
+        drawImage(sprite, canvas)
+        drawShape(sprite, canvas)
     }
 
-    private fun drawSprite(sprite: SVGADrawerSprite) {
-        drawImage(sprite)
-        drawShape(sprite)
-    }
-
-    private fun drawImage(sprite: SVGADrawerSprite) {
-        val canvas = this.canvas ?: return
+    private fun drawImage(sprite: SVGADrawerSprite, canvas :Canvas) {
         (dynamicItem.dynamicImage[sprite.imageKey] ?: videoItem.images[sprite.imageKey])?.let {
+            resetShareMatrix(sprite.frameEntity.transform)
+
             sharedPaint.reset()
             sharedPaint.isAntiAlias = videoItem.antiAlias
             sharedPaint.isFilterBitmap = videoItem.antiAlias
             sharedPaint.alpha = (sprite.frameEntity.alpha * 255).toInt()
-            enableScaleEntity()
-            sharedContentTransform.preConcat(sprite.frameEntity.transform)
+
             if (sprite.frameEntity.maskPath != null) {
                 val maskPath = sprite.frameEntity.maskPath ?: return@let
                 canvas.save()
@@ -74,12 +70,11 @@ class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
                 sharedContentTransform.preScale((sprite.frameEntity.layout.width / it.width).toFloat(), (sprite.frameEntity.layout.width / it.width).toFloat())
                 canvas.drawBitmap(it, sharedContentTransform, sharedPaint)
             }
-            drawText(it, sprite)
+            drawText(canvas,it, sprite)
         }
     }
 
-    private fun drawText(drawingBitmap: Bitmap, sprite: SVGADrawerSprite) {
-        val canvas = this.canvas ?: return
+    private fun drawText(canvas :Canvas, drawingBitmap: Bitmap, sprite: SVGADrawerSprite) {
         dynamicItem.dynamicText[sprite.imageKey]?.let { drawingText ->
             dynamicItem.dynamicTextPaint[sprite.imageKey]?.let { drawingTextPaint ->
                 val textBitmap = Bitmap.createBitmap(drawingBitmap.width, drawingBitmap.height, Bitmap.Config.ARGB_8888)
@@ -115,11 +110,8 @@ class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
         }
     }
 
-    private fun drawShape(sprite: SVGADrawerSprite) {
-        val canvas = this.canvas ?: return
-        enableScaleEntity()
-        sharedContentTransform.preConcat(sprite.frameEntity.transform)
-
+    private fun drawShape(sprite: SVGADrawerSprite, canvas :Canvas) {
+        resetShareMatrix(sprite.frameEntity.transform)
         sprite.frameEntity.shapes.forEach { shape ->
             shape.buildPath()
             shape.shapePath?.let {
