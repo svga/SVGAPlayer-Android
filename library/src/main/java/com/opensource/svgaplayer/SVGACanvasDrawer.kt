@@ -10,8 +10,8 @@ import android.widget.ImageView
 
 class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicEntity) : SGVADrawer(videoItem) {
 
-    private val canvasW = 0
-    private val canvasH = 0
+    private var canvasW = 0
+    private var canvasH = 0
     private val sharedPaint = Paint()
     private val sharedPath = Path()
     private val sharedPath2 = Path()
@@ -32,6 +32,8 @@ class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
         if(canvasW != canvas.width || canvasH != canvas.height){
             sharedPathMap.clear()
         }
+        canvasW = canvas.width
+        canvasH = canvas.height
     }
 
     private fun resetShareMatrix(transform :Matrix){
