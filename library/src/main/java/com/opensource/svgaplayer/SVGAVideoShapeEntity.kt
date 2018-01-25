@@ -4,13 +4,8 @@ import android.graphics.Color
 import android.graphics.Matrix
 import android.graphics.Path
 import android.graphics.RectF
-import android.os.Build
 import com.opensource.svgaplayer.proto.ShapeEntity
-
-import org.json.JSONArray
-import org.json.JSONException
 import org.json.JSONObject
-
 import java.util.HashMap
 
 /**
