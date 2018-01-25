@@ -9,8 +9,7 @@ import android.widget.ImageView
 
 open class SGVADrawer(val videoItem: SVGAVideoEntity) {
 
-    var canvas: Canvas? = null
-    var canvasSizeChange = false
+    val scaleEntity = ScaleEntity()
 
     inner class SVGADrawerSprite(val imageKey: String?, val frameEntity: SVGAVideoSpriteFrameEntity)
 
@@ -27,11 +26,11 @@ open class SGVADrawer(val videoItem: SVGAVideoEntity) {
     }
 
     open fun drawFrame(canvas : Canvas, frameIndex: Int, scaleType: ImageView.ScaleType) {
-        canvasSizeChange = true
-        this.canvas?.let {
-            canvasSizeChange = !(it.width == canvas.width && it.height == canvas.height)
-        }
-        this.canvas = canvas
+        performScaleType(canvas,scaleType)
+    }
+
+    open fun performScaleType(canvas : Canvas,scaleType: ImageView.ScaleType) {
+        scaleEntity.performScaleType(canvas.width.toFloat(),canvas.height.toFloat(),videoItem.videoSize.width.toFloat(),videoItem.videoSize.height.toFloat(),scaleType)
     }
 
 }
