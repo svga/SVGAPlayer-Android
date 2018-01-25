@@ -283,7 +283,7 @@ class SVGAVideoShapeEntity {
             sharedPath.addRoundRect(RectF(x, y, x + width, y + height), cornerRadius, cornerRadius, Path.Direction.CW)
         }
         this.shapePath = Path()
-        this.shapePath?.addPath(sharedPath)
+        this.shapePath?.set(sharedPath)
     }
 
 }

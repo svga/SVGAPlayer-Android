@@ -13,7 +13,7 @@ class SVGAPath(originValue: String) {
 
     fun buildPath(toPath: Path) {
         cachedPath?.let {
-            toPath.addPath(it)
+            toPath.set(it)
             return
         }
         val cachedPath = Path()
@@ -31,7 +31,7 @@ class SVGAPath(originValue: String) {
             }
         }
         this.cachedPath = cachedPath
-        toPath.addPath(cachedPath)
+        toPath.set(cachedPath)
     }
 
     private fun operate(finalPath: Path, method: String, args: StringTokenizer) {
