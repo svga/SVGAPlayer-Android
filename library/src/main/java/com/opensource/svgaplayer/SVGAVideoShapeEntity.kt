@@ -4,13 +4,8 @@ import android.graphics.Color
 import android.graphics.Matrix
 import android.graphics.Path
 import android.graphics.RectF
-import android.os.Build
 import com.opensource.svgaplayer.proto.ShapeEntity
-
-import org.json.JSONArray
-import org.json.JSONException
 import org.json.JSONObject
-
 import java.util.HashMap
 
 /**
@@ -283,7 +278,7 @@ class SVGAVideoShapeEntity {
             sharedPath.addRoundRect(RectF(x, y, x + width, y + height), cornerRadius, cornerRadius, Path.Direction.CW)
         }
         this.shapePath = Path()
-        this.shapePath?.addPath(sharedPath)
+        this.shapePath?.set(sharedPath)
     }
 
 }
