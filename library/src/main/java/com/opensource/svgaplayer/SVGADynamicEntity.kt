@@ -2,6 +2,9 @@ package com.opensource.svgaplayer
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.text.Layout
+import android.text.SpannableString
+import android.text.StaticLayout
 import android.text.TextPaint
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
@@ -19,6 +22,10 @@ class SVGADynamicEntity {
     var dynamicText: HashMap<String, String> = hashMapOf()
 
     var dynamicTextPaint: HashMap<String, TextPaint> = hashMapOf()
+
+    var dynamicLayoutText: HashMap<String, StaticLayout> = hashMapOf()
+
+    internal var isTextDirty = false
 
     fun setDynamicImage(bitmap: Bitmap, forKey: String) {
         this.dynamicImage.put(forKey, bitmap)
@@ -44,14 +51,22 @@ class SVGADynamicEntity {
     }
 
     fun setDynamicText(text: String, textPaint: TextPaint, forKey: String) {
+        this.isTextDirty = true
         this.dynamicText.put(forKey, text)
         this.dynamicTextPaint.put(forKey, textPaint)
     }
 
+    fun setDynamicText(layoutText: StaticLayout, forKey: String) {
+        this.isTextDirty = true
+        this.dynamicLayoutText.put(forKey, layoutText)
+    }
+
     fun clearDynamicObjects() {
+        this.isTextDirty = true
         this.dynamicImage.clear()
         this.dynamicText.clear()
         this.dynamicTextPaint.clear()
+        this.dynamicLayoutText.clear()
     }
 
 }

@@ -1,6 +1,7 @@
 package com.opensource.svgaplayer
 
 import android.graphics.*
+import android.text.StaticLayout
 import android.widget.ImageView
 
 
@@ -17,6 +18,7 @@ class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
     private val sharedPath = Path()
     private val sharedPath2 = Path()
     private val sharedContentTransform = Matrix()
+    private val textBitmapCache: HashMap<String, Bitmap> = hashMapOf()
 
     override fun drawFrame(frameIndex: Int, scaleType: ImageView.ScaleType) {
         super.drawFrame(frameIndex, scaleType)
@@ -45,7 +47,8 @@ class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
 
     private fun drawImage(sprite: SVGADrawerSprite) {
         val canvas = this.canvas ?: return
-        (dynamicItem.dynamicImage[sprite.imageKey] ?: videoItem.images[sprite.imageKey])?.let {
+        val imageKey = sprite.imageKey ?: return
+        (dynamicItem.dynamicImage[imageKey] ?: videoItem.images[imageKey])?.let {
             sharedPaint.reset()
             sharedPaint.isAntiAlias = videoItem.antiAlias
             sharedPaint.isFilterBitmap = videoItem.antiAlias
@@ -72,38 +75,62 @@ class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
     }
 
     private fun drawText(drawingBitmap: Bitmap, sprite: SVGADrawerSprite) {
+        if (dynamicItem.isTextDirty) {
+            this.textBitmapCache.clear()
+            dynamicItem.isTextDirty = false
+        }
         val canvas = this.canvas ?: return
-        dynamicItem.dynamicText[sprite.imageKey]?.let { drawingText ->
-            dynamicItem.dynamicTextPaint[sprite.imageKey]?.let { drawingTextPaint ->
-                val textBitmap = Bitmap.createBitmap(drawingBitmap.width, drawingBitmap.height, Bitmap.Config.ARGB_8888)
+        val imageKey = sprite.imageKey ?: return
+        var textBitmap: Bitmap? = null
+        dynamicItem.dynamicText[imageKey]?.let { drawingText ->
+            dynamicItem.dynamicTextPaint[imageKey]?.let { drawingTextPaint ->
+                textBitmapCache[imageKey]?.let {
+                    textBitmap = it
+                } ?: kotlin.run {
+                    textBitmap = Bitmap.createBitmap(drawingBitmap.width, drawingBitmap.height, Bitmap.Config.ARGB_8888)
+                    val textCanvas = Canvas(textBitmap)
+                    drawingTextPaint.isAntiAlias = true
+                    val bounds = Rect()
+                    drawingTextPaint.getTextBounds(drawingText, 0, drawingText.length, bounds)
+                    val x = (drawingBitmap.width - bounds.width()) / 2.0
+                    val targetRectTop = 0
+                    val targetRectBottom = drawingBitmap.height
+                    val y = (targetRectBottom + targetRectTop - drawingTextPaint.fontMetrics.bottom - drawingTextPaint.fontMetrics.top) / 2
+                    textCanvas.drawText(drawingText, x.toFloat(), y, drawingTextPaint)
+                    textBitmapCache.put(imageKey, textBitmap as Bitmap)
+                }
+            }
+        }
+        dynamicItem.dynamicLayoutText[imageKey]?.let {
+            textBitmapCache[imageKey]?.let {
+                textBitmap = it
+            } ?: kotlin.run {
+                var layout = StaticLayout(it.text, 0, it.text.length, it.paint, drawingBitmap.width, it.alignment, it.spacingMultiplier, it.spacingAdd, false)
+                textBitmap = Bitmap.createBitmap(drawingBitmap.width, drawingBitmap.height, Bitmap.Config.ARGB_8888)
                 val textCanvas = Canvas(textBitmap)
-                drawingTextPaint.isAntiAlias = true
-                val bounds = Rect()
-                drawingTextPaint.getTextBounds(drawingText, 0, drawingText.length, bounds)
-                val x = (drawingBitmap.width - bounds.width()) / 2.0
-                val targetRectTop = 0
-                val targetRectBottom = drawingBitmap.height
-                val y = (targetRectBottom + targetRectTop - drawingTextPaint.fontMetrics.bottom - drawingTextPaint.fontMetrics.top) / 2
-                textCanvas.drawText(drawingText, x.toFloat(), y, drawingTextPaint)
-
-                sharedPaint.reset()
-                sharedPaint.isAntiAlias = videoItem.antiAlias
-                if (sprite.frameEntity.maskPath != null) {
-                    val maskPath = sprite.frameEntity.maskPath ?: return@let
-                    canvas.save()
-                    canvas.concat(sharedContentTransform)
-                    canvas.clipRect(0, 0, drawingBitmap.width, drawingBitmap.height)
-                    val bitmapShader = BitmapShader(textBitmap, Shader.TileMode.REPEAT, Shader.TileMode.REPEAT)
-                    sharedPaint.shader = bitmapShader
-                    sharedPath.reset()
-                    maskPath.buildPath(sharedPath)
-                    canvas.drawPath(sharedPath, sharedPaint)
-                    canvas.restore()
-                }
-                else {
-                    sharedPaint.isFilterBitmap = videoItem.antiAlias
-                    canvas.drawBitmap(textBitmap, sharedContentTransform, sharedPaint)
-                }
+                textCanvas.translate(0f, ((drawingBitmap.height - layout.height) / 2).toFloat())
+                layout.draw(textCanvas)
+                textBitmapCache.put(imageKey, textBitmap as Bitmap)
+            }
+        }
+        textBitmap?.let { textBitmap ->
+            sharedPaint.reset()
+            sharedPaint.isAntiAlias = videoItem.antiAlias
+            if (sprite.frameEntity.maskPath != null) {
+                val maskPath = sprite.frameEntity.maskPath ?: return@let
+                canvas.save()
+                canvas.concat(sharedContentTransform)
+                canvas.clipRect(0, 0, drawingBitmap.width, drawingBitmap.height)
+                val bitmapShader = BitmapShader(textBitmap, Shader.TileMode.REPEAT, Shader.TileMode.REPEAT)
+                sharedPaint.shader = bitmapShader
+                sharedPath.reset()
+                maskPath.buildPath(sharedPath)
+                canvas.drawPath(sharedPath, sharedPaint)
+                canvas.restore()
+            }
+            else {
+                sharedPaint.isFilterBitmap = videoItem.antiAlias
+                canvas.drawBitmap(textBitmap, sharedContentTransform, sharedPaint)
             }
         }
     }

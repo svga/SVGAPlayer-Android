@@ -14,9 +14,19 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.text.BoringLayout;
+import android.text.Layout;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
+import android.text.StaticLayout;
 import android.text.TextPaint;
+import android.text.TextUtils;
+import android.text.style.AbsoluteSizeSpan;
+import android.text.style.ForegroundColorSpan;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -69,10 +79,10 @@ public class MainActivity extends AppCompatActivity {
         SVGAParser parser = new SVGAParser(this);
         resetDownloader(parser);
         try {
-            parser.parse(new URL("https://github.com/yyued/SVGA-Samples/blob/master/angel.svga?raw=true"), new SVGAParser.ParseCompletion() {
+            parser.parse(new URL("https://github.com/yyued/SVGA-Samples/blob/master/kingset.svga?raw=true"), new SVGAParser.ParseCompletion() {
                 @Override
                 public void onComplete(@NotNull SVGAVideoEntity videoItem) {
-                    SVGADrawable drawable = new SVGADrawable(videoItem);
+                    SVGADrawable drawable = new SVGADrawable(videoItem, requestDynamicItemWithSpannableText());
                     testView.setImageDrawable(drawable);
                     testView.startAnimation();
                 }
@@ -84,6 +94,45 @@ public class MainActivity extends AppCompatActivity {
         } catch (Exception e) {
             System.out.print(true);
         }
+    }
+
+    /**
+     * 进行简单的文本替换
+     * @return
+     */
+    private SVGADynamicEntity requestDynamicItem() {
+        SVGADynamicEntity dynamicEntity = new SVGADynamicEntity();
+        TextPaint textPaint = new TextPaint();
+        textPaint.setColor(Color.WHITE);
+        textPaint.setTextSize(28);
+        dynamicEntity.setDynamicText("Pony 送了一打风油精给主播", textPaint, "banner");
+        return dynamicEntity;
+    }
+
+    /**
+     * 你可以设置富文本到 ImageKey 相关的元素上
+     * 富文本是会自动换行的，不要设置过长的文本
+     * @return
+     */
+    private SVGADynamicEntity requestDynamicItemWithSpannableText() {
+        final SVGADynamicEntity dynamicEntity = new SVGADynamicEntity();
+        SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder("Pony 送了一打风油精给主播");
+        spannableStringBuilder.setSpan(new ForegroundColorSpan(Color.YELLOW), 0, 4, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+        TextPaint textPaint = new TextPaint();
+        textPaint.setColor(Color.WHITE);
+        textPaint.setTextSize(28);
+        dynamicEntity.setDynamicText(new StaticLayout(
+                spannableStringBuilder,
+                0,
+                spannableStringBuilder.length(),
+                textPaint,
+                0,
+                Layout.Alignment.ALIGN_CENTER,
+                1.0f,
+                0.0f,
+                false
+        ), "banner");
+        return dynamicEntity;
     }
 
     /**
