@@ -14,6 +14,12 @@ If you want to run Sample Project on Android Studio 2.3.2, Download this [commit
 
 ## Version
 
+### 2.1.1
+
+Improve: Improve performances, arrange code. Thanks @andyliumstar.
+Feature: Add StaticLayout(SpannableString) Text to DynamicEntity.
+Feature: Add Hidden Option to DynamicEntity.
+
 ### 2.1.0
 
 Bugfix: SVGAImageView may leaks while startAnimation call multiple times. Thanks @andyliumstar
@@ -33,15 +39,6 @@ Add isAnimating props to SVGAImageView.
 ### 2.0.0
 
 Add SVGA-Format 2.0.0 support.
-
-### 1.2.7
-
-* add ScaleType support.
-* bug-fix: crash on layout.xml, view removing.
-
-### 1.2.6
-
-* reuse Path, decrease GC trigger, improves vector animation performance.
 
 ## SVGA Format
 
@@ -67,7 +64,7 @@ allprojects {
 
 add dependency to build.gradle (Final Release https://jitpack.io/#yyued/SVGAPlayer-Android/ )
 ```
-compile 'com.github.yyued:SVGAPlayer-Android:2.0.3'
+compile 'com.github.yyued:SVGAPlayer-Android:2.1.1'
 ```
 
 ## Usage
@@ -189,11 +186,42 @@ dynamicItem.setDynamicImage(bitmap or url, "99");
 
 Use setDynamicText method, to add text on specific image. Ask your designer to provide imageKey(or unzip the svga file, find it).
 
-```
+```java
 TextPaint textPaint = new TextPaint();
 textPaint.setTextSize(30);
 textPaint.setFakeBoldText(true);
 textPaint.setARGB(0xff, 0xff, 0xe0, 0xa4);
 textPaint.setShadowLayer((float)1.0, (float)0.0, (float)1.0, Color.BLACK); // 各种配置
 dynamicItem.setDynamicText("崔小姐不吃鱼 送了魔法奇缘", textPaint, "banner");
+```
+
+### Dynamic Text (Static Layout)
+
+You can set SpannableString as dynamic text now.
+
+```java
+SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder("Pony 送了一打风油精给主播");
+spannableStringBuilder.setSpan(new ForegroundColorSpan(Color.YELLOW), 0, 4, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+TextPaint textPaint = new TextPaint();
+textPaint.setColor(Color.WHITE);
+textPaint.setTextSize(28);
+dynamicItem.setDynamicText(new StaticLayout(
+        spannableStringBuilder,
+        0,
+        spannableStringBuilder.length(),
+        textPaint,
+        0,
+        Layout.Alignment.ALIGN_CENTER,
+        1.0f,
+        0.0f,
+        false
+), "banner");
+```
+
+### Dynamic Hidden Element
+
+Now use setHidden to hide an element prevents drawing.
+
+```java
+dynamicItem.setHidden(true, "ImageKey")
 ```

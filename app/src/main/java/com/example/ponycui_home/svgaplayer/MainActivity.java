@@ -115,7 +115,7 @@ public class MainActivity extends AppCompatActivity {
      * @return
      */
     private SVGADynamicEntity requestDynamicItemWithSpannableText() {
-        final SVGADynamicEntity dynamicEntity = new SVGADynamicEntity();
+        SVGADynamicEntity dynamicEntity = new SVGADynamicEntity();
         SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder("Pony 送了一打风油精给主播");
         spannableStringBuilder.setSpan(new ForegroundColorSpan(Color.YELLOW), 0, 4, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
         TextPaint textPaint = new TextPaint();
