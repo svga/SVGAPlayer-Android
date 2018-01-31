@@ -16,29 +16,27 @@ If you want to run Sample Project on Android Studio 2.3.2, Download this [commit
 
 ### 2.1.1
 
-Improve: Improve performances, arrange code. Thanks @andyliumstar.
-Feature: Add StaticLayout(SpannableString) Text to DynamicEntity.
-Feature: Add Hidden Option to DynamicEntity.
+* Improve: Improve performances, arrange code. Thanks @andyliumstar.
+* Feature: Add StaticLayout(SpannableString) Text to DynamicEntity.
+* Feature: Add Hidden Option to DynamicEntity.
 
 ### 2.1.0
 
-Bugfix: SVGAImageView may leaks while startAnimation call multiple times. Thanks @andyliumstar
-
-Feature: Add range mode and reverse mode.
+* Bugfix: SVGAImageView may leaks while startAnimation call multiple times. Thanks @andyliumstar
+* Feature: Add range mode and reverse mode.
 
 ### 2.0.3
 
-Improve: SVGAPath parsing faster then before.
+* Improve: SVGAPath parsing faster then before.
 
 ### 2.0.1
 
-Let antiAlias defaults to true, add DrawFilter to Canvas.
-
-Add isAnimating props to SVGAImageView.
+* Let antiAlias defaults to true, add DrawFilter to Canvas.
+* Add isAnimating props to SVGAImageView.
 
 ### 2.0.0
 
-Add SVGA-Format 2.0.0 support.
+* Add SVGA-Format 2.0.0 support.
 
 ## SVGA Format
 
