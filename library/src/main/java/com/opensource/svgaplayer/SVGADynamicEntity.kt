@@ -17,6 +17,8 @@ import java.util.logging.Handler
  */
 class SVGADynamicEntity {
 
+    var dynamicHidden: HashMap<String, Boolean> = hashMapOf()
+
     var dynamicImage: HashMap<String, Bitmap> = hashMapOf()
 
     var dynamicText: HashMap<String, String> = hashMapOf()
@@ -26,6 +28,10 @@ class SVGADynamicEntity {
     var dynamicLayoutText: HashMap<String, StaticLayout> = hashMapOf()
 
     internal var isTextDirty = false
+
+    fun setHidden(value: Boolean, forKey: String) {
+        this.dynamicHidden.put(forKey, value)
+    }
 
     fun setDynamicImage(bitmap: Bitmap, forKey: String) {
         this.dynamicImage.put(forKey, bitmap)
