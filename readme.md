@@ -14,6 +14,10 @@ If you want to run Sample Project on Android Studio 2.3.2, Download this [commit
 
 ## Version
 
+### 2.1.2
+
+* Feature: Add DynamicDrawer to DynamicEntity.
+
 ### 2.1.1
 
 * Improve: Improve performances, arrange code. Thanks @andyliumstar.
@@ -222,4 +226,20 @@ Now use setHidden to hide an element prevents drawing.
 
 ```java
 dynamicItem.setHidden(true, "ImageKey")
+```
+
+### Dynamic Drawer
+
+You can set a drawer function above specific item, draw over canvas by yourself.
+
+```java
+dynamicItem.setDynamicDrawer(new Function2<Canvas, Integer, Boolean>() {
+    @Override
+    public Boolean invoke(Canvas canvas, Integer frameIndex) {
+        Paint aPaint = new Paint();
+        aPaint.setColor(Color.WHITE);
+        canvas.drawCircle(50, 54, frameIndex % 5, aPaint);
+        return false;
+    }
+}, "banner");
 ```

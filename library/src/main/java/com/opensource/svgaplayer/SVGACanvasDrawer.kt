@@ -26,7 +26,7 @@ class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
         resetCachePath(canvas)
         val sprites = requestFrameSprites(frameIndex)
         sprites.forEach {
-            drawSprite(it,canvas)
+            drawSprite(it, canvas, frameIndex)
         }
     }
 
@@ -45,9 +45,10 @@ class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
         sharedFrameMatrix.preConcat(transform)
     }
 
-    private fun drawSprite(sprite: SVGADrawerSprite,canvas :Canvas) {
+    private fun drawSprite(sprite: SVGADrawerSprite, canvas :Canvas, frameIndex: Int) {
         drawImage(sprite, canvas)
         drawShape(sprite, canvas)
+        drawDynamic(sprite, canvas, frameIndex)
     }
 
     private fun drawImage(sprite: SVGADrawerSprite, canvas :Canvas) {
@@ -257,6 +258,17 @@ class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
                         (if (it[1] < 0.1f) 0.1f else it[1]) * scale
                 ), it[2] * scale)
             }
+        }
+    }
+
+    private fun drawDynamic(sprite: SVGADrawerSprite, canvas: Canvas, frameIndex: Int) {
+        val imageKey = sprite.imageKey ?: return
+        dynamicItem.dynamicDrawer[imageKey]?.let {
+            resetShareMatrix(sprite.frameEntity.transform)
+            canvas.save()
+            canvas.concat(sharedFrameMatrix)
+            it.invoke(canvas, frameIndex)
+            canvas.restore()
         }
     }
 

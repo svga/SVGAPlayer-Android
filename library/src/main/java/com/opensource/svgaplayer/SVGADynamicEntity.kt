@@ -2,6 +2,7 @@ package com.opensource.svgaplayer
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Canvas
 import android.text.Layout
 import android.text.SpannableString
 import android.text.StaticLayout
@@ -17,15 +18,17 @@ import java.util.logging.Handler
  */
 class SVGADynamicEntity {
 
-    var dynamicHidden: HashMap<String, Boolean> = hashMapOf()
+    internal var dynamicHidden: HashMap<String, Boolean> = hashMapOf()
 
-    var dynamicImage: HashMap<String, Bitmap> = hashMapOf()
+    internal var dynamicImage: HashMap<String, Bitmap> = hashMapOf()
 
-    var dynamicText: HashMap<String, String> = hashMapOf()
+    internal var dynamicText: HashMap<String, String> = hashMapOf()
 
-    var dynamicTextPaint: HashMap<String, TextPaint> = hashMapOf()
+    internal var dynamicTextPaint: HashMap<String, TextPaint> = hashMapOf()
 
-    var dynamicLayoutText: HashMap<String, StaticLayout> = hashMapOf()
+    internal var dynamicLayoutText: HashMap<String, StaticLayout> = hashMapOf()
+
+    internal var dynamicDrawer: HashMap<String, (canvas: Canvas, frameIndex: Int) -> Boolean> = hashMapOf()
 
     internal var isTextDirty = false
 
@@ -67,6 +70,10 @@ class SVGADynamicEntity {
         this.dynamicLayoutText.put(forKey, layoutText)
     }
 
+    fun setDynamicDrawer(drawer: (canvas: Canvas, frameIndex: Int) -> Boolean, forKey: String) {
+        this.dynamicDrawer.put(forKey, drawer)
+    }
+
     fun clearDynamicObjects() {
         this.isTextDirty = true
         this.dynamicHidden.clear()
@@ -74,6 +81,7 @@ class SVGADynamicEntity {
         this.dynamicText.clear()
         this.dynamicTextPaint.clear()
         this.dynamicLayoutText.clear()
+        this.dynamicDrawer.clear()
     }
 
 }

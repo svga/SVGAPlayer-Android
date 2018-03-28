@@ -46,6 +46,7 @@ import java.net.URL;
 
 import kotlin.Unit;
 import kotlin.jvm.functions.Function1;
+import kotlin.jvm.functions.Function2;
 import kotlin.jvm.functions.Function3;
 import okhttp3.CacheControl;
 import okhttp3.Call;
@@ -132,6 +133,15 @@ public class MainActivity extends AppCompatActivity {
                 0.0f,
                 false
         ), "banner");
+        dynamicEntity.setDynamicDrawer(new Function2<Canvas, Integer, Boolean>() {
+            @Override
+            public Boolean invoke(Canvas canvas, Integer frameIndex) {
+                Paint aPaint = new Paint();
+                aPaint.setColor(Color.WHITE);
+                canvas.drawCircle(50, 54, frameIndex % 5, aPaint);
+                return false;
+            }
+        }, "banner");
         return dynamicEntity;
     }
 
