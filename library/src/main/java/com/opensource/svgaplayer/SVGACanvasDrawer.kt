@@ -149,17 +149,18 @@ class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
                 sharedPaint.isAntiAlias = videoItem.antiAlias
                 sharedPaint.alpha = (sprite.frameEntity.alpha * 255).toInt()
                 if(!drawPathCache.containsKey(shape)){
-                    sharedShapeMatrix.reset()
-                    shape.transform?.let {
-                        sharedShapeMatrix.postConcat(it)
-                    }
-                    sharedShapeMatrix.postConcat(sharedFrameMatrix)
                     val path = Path()
                     path.set(shape.shapePath)
-                    path.transform(sharedShapeMatrix)
                     drawPathCache.put(shape,path)
                 }
-
+                sharedPath.reset()
+                sharedPath.addPath(Path(drawPathCache[shape]))
+                sharedShapeMatrix.reset()
+                shape.transform?.let {
+                    sharedShapeMatrix.postConcat(it)
+                }
+                sharedShapeMatrix.postConcat(sharedFrameMatrix)
+                sharedPath.transform(sharedShapeMatrix)
                 shape.styles?.fill?.let {
                     if (it != 0x00000000) {
                         sharedPaint.color = it
@@ -170,7 +171,7 @@ class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
                             sharedPath2.transform(this.sharedFrameMatrix)
                             canvas.clipPath(sharedPath2)
                         }
-                        canvas.drawPath(drawPathCache.get(shape), sharedPaint)
+                        canvas.drawPath(sharedPath, sharedPaint)
                         if (sprite.frameEntity.maskPath !== null) canvas.restore()
                     }
                 }
@@ -185,7 +186,7 @@ class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
                             sharedPath2.transform(this.sharedFrameMatrix)
                             canvas.clipPath(sharedPath2)
                         }
-                        canvas.drawPath(drawPathCache.get(shape), sharedPaint)
+                        canvas.drawPath(sharedPath, sharedPaint)
                         if (sprite.frameEntity.maskPath !== null) canvas.restore()
                     }
                 }
