@@ -6,7 +6,7 @@ import android.graphics.Path
 import android.graphics.RectF
 import com.opensource.svgaplayer.proto.ShapeEntity
 import org.json.JSONObject
-import java.util.HashMap
+import java.util.*
 
 /**
  * Created by cuiminghui on 2017/2/22.
@@ -279,6 +279,13 @@ class SVGAVideoShapeEntity {
         }
         this.shapePath = Path()
         this.shapePath?.set(sharedPath)
+    }
+
+    fun onDestroy() {
+        args = null
+        styles = null
+        transform = null
+        shapePath?.reset()
     }
 
 }

@@ -8,9 +8,9 @@ import org.json.JSONObject
  */
 class SVGAVideoSpriteEntity {
 
-    val imageKey: String?
+    var imageKey: String?
 
-    val frames: List<SVGAVideoSpriteFrameEntity>
+    var frames: List<SVGAVideoSpriteFrameEntity>
 
     constructor(obj: JSONObject) {
         this.imageKey = obj.optString("imageKey")
@@ -53,4 +53,8 @@ class SVGAVideoSpriteEntity {
 
     }
 
+    fun onDestroy() {
+        imageKey = null
+        frames = listOf()
+    }
 }

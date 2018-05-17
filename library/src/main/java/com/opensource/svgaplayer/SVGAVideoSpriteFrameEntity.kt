@@ -1,15 +1,8 @@
 package com.opensource.svgaplayer
 
 import android.graphics.Matrix
-import android.graphics.Path
-import android.text.TextUtils
 import com.opensource.svgaplayer.proto.FrameEntity
-
-import org.json.JSONArray
-import org.json.JSONException
 import org.json.JSONObject
-
-import java.io.Serializable
 
 /**
  * Created by cuiminghui on 2016/10/17.
@@ -94,4 +87,10 @@ class SVGAVideoSpriteFrameEntity {
         }
     }
 
+    fun onDestroy() {
+        layout = SVGARect(0.0, 0.0, 0.0, 0.0)
+        transform = Matrix()
+        maskPath = null
+        shapes = listOf()
+    }
 }

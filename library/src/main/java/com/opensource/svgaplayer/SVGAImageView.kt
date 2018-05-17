@@ -2,6 +2,7 @@ package com.opensource.svgaplayer
 
 import android.animation.Animator
 import android.animation.ValueAnimator
+import android.annotation.TargetApi
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.ColorFilter
@@ -42,14 +43,14 @@ class SVGADrawable(val videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
 
     var scaleType: ImageView.ScaleType = ImageView.ScaleType.MATRIX
 
-    private val drawer = SVGACanvasDrawer(videoItem, dynamicItem)
+    private var drawer: SVGACanvasDrawer? = SVGACanvasDrawer(videoItem, dynamicItem)
 
     override fun draw(canvas: Canvas?) {
         if (cleared) {
             return
         }
         canvas?.let {
-            drawer.drawFrame(it,currentFrame, scaleType)
+            drawer?.drawFrame(it, currentFrame, scaleType)
         }
     }
 
@@ -61,6 +62,33 @@ class SVGADrawable(val videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
 
     override fun setColorFilter(colorFilter: ColorFilter?) {
 
+    }
+
+    /**
+     * memory destroy
+     */
+    fun onDestroy() {
+        Thread({
+            videoItem.images.let {
+                it.values.forEach { u ->
+                    if (!u.isRecycled) u.recycle()
+                }
+            }
+            videoItem.sprites.let {
+                it.forEach {
+                    it.frames.let {
+                        it.forEach {
+                            it.onDestroy()
+                        }
+                    }
+                    it.onDestroy()
+                }
+            }
+            dynamicItem.clearDynamicObjects()
+            drawer?.onDestroy()
+            drawer = null
+            System.gc()
+        }).start()
     }
 
 }
@@ -99,6 +127,7 @@ open class SVGAImageView : ImageView {
         attrs?.let { loadAttrs(it) }
     }
 
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes) {
         setSoftwareLayerType()
         attrs?.let { loadAttrs(it) }
@@ -272,4 +301,11 @@ open class SVGAImageView : ImageView {
         stepToFrame(frame, andPlay)
     }
 
+    fun onDestroy() {
+        callback = null
+        animator = null
+        (drawable as? SVGADrawable ?: return).run {
+            this.onDestroy()
+        }
+    }
 }

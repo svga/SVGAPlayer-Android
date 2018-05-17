@@ -273,4 +273,22 @@ class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
         }
     }
 
+    fun onDestroy() {
+        sharedPaint.reset()
+        sharedFrameMatrix.reset()
+        sharedFrameMatrix.reset()
+        sharedPath.reset()
+        sharedPath2.reset()
+        sharedShapeMatrix.reset()
+        drawTextCache.let {
+            it.values.forEach { u ->
+                if (!u.isRecycled) u.recycle()
+            }
+        }
+        drawPathCache.forEach {
+            it.key.onDestroy()
+            it.value.reset()
+        }
+    }
+
 }
