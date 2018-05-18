@@ -206,7 +206,7 @@ open class SVGAImageView : ImageView {
                     it.getDeclaredField("sDurationScale")?.let {
                         it.isAccessible = true
                         it.getFloat(animatorClass).let {
-                            durationScale = it.toDouble()
+                            durationScale = if (it == 0f) 1.0 else it.toDouble()
                         }
                     }
                 }
