@@ -2,6 +2,7 @@ package com.opensource.svgaplayer
 
 import android.animation.Animator
 import android.animation.ValueAnimator
+import android.content.ContentValues.TAG
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.ColorFilter
@@ -9,6 +10,7 @@ import android.graphics.PixelFormat
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.util.AttributeSet
+import android.util.Log
 import android.view.View
 import android.view.animation.LinearInterpolator
 import android.widget.ImageView
@@ -21,7 +23,7 @@ import java.net.URL
 class SVGADrawable(val videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicEntity): Drawable() {
 
     constructor(videoItem: SVGAVideoEntity): this(videoItem, SVGADynamicEntity())
-
+    val TAG = "SVGADrawable"
     var cleared = true
         internal set (value) {
             if (field == value) {
@@ -48,6 +50,7 @@ class SVGADrawable(val videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
         if (cleared) {
             return
         }
+        Log.i(TAG,"method->draw width: ${canvas?.width},height: ${canvas?.height}")
         canvas?.let {
             drawer.drawFrame(it,currentFrame, scaleType)
         }
@@ -110,6 +113,10 @@ open class SVGAImageView : ImageView {
         }
     }
 
+    override fun onDraw(canvas: Canvas?) {
+        super.onDraw(canvas)
+    }
+
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
         animator?.cancel()
@@ -119,7 +126,7 @@ open class SVGAImageView : ImageView {
 
     private fun loadAttrs(attrs: AttributeSet) {
         val typedArray = context.theme.obtainStyledAttributes(attrs, R.styleable.SVGAImageView, 0, 0)
-        loops = typedArray.getInt(R.styleable.SVGAImageView_loopCount, 0)
+        loops = typedArray.getInt(R.styleable.SVGAImageView_svgaLoopCount, 0)
         clearsAfterStop = typedArray.getBoolean(R.styleable.SVGAImageView_clearsAfterStop, true)
         val antiAlias = typedArray.getBoolean(R.styleable.SVGAImageView_antiAlias, true)
         val autoPlay = typedArray.getBoolean(R.styleable.SVGAImageView_autoPlay, true)

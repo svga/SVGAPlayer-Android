@@ -1,6 +1,7 @@
 package com.opensource.svgaplayer
 
 import android.graphics.Canvas
+import android.graphics.Rect
 import android.widget.ImageView
 
 /**
@@ -25,12 +26,12 @@ open class SGVADrawer(val videoItem: SVGAVideoEntity) {
         }
     }
 
-    open fun drawFrame(canvas : Canvas, frameIndex: Int, scaleType: ImageView.ScaleType) {
-        performScaleType(canvas,scaleType)
+    open fun drawFrame(canvas : Canvas, frameIndex: Int,rect: Rect, scaleType: ImageView.ScaleType) {
+        performScaleType(rect,scaleType)
     }
 
-    open fun performScaleType(canvas : Canvas,scaleType: ImageView.ScaleType) {
-        scaleEntity.performScaleType(canvas.width.toFloat(),canvas.height.toFloat(),videoItem.videoSize.width.toFloat(),videoItem.videoSize.height.toFloat(),scaleType)
+    open fun performScaleType(rect: Rect,scaleType: ImageView.ScaleType) {
+        scaleEntity.performScaleType(rect.width().toFloat(),rect.height().toFloat(),videoItem.videoSize.width.toFloat(),videoItem.videoSize.height.toFloat(),scaleType)
     }
 
 }
