@@ -52,7 +52,7 @@ class SVGADrawable(val videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
         }
         Log.i(TAG,"method->draw width: ${canvas?.width},height: ${canvas?.height}")
         canvas?.let {
-            drawer.drawFrame(it,currentFrame, scaleType)
+            drawer.drawFrame(it,currentFrame,bounds, scaleType)
         }
     }
 
