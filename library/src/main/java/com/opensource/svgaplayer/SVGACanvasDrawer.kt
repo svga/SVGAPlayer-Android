@@ -2,7 +2,6 @@ package com.opensource.svgaplayer
 
 import android.graphics.*
 import android.text.StaticLayout
-import android.util.Log
 import android.widget.ImageView
 
 
@@ -11,7 +10,6 @@ import android.widget.ImageView
  */
 
 class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicEntity) : SGVADrawer(videoItem) {
-    private val TAG = "SVGACanvasDrawer"
     private var canvasW = 0
     private var canvasH = 0
     private val sharedPaint = Paint()
@@ -42,11 +40,8 @@ class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
     private fun resetShareMatrix(transform :Matrix){
         sharedFrameMatrix.reset()
         sharedFrameMatrix.postScale(scaleEntity.scaleFx, scaleEntity.scaleFy)
-        Log.i(TAG,"method->resetShareMatrix scaleFx: ${scaleEntity.scaleFx} scaleFy: ${scaleEntity.scaleFy}")
         sharedFrameMatrix.postTranslate(scaleEntity.tranFx, scaleEntity.tranFy)
-        Log.i(TAG,"method->resetShareMatrix tranFx: ${scaleEntity.tranFx} tranFy: ${scaleEntity.tranFy}")
         sharedFrameMatrix.preConcat(transform)
-        Log.i(TAG,"method->resetShareMatrix transform: ${transform}")
     }
 
     private fun drawSprite(sprite: SVGADrawerSprite, canvas :Canvas, frameIndex: Int) {
@@ -77,15 +72,6 @@ class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
             }
             else {
                 sharedFrameMatrix.preScale((sprite.frameEntity.layout.width / it.width).toFloat(), (sprite.frameEntity.layout.width / it.width).toFloat())
-
-                Log.i(TAG,"method->drawImage sx: ${(sprite.frameEntity.layout.width / it.width).toFloat()}")
-                Log.i(TAG,"method->drawImage sy: ${(sprite.frameEntity.layout.height / it.height).toFloat()}")
-
-                Log.i(TAG,"method->drawImage layout_height: ${sprite.frameEntity.layout.height},bitmap height ${it.height}")
-                Log.i(TAG,"method->drawImage layout_width: ${sprite.frameEntity.layout.width},bitmap width ${it.width}")
-
-                Log.i(TAG,"method->drawImage sharedFrameMatrix: "+sharedFrameMatrix.toString())
-
                 canvas.drawBitmap(it, sharedFrameMatrix, sharedPaint)
 
 

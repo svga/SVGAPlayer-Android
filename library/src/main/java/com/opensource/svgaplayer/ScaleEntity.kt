@@ -1,5 +1,6 @@
 package com.opensource.svgaplayer
 
+import android.content.ContentValues.TAG
 import android.util.Log
 import android.widget.ImageView
 
@@ -7,7 +8,6 @@ import android.widget.ImageView
  * Created by ubt on 2018/1/19.
  */
 class ScaleEntity {
-    val TAG = "ScaleEntity"
     var tranFx : Float = 0.0f
     var tranFy : Float = 0.0f
     var scaleFx : Float = 1.0f
@@ -28,8 +28,6 @@ class ScaleEntity {
         if (canvasWidth == 0.0f || canvasHeight == 0.0f || videoWidth == 0.0f || videoHeight == 0.0f) {
             return
         }
-        Log.i(TAG,"method->performScaleType canvasWidth: ${canvasWidth},canvasHeight:${canvasHeight}," +
-                "videoWidth:${videoWidth},videoHeight:${videoHeight},scaleType:${scaleType}")
         resetVar()
         val canW_vidW_f = (canvasWidth - videoWidth) / 2.0f
         val canH_vidH_f = (canvasHeight - videoHeight) / 2.0f
@@ -39,8 +37,6 @@ class ScaleEntity {
 
         val canH_d_vidH = canvasHeight / videoHeight
         val canW_d_vidW = canvasWidth / videoWidth
-        Log.i(TAG,"scaleType: ${scaleType}, canW_vidW_f ${canW_vidW_f}, canH_vidH_f: ${canH_vidH_f}," +
-                " videoRatio ${videoRatio},canvasRatio: ${canvasRatio} ，canH_d_vidH：${canH_d_vidH}, canW_d_vidW: ${canW_d_vidW}")
         when (scaleType) {
             ImageView.ScaleType.CENTER -> {
                 tranFx = canW_vidW_f

@@ -23,7 +23,6 @@ import java.net.URL
 class SVGADrawable(val videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicEntity): Drawable() {
 
     constructor(videoItem: SVGAVideoEntity): this(videoItem, SVGADynamicEntity())
-    val TAG = "SVGADrawable"
     var cleared = true
         internal set (value) {
             if (field == value) {
@@ -50,7 +49,6 @@ class SVGADrawable(val videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
         if (cleared) {
             return
         }
-        Log.i(TAG,"method->draw width: ${canvas?.width},height: ${canvas?.height}")
         canvas?.let {
             drawer.drawFrame(it,currentFrame,bounds, scaleType)
         }
