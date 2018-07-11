@@ -9,6 +9,7 @@ import android.graphics.PixelFormat
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.util.AttributeSet
+import android.util.Log
 import android.view.View
 import android.view.animation.LinearInterpolator
 import android.widget.ImageView
@@ -178,6 +179,11 @@ open class SVGAImageView : ImageView {
                         it.isAccessible = true
                         it.getFloat(animatorClass).let {
                             durationScale = it.toDouble()
+                        }
+                        if (durationScale == 0.0) {
+                            it.setFloat(animatorClass, 1.0f)
+                            durationScale = 1.0
+                            Log.e("SVGAPlayer", "The animation duration scale has been reset to 1.0x, because you closed it on developer options.")
                         }
                     }
                 }
