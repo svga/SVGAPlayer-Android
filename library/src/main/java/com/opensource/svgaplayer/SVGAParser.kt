@@ -57,7 +57,9 @@ class SVGAParser(private val context: Context) {
                                     }
                                     outputStream.write(buffer, 0, count)
                                 }
-                                complete(ByteArrayInputStream(outputStream.toByteArray()))
+                                ByteArrayInputStream(outputStream.toByteArray()).use {
+                                    complete(it)
+                                }
                             }
                         }
                     }
