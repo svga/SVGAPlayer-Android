@@ -76,9 +76,10 @@ class SVGAParser(private val context: Context) {
 
     fun parse(assetsName: String, callback: ParseCompletion) {
         try {
-            context.assets.open(assetsName)?.let {
+            context.assets.open(assetsName)?.use {
                 parse(it, cacheKey("file:///assets/" + assetsName), callback)
             }
+
         } catch (e: Exception) {}
     }
 
