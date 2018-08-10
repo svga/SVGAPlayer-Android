@@ -76,10 +76,9 @@ class SVGAParser(private val context: Context) {
 
     fun parse(assetsName: String, callback: ParseCompletion) {
         try {
-            context.assets.open(assetsName)?.use {
-                parse(it, cacheKey("file:///assets/" + assetsName), callback)
+            context.assets.open(assetsName)?.let {
+                parse(it, cacheKey("file:///assets/" + assetsName), callback, true)
             }
-
         } catch (e: Exception) {}
     }
 
@@ -104,9 +103,12 @@ class SVGAParser(private val context: Context) {
         })
     }
 
-    fun parse(inputStream: InputStream, cacheKey: String, callback: ParseCompletion) {
+    fun parse(inputStream: InputStream, cacheKey: String, callback: ParseCompletion, closeInputStream: Boolean = false) {
         Thread({
             val videoItem = parse(inputStream, cacheKey)
+            if (closeInputStream) {
+                inputStream.close()
+            }
             if (videoItem != null) {
                     Handler(context.mainLooper).post {
                         callback.onComplete(videoItem)
