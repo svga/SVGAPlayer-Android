@@ -65,15 +65,17 @@ class SVGAVideoEntity {
         obj.optJSONObject("images")?.let { imgObjects ->
             imgObjects.keys().forEach { imageKey ->
                 options.inPreferredConfig = Bitmap.Config.RGB_565
-                var filePath = cacheDir.absolutePath + "/" + imgObjects[imageKey]
-                var bitmap = if (File(filePath).exists()) BitmapFactory.decodeFile(filePath, options) else null
-                if (bitmap != null) {
-                    images.put(imageKey, bitmap)
-                }
-                else {
-                    (cacheDir.absolutePath + "/" + imageKey + ".png")?.takeIf { File(it).exists() }?.let { it
-                        BitmapFactory.decodeFile(it, options)?.let {
-                            images.put(imageKey, it)
+                imgObjects[imageKey]?.let {
+                    var filePath = cacheDir.absolutePath + "/" + imgObjects[imageKey]
+                    var bitmap = if (File(filePath).exists()) BitmapFactory.decodeFile(filePath, options) else null
+                    if (bitmap != null) {
+                        images.put(imageKey, bitmap)
+                    }
+                    else {
+                        (cacheDir.absolutePath + "/" + imageKey + ".png")?.takeIf { File(it).exists() }?.let { it
+                            BitmapFactory.decodeFile(it, options)?.let {
+                                images.put(imageKey, it)
+                            }
                         }
                     }
                 }
