@@ -264,7 +264,6 @@ class SVGAParser(private val context: Context) {
                 return byteArrayOutputStream.toByteArray()
             }
         } catch (e: Exception) {
-            throw e
         }
     }
 
@@ -320,7 +319,6 @@ class SVGAParser(private val context: Context) {
             }
         } catch (e: Exception) {
             cacheDir.delete()
-            throw e
         }
     }
 }
