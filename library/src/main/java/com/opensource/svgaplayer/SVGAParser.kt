@@ -249,18 +249,22 @@ class SVGAParser(private val context: Context) {
     private fun cacheDir(cacheKey: String): File = File(context.cacheDir.absolutePath + "/" + cacheKey + "/")
 
     private fun readAsBytes(inputStream: InputStream): ByteArray {
-        ByteArrayOutputStream().use { byteArrayOutputStream ->
-            val byteArray = ByteArray(2048)
-            while (true) {
-                val count = inputStream.read(byteArray, 0, 2048)
-                if (count <= 0) {
-                    break
+        try {
+            ByteArrayOutputStream().use { byteArrayOutputStream ->
+                val byteArray = ByteArray(2048)
+                while (true) {
+                    val count = inputStream.read(byteArray, 0, 2048)
+                    if (count <= 0) {
+                        break
+                    }
+                    else {
+                        byteArrayOutputStream.write(byteArray, 0, count)
+                    }
                 }
-                else {
-                    byteArrayOutputStream.write(byteArray, 0, count)
-                }
+                return byteArrayOutputStream.toByteArray()
             }
-            return byteArrayOutputStream.toByteArray()
+        } catch (e: Exception) {
+            throw e
         }
     }
 
@@ -291,28 +295,32 @@ class SVGAParser(private val context: Context) {
     private fun unzip(inputStream: InputStream, cacheKey: String) {
         val cacheDir = this.cacheDir(cacheKey)
         cacheDir.mkdirs()
-        BufferedInputStream(inputStream).use {
-            ZipInputStream(it).use { zipInputStream ->
-                while (true) {
-                    val zipItem = zipInputStream.nextEntry ?: break
-                    if (zipItem.name.contains("/")) {
-                        continue
-                    }
-                    val file = File(cacheDir, zipItem.name)
-                    FileOutputStream(file).use { fileOutputStream ->
-                        val buff = ByteArray(2048)
-                        while (true) {
-                            val readBytes = zipInputStream.read(buff)
-                            if (readBytes <= 0) {
-                                break
-                            }
-                            fileOutputStream.write(buff, 0, readBytes)
+        try {
+            BufferedInputStream(inputStream).use {
+                ZipInputStream(it).use { zipInputStream ->
+                    while (true) {
+                        val zipItem = zipInputStream.nextEntry ?: break
+                        if (zipItem.name.contains("/")) {
+                            continue
                         }
+                        val file = File(cacheDir, zipItem.name)
+                        FileOutputStream(file).use { fileOutputStream ->
+                            val buff = ByteArray(2048)
+                            while (true) {
+                                val readBytes = zipInputStream.read(buff)
+                                if (readBytes <= 0) {
+                                    break
+                                }
+                                fileOutputStream.write(buff, 0, readBytes)
+                            }
+                        }
+                        zipInputStream.closeEntry()
                     }
-                    zipInputStream.closeEntry()
                 }
             }
+        } catch (e: Exception) {
+            cacheDir.delete()
+            throw e
         }
     }
-
 }
