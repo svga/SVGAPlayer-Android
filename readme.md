@@ -2,45 +2,10 @@
 
 [![](https://jitpack.io/v/yyued/SVGAPlayer-Android.svg)](https://jitpack.io/#yyued/SVGAPlayer-Android)
 
-## Android Studio 3.0.0
+## 付费咨询
 
-We Recommend You Upgrade [Android Studio 3.0.0](https://developer.android.com/studio/index.html?hl=zh-cn).
-
-If you want to run Sample Project on Android Studio 2.3.2, Download this [commit](https://github.com/yyued/SVGAPlayer-Android/archive/465812d2b94ecace62a7e8f6c8da5bc593d43f63.zip).
-
-我们推荐你将 Android Studio 升级到 3.0.0 版本，示例工程不能在 2.3.2 中开启（除非，你自行修改 Gradle 配置）。
-
-如果你要在 Android Studio 2.3.2 中运行示例工程, 下载这个 [commit](https://github.com/yyued/SVGAPlayer-Android/archive/465812d2b94ecace62a7e8f6c8da5bc593d43f63.zip).
-
-## Version
-
-### 2.1.2
-
-* Feature: Add DynamicDrawer to DynamicEntity.
-
-### 2.1.1
-
-* Improve: Improve performances, arrange code. Thanks @andyliumstar.
-* Feature: Add StaticLayout(SpannableString) Text to DynamicEntity.
-* Feature: Add Hidden Option to DynamicEntity.
-
-### 2.1.0
-
-* Bugfix: SVGAImageView may leaks while startAnimation call multiple times. Thanks @andyliumstar
-* Feature: Add range mode and reverse mode.
-
-### 2.0.3
-
-* Improve: SVGAPath parsing faster then before.
-
-### 2.0.1
-
-* Let antiAlias defaults to true, add DrawFilter to Canvas.
-* Add isAnimating props to SVGAImageView.
-
-### 2.0.0
-
-* Add SVGA-Format 2.0.0 support.
+* 如果你发现 SVGAPlayer 存在 BUG，请在 GitHub 上按照模板提交 issue。
+* 如果有使用上的问题，请勿提交 issue（会被立刻关闭），请至[知乎付费问答](https://www.zhihu.com/zhi/people/1011556735563157504)提问，我们会全程跟踪你的疑问。
 
 ## SVGA Format
 
@@ -66,7 +31,7 @@ allprojects {
 
 add dependency to build.gradle (Final Release https://jitpack.io/#yyued/SVGAPlayer-Android/ )
 ```
-compile 'com.github.yyued:SVGAPlayer-Android:2.1.1'
+compile 'com.github.yyued:SVGAPlayer-Android:2.1.8'
 ```
 
 ## Usage
