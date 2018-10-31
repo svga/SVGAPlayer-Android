@@ -2,9 +2,15 @@ package com.opensource.svgaplayer
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.media.AudioAttributes
+import android.media.AudioManager
+import android.media.SoundPool
 import com.opensource.svgaplayer.proto.MovieEntity
 import org.json.JSONObject
 import java.io.File
+import java.io.FileDescriptor
+import java.io.FileInputStream
+import java.io.FileOutputStream
 import java.util.*
 
 private val options = BitmapFactory.Options()
@@ -28,6 +34,10 @@ class SVGAVideoEntity {
     var sprites: List<SVGAVideoSpriteEntity> = listOf()
         private set
 
+    var audios: List<SVGAAudioEntity> = listOf()
+
+    var soundPool: SoundPool? = null
+
     var images = HashMap<String, Bitmap>()
         private set
 
@@ -46,7 +56,10 @@ class SVGAVideoEntity {
         resetSprites(obj)
     }
 
+    var _movieItem: MovieEntity? = null
+
     constructor(obj: MovieEntity, cacheDir: File) {
+        this._movieItem = obj
         this.cacheDir = cacheDir
         obj.params?.let { movieParams ->
             videoSize = SVGARect(0.0, 0.0, (movieParams.viewBoxWidth ?: 0.0f).toDouble(), (movieParams.viewBoxHeight ?: 0.0f).toDouble())
@@ -59,6 +72,14 @@ class SVGAVideoEntity {
             e.printStackTrace()
         }
         resetSprites(obj)
+    }
+
+    internal fun prepare(callback: () -> Unit) {
+        this._movieItem?.let {
+            resetAudios(it) {
+                callback()
+            }
+        }
     }
 
     private fun resetImages(obj: JSONObject) {
@@ -85,21 +106,27 @@ class SVGAVideoEntity {
         obj.images?.entries?.forEach {
             val imageKey = it.key
             options.inPreferredConfig = Bitmap.Config.RGB_565
-            val bitmap = BitmapFactory.decodeByteArray(it.value.toByteArray(), 0, it.value.size(), options)
-            if (bitmap != null) {
-                images.put(imageKey, bitmap)
-            }
+            val byteArray = it.value.toByteArray()
+            if (byteArray.count() < 4) { return@forEach }
+            val fileTag = byteArray.slice(IntRange(0, 3))
+            if (fileTag[0].toInt() == 73 && fileTag[1].toInt() == 68 && fileTag[2].toInt() == 51 && fileTag[3].toInt() == 3) { }
             else {
-                it.value.utf8()?.let {
-                    var filePath = cacheDir.absolutePath + "/" + it
-                    var bitmap = if (File(filePath).exists()) BitmapFactory.decodeFile(filePath, options) else null
-                    if (bitmap != null) {
-                        images.put(imageKey, bitmap)
-                    }
-                    else {
-                        (cacheDir.absolutePath + "/" + imageKey + ".png")?.takeIf { File(it).exists() }?.let { it
-                            BitmapFactory.decodeFile(it, options)?.let {
-                                images.put(imageKey, it)
+                val bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.count(), options)
+                if (bitmap != null) {
+                    images[imageKey] = bitmap
+                }
+                else {
+                    it.value.utf8()?.let {
+                        var filePath = cacheDir.absolutePath + "/" + it
+                        var bitmap = if (File(filePath).exists()) BitmapFactory.decodeFile(filePath, options) else null
+                        if (bitmap != null) {
+                            images.put(imageKey, bitmap)
+                        }
+                        else {
+                            (cacheDir.absolutePath + "/" + imageKey + ".png")?.takeIf { File(it).exists() }?.let { it
+                                BitmapFactory.decodeFile(it, options)?.let {
+                                    images.put(imageKey, it)
+                                }
                             }
                         }
                     }
@@ -124,6 +151,50 @@ class SVGAVideoEntity {
         sprites = obj.sprites?.map {
             return@map SVGAVideoSpriteEntity(it)
         } ?: listOf()
+    }
+
+    private fun resetAudios(obj: MovieEntity, completionBlock: () -> Unit) {
+        obj.audios?.takeIf { it.isNotEmpty() }?.let { audios ->
+            var soundLoaded = 0
+            val soundPool = SoundPool(Math.min(12, audios.count()), AudioManager.STREAM_RING, 0)
+            val audiosFile = HashMap<String, File>()
+            soundPool.setOnLoadCompleteListener { soundPool, _, _ ->
+                soundLoaded++
+                if (soundLoaded >= audios.count()) {
+                    completionBlock()
+                }
+            }
+            val audiosData = HashMap<String, ByteArray>()
+            obj.images?.entries?.forEach {
+                val imageKey = it.key
+                val byteArray = it.value.toByteArray()
+                if (byteArray.count() < 4) { return@forEach }
+                val fileTag = byteArray.slice(IntRange(0, 3))
+                if (fileTag[0].toInt() == 73 && fileTag[1].toInt() == 68 && fileTag[2].toInt() == 51 && fileTag[3].toInt() == 3) {
+                    audiosData[imageKey] = byteArray
+                }
+            }
+            if (audiosData.count() > 0) {
+                audiosData.forEach { aKey, bytes ->
+                    val tmpFile = File.createTempFile(aKey, ".mp3")
+                    val fos = FileOutputStream(tmpFile)
+                    fos.write(bytes)
+                    fos.flush()
+                    fos.close()
+                    audiosFile[aKey] = tmpFile
+                }
+            }
+            this.audios = audios.map { audio ->
+                val item = SVGAAudioEntity(audio)
+                audiosFile[audio.audioKey]?.let {
+                    val fis = FileInputStream(it)
+                    item.soundID = soundPool.load(fis.fd, (((audio.startTime ?: 0).toDouble() / (audio.totalTime ?: 0).toDouble()) * fis.available().toDouble()).toLong(), fis.available().toLong(), 1)
+                    fis.close()
+                }
+                return@map item
+            }
+            this.soundPool = soundPool
+        } ?: kotlin.run(completionBlock)
     }
 
 }

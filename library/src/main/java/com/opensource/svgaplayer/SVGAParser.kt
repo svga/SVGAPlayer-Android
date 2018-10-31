@@ -36,7 +36,7 @@ class SVGAParser(private val context: Context) {
         var noCache = false
 
         open fun resume(url: URL, complete: (inputStream: InputStream) -> Unit, failure: (e: Exception) -> Unit) {
-            Thread({
+            Thread {
                 try {
                     if (HttpResponseCache.getInstalled() == null && !noCache) {
                         Log.e("SVGAParser", "SVGAParser can not handle cache before install HttpResponseCache. see https://github.com/yyued/SVGAPlayer-Android#cache")
@@ -67,7 +67,7 @@ class SVGAParser(private val context: Context) {
                     e.printStackTrace()
                     failure(e)
                 }
-            }).start()
+            }.start()
         }
 
     }
@@ -77,7 +77,7 @@ class SVGAParser(private val context: Context) {
     fun parse(assetsName: String, callback: ParseCompletion) {
         try {
             context.assets.open(assetsName)?.let {
-                parse(it, cacheKey("file:///assets/" + assetsName), callback, true)
+                parse(it, cacheKey("file:///assets/$assetsName"), callback, true)
             }
         } catch (e: Exception) {}
     }
@@ -93,8 +93,10 @@ class SVGAParser(private val context: Context) {
         }
         fileDownloader.resume(url, {
             val videoItem = parse(it, cacheKey(url)) ?: return@resume (Handler(context.mainLooper).post { callback.onError() } as? Unit ?: Unit)
-            Handler(context.mainLooper).post {
-                callback.onComplete(videoItem)
+            videoItem.prepare {
+                Handler(context.mainLooper).post {
+                    callback.onComplete(videoItem)
+                }
             }
         }, {
             Handler(context.mainLooper).post {
@@ -104,28 +106,29 @@ class SVGAParser(private val context: Context) {
     }
 
     fun parse(inputStream: InputStream, cacheKey: String, callback: ParseCompletion, closeInputStream: Boolean = false) {
-        Thread({
+        Thread {
             val videoItem = parse(inputStream, cacheKey)
             if (closeInputStream) {
                 inputStream.close()
             }
             if (videoItem != null) {
+                videoItem.prepare {
                     Handler(context.mainLooper).post {
                         callback.onComplete(videoItem)
                     }
                 }
-                else {
-                    Handler(context.mainLooper).post {
-                        callback.onError()
-                    }
+            } else {
+                Handler(context.mainLooper).post {
+                    callback.onError()
                 }
-        }).start()
+            }
+        }.start()
     }
 
     private fun parse(inputStream: InputStream, cacheKey: String): SVGAVideoEntity? {
         readAsBytes(inputStream)?.let { bytes ->
             if (bytes.size > 4 && bytes[0].toInt() == 80 && bytes[1].toInt() == 75 && bytes[2].toInt() == 3 && bytes[3].toInt() == 4) {
-                synchronized(sharedLock, {
+                synchronized(sharedLock) {
                     if (!cacheDir(cacheKey).exists()) {
                         try {
                             ByteArrayInputStream(bytes).use {
@@ -174,7 +177,7 @@ class SVGAParser(private val context: Context) {
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
-                })
+                }
             }
             else {
                 try {
@@ -190,7 +193,7 @@ class SVGAParser(private val context: Context) {
     }
 
     private fun parseWithCacheKey(cacheKey: String): SVGAVideoEntity? {
-        synchronized(sharedLock, {
+        synchronized(sharedLock) {
             try {
                 val cacheDir = File(context.cacheDir.absolutePath + "/" + cacheKey + "/")
                 File(cacheDir, "movie.binary").takeIf { it.isFile }?.let { binaryFile ->
@@ -232,7 +235,7 @@ class SVGAParser(private val context: Context) {
             } catch (e: Exception) {
                 e.printStackTrace()
             }
-        })
+        }
         return null
     }
 

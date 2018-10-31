@@ -134,7 +134,7 @@ open class SVGAImageView : ImageView {
         }
         typedArray.getString(R.styleable.SVGAImageView_source)?.let {
             val parser = SVGAParser(context)
-            Thread({
+            Thread {
                 val callback: SVGAParser.ParseCompletion = object : SVGAParser.ParseCompletion {
                     override fun onComplete(videoItem: SVGAVideoEntity) {
                         handler?.post {
@@ -153,7 +153,7 @@ open class SVGAImageView : ImageView {
                 } else {
                     parser.parse(it, callback)
                 }
-            }).start()
+            }.start()
         }
         typedArray.recycle()
     }

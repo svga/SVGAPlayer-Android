@@ -1,8 +1,12 @@
 package com.opensource.svgaplayer
 
 import android.graphics.*
+import android.media.AudioManager
+import android.media.SoundPool
+import android.os.SystemClock
 import android.text.StaticLayout
 import android.widget.ImageView
+import java.io.FileInputStream
 
 
 /**
@@ -27,6 +31,25 @@ class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
         val sprites = requestFrameSprites(frameIndex)
         sprites.forEach {
             drawSprite(it, canvas, frameIndex)
+        }
+        this.playAudio(frameIndex)
+    }
+
+    private fun playAudio(frameIndex: Int) {
+        this.videoItem.audios.forEach { audio ->
+            if (audio.startFrame == frameIndex) {
+                this.videoItem.soundPool?.let { soundPool ->
+                    audio.soundID?.let {soundID ->
+                        audio.playID = soundPool.play(soundID, 1.0f, 1.0f, 1, 0, 1.0f)
+                    }
+                }
+            }
+            if (audio.endFrame <= frameIndex) {
+                audio.playID?.let {
+                    this.videoItem.soundPool?.stop(it)
+                }
+                audio.playID = null
+            }
         }
     }
 
