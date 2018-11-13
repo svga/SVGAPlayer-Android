@@ -31,7 +31,7 @@ allprojects {
 
 add dependency to build.gradle (Final Release https://jitpack.io/#yyued/SVGAPlayer-Android/ )
 ```
-compile 'com.github.yyued:SVGAPlayer-Android:2.1.9'
+compile 'com.github.yyued:SVGAPlayer-Android:2.3.0'
 ```
 
 ## Usage
