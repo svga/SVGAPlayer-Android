@@ -92,7 +92,7 @@ class SVGAParser(private val context: Context) {
             }
         }
         fileDownloader.resume(url, {
-            val videoItem = parse(it, cacheKey(url)) ?: return@resume (Handler(context.mainLooper).post { callback.onError() } as? Unit ?: Unit)
+            val videoItem = parse(it, cacheKey(url)) ?: return@resume (Handler(context.mainLooper).post { callback.onError() }).let {  }
             videoItem.prepare {
                 Handler(context.mainLooper).post {
                     callback.onComplete(videoItem)

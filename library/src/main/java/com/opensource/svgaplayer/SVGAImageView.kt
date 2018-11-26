@@ -167,7 +167,7 @@ open class SVGAImageView : ImageView {
         val drawable = drawable as? SVGADrawable ?: return
         drawable.cleared = false
         drawable.scaleType = scaleType
-        drawable.videoItem?.let {
+        drawable.videoItem.let {
             var durationScale = 1.0
             val startFrame = Math.max(0, range?.location ?: 0)
             val endFrame = Math.min(it.frames - 1, ((range?.location ?: 0) + (range?.length ?: Int.MAX_VALUE) - 1))

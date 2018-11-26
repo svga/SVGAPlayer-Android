@@ -20,7 +20,7 @@ class SVGAVideoSpriteEntity {
                 it.optJSONObject(i)?.let {
                     val frameItem = SVGAVideoSpriteFrameEntity(it)
                     if (frameItem.shapes.isNotEmpty()) {
-                        frameItem.shapes.first()?.let {
+                        frameItem.shapes.first().let {
                             if (it.isKeep && mutableFrames.size > 0) {
                                 frameItem.shapes = mutableFrames.last().shapes
                             }
@@ -39,7 +39,7 @@ class SVGAVideoSpriteEntity {
         frames = obj.frames?.map {
             val frameItem = SVGAVideoSpriteFrameEntity(it)
             if (frameItem.shapes.isNotEmpty()) {
-                frameItem.shapes.first()?.let {
+                frameItem.shapes.first().let {
                     if (it.isKeep) {
                         lastFrame?.let {
                             frameItem.shapes = it.shapes
