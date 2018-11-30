@@ -1,0 +1,9 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.opensource.svgaplayer.glideplugin">
+
+    <application>
+        <meta-data
+            android:name="com.opensource.svgaplayer.glideplugin.CompatSVGAModule"
+            android:value="GlideModule" />
+    </application>
+</manifest>
