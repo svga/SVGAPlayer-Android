@@ -24,9 +24,36 @@ import kotlinx.android.synthetic.main.activity_test.*
  */
 class GlideActivity : AppCompatActivity() {
 
+    private val svgaFiles = mapOf(
+        "norsvga" to listOf(
+            "logo-revenge-start",
+            "logo-start"),
+        "ranksvga" to listOf(
+            "king-star",
+            "rank-add",
+            "rank-loss",
+            "star-add",
+            "star-loss"),
+        "ranksvga2" to listOf(
+            "att_failed",
+            "att_succ",
+            "def_failed",
+            "def_succ",
+            "failed_and_upgrade",
+            "no_upgrade",
+            "rank_failed",
+            "rank_succ",
+            "succ_and_upgrade")
+    )
+
+    private var curIdx = 0
+
+    private val fileUrl = mutableListOf<String>()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_test)
+        loadAssetFileUrl()
     }
 
     fun loadSVGAFromNetwork(v: View) {
@@ -35,10 +62,22 @@ class GlideActivity : AppCompatActivity() {
             .into(iv_img)
     }
 
+    private fun loadAssetFileUrl() {
+        svgaFiles.entries.forEach { (path, list) ->
+            list.forEach { fileName ->
+                fileUrl.add("$path/$fileName.svga")
+            }
+        }
+    }
+
     fun loadSVGAFromAssets(v: View) {
+        val fileName = "file:///android_asset/${fileUrl[curIdx]}"
+        tv_assets_name.text = fileName
+        tv_assets_name.visibility = View.VISIBLE
         Glide.with(this)
-            .load("file:///android_asset/angel.svga")
+            .load(fileName)
             .into(iv_img)
+        curIdx = ++curIdx % fileUrl.size
     }
 
     fun loadSVGAFromNetworkAndAddText(v: View) {

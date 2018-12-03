@@ -9,7 +9,7 @@
         android:theme="@style/AppTheme"
         android:hardwareAccelerated="true" >
         <activity
-            android:name=".MainActivity"
+            android:name=".glide.GlideActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

@@ -16,6 +16,12 @@
         android:onClick="loadSVGAFromAssets"
         android:text="load from assets" />
 
+    <TextView
+        android:id="@+id/tv_assets_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
