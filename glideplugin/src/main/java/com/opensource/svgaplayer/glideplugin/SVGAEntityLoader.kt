@@ -1,16 +1,12 @@
 package com.opensource.svgaplayer.glideplugin
 
-import android.net.Uri
 import android.support.annotation.MainThread
 import com.bumptech.glide.Priority
+import com.bumptech.glide.load.Key
 import com.bumptech.glide.load.Options
 import com.bumptech.glide.load.data.DataFetcher
-import com.bumptech.glide.load.model.GlideUrl
 import com.bumptech.glide.load.model.ModelLoader
-import com.bumptech.glide.load.model.ModelLoaderFactory
-import com.bumptech.glide.load.model.MultiModelLoaderFactory
-import com.bumptech.glide.load.model.StringLoader
-import com.bumptech.glide.load.model.UrlUriLoader
+import com.bumptech.glide.signature.ObjectKey
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
@@ -20,64 +16,32 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.zip.ZipInputStream
 
 /**
- * Created by 张宇 on 2018/11/27.
+ * Created by 张宇 on 2018/12/3.
  * E-mail: zhangyu4@yy.com
  * YY: 909017428
  */
-internal class SVGAEntityLoader(
-    private val actual: ModelLoader<GlideUrl, InputStream>,
+abstract class SVGAEntityLoader<MODEL : Any>(
+    private val actual: ModelLoader<MODEL, InputStream>,
     private val cachePath: String
-) : ModelLoader<GlideUrl, File> {
+) : ModelLoader<MODEL, File> {
 
-    override fun buildLoadData(model: GlideUrl, width: Int, height: Int, options: Options)
-        : ModelLoader.LoadData<File>? {
+    override fun buildLoadData(model: MODEL, width: Int, height: Int, options: Options): ModelLoader.LoadData<File>? {
         val actualFetcher = actual.buildLoadData(model, width, height, options)?.fetcher
             ?: return null
-        return ModelLoader.LoadData(model, SVGAEntityFetcher(model, actualFetcher, cachePath))
+        return ModelLoader.LoadData(
+            toGlideKey(model),
+            SVGAEntityFetcher(toStringKey(model), actualFetcher, cachePath))
     }
 
-    override fun handles(model: GlideUrl) =
-        model.toStringUrl().substringBefore('?').endsWith(".svga") &&
-            actual.handles(model)
+    override fun handles(model: MODEL): Boolean = actual.handles(model)
 
-    internal class SVGAEntityLoaderFactory(private val cachePath: String) : ModelLoaderFactory<GlideUrl, File> {
+    protected abstract fun toStringKey(model: MODEL): String
 
-        override fun build(multiFactory: MultiModelLoaderFactory): ModelLoader<GlideUrl, File> {
-            return SVGAEntityLoader(
-                multiFactory.build(GlideUrl::class.java, InputStream::class.java),
-                cachePath)
-        }
-
-        override fun teardown() {
-            //do nothing
-        }
-    }
-
-    internal class SVGAStringLoaderFactory : ModelLoaderFactory<String, File> {
-
-        override fun build(multiFactory: MultiModelLoaderFactory): ModelLoader<String, File> {
-            return StringLoader(multiFactory.build(Uri::class.java, File::class.java))
-        }
-
-        override fun teardown() {
-            //Do nothing
-        }
-    }
-
-    internal class SVGAUriLoaderFactory : ModelLoaderFactory<Uri, File> {
-
-        override fun build(multiFactory: MultiModelLoaderFactory): ModelLoader<Uri, File> {
-            return UrlUriLoader(multiFactory.build(GlideUrl::class.java, File::class.java))
-        }
-
-        override fun teardown() {
-            //Do Nothing
-        }
-
-    }
+    protected open fun toGlideKey(model: MODEL): Key =
+        if (model is Key) model else ObjectKey(model)
 
     private class SVGAEntityFetcher(
-        private val model: GlideUrl,
+        private val modelKey: String,
         private val fetcher: DataFetcher<InputStream>,
         private val cachePath: String
     ) : AbsSVGAEntityDecoder(), DataFetcher<File> {
@@ -127,23 +91,33 @@ internal class SVGAEntityLoader(
 
         private fun decode(source: InputStream): File? {
             if (isCanceled.get()) return null
+            if (cacheDir.isDirectory && cacheDir.list().isNotEmpty()) return cacheDir
 
             readHeadAsBytes(source)?.let { sourceHead ->
                 if (sourceHead.isZipFormat && !isCanceled.get()) {
-                    if (!cacheDir.exists()) {
-                        try {
-                            cacheDir.mkdirs()
-                            unzip(source, cacheDir)
-                        } catch (e: Exception) {
-                            cacheDir.deleteRecursively()
-                            e.printStackTrace()
-                        }
+                    try {
+                        cacheDir.makeSureExist()
+                        unzip(source, cacheDir)
+                    } catch (e: Exception) {
+                        cacheDir.deleteRecursively()
+                        e.printStackTrace()
                     }
-
                     return cacheDir
                 }
             }
             return null
+        }
+
+        private fun File.makeSureExist() {
+            val dir = this
+            if (dir.exists()) {
+                if (!dir.isDirectory) {
+                    dir.deleteRecursively()
+                    dir.mkdirs()
+                }
+            } else {
+                dir.mkdirs()
+            }
         }
 
         private fun unzip(inputStream: InputStream, dir: File) {
@@ -181,7 +155,7 @@ internal class SVGAEntityLoader(
         }
 
         private val cacheDir: File by lazy(LazyThreadSafetyMode.NONE) {
-            File(cachePath, cacheKey(model.toStringUrl()))
+            File(cachePath, cacheKey(modelKey))
         }
     }
 }

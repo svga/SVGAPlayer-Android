@@ -31,12 +31,16 @@ class SVGAModule : LibraryGlideModule() {
         )
         hookTheImageViewFactory(glide)
         val cachePath = context.cacheDir.absolutePath
-        registry.register(SVGAVideoEntity::class.java, SVGADrawable::class.java, SVGADrawableTranscoder())
+        registry
+            .register(SVGAVideoEntity::class.java, SVGADrawable::class.java, SVGADrawableTranscoder())
             .append(BUCKET_SVGA, InputStream::class.java, SVGAVideoEntity::class.java, SVGAEntityStreamDecoder(cachePath))
             .append(BUCKET_SVGA, File::class.java, SVGAVideoEntity::class.java, SVGAEntityFileDecoder())
-            .append(GlideUrl::class.java, File::class.java, SVGAEntityLoader.SVGAEntityLoaderFactory(cachePath))
-            .append(String::class.java, File::class.java, SVGAEntityLoader.SVGAStringLoaderFactory())
-            .append(Uri::class.java, File::class.java, SVGAEntityLoader.SVGAUriLoaderFactory())
+            // Uri for file://android_asset
+            .append(Uri::class.java, File::class.java, SVGAAssetLoaderFactory(cachePath))
+            // String/Uri/GlideUrl for http:/https:
+            .append(String::class.java, File::class.java, SVGAStringLoaderFactory())
+            .append(Uri::class.java, File::class.java, SVGAUriLoaderFactory())
+            .append(GlideUrl::class.java, File::class.java, SVGAUrlLoaderFactory(cachePath))
     }
 
     private fun hookTheImageViewFactory(glide: Glide) {
