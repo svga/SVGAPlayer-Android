@@ -1,25 +1,19 @@
 # SVGAPlayer
 
-[![](https://jitpack.io/v/yyued/SVGAPlayer-Android.svg)](https://jitpack.io/#yyued/SVGAPlayer-Android)
+SVGAPlayer is a light-weight animation renderer. You use [tools](http://svga.io/designer.html) to export `svga` file from `Adobe Animate CC` or `Adobe After Effects`, and then use SVGAPlayer to render animation on mobile application.
 
-## 付费咨询
+`SVGAPlayer-Android` render animation natively via Android Canvas Library, brings you a high-performance, low-cost animation experience.
 
-* 如果你发现 SVGAPlayer 存在 BUG，请在 GitHub 上按照模板提交 issue。
-* 如果有使用上的问题，请勿提交 issue（会被立刻关闭），请至[知乎付费问答](https://www.zhihu.com/zhi/people/1011556735563157504)提问，我们会全程跟踪你的疑问。
+If wonder more information, go to this [website](http://svga.io/).
 
-## SVGA Format
+## Usage
 
-* SVGA is an opensource animation library, develop by YY UED.
-* SVGA base on SVG's concept, but not compatible to SVG.
-* SVGA can play on iOS/Android/Web.
+Here introduce `SVGAPlayer-Android` usage. Wonder exporting usage? Click [here](http://svga.io/designer.html).
 
-@see https://github.com/yyued/SVGA-Format
+### Install Via Gradle
 
-## Install
+We host aar file on JitPack, your need to add `JitPack.io` repo `build.gradle`
 
-### Gradle 
-
-add JitPack.io repo build.gradle
 ```
 allprojects {
     repositories {
@@ -29,16 +23,21 @@ allprojects {
 }
 ```
 
-add dependency to build.gradle (Final Release https://jitpack.io/#yyued/SVGAPlayer-Android/ )
+Then, add dependency to app `build.gradle`.
+
 ```
 compile 'com.github.yyued:SVGAPlayer-Android:2.3.0'
 ```
 
-## Usage
+[![](https://jitpack.io/v/yyued/SVGAPlayer-Android.svg)](https://jitpack.io/#yyued/SVGAPlayer-Android)
 
-### Layout.xml
+### Locate files
 
-use layout.xml.
+SVGAPlayer could load svga file from Android `assets` directory or remote server.
+
+### Using XML
+
+You may use `layout.xml` to add a `SVGAImageView`.
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -58,27 +57,71 @@ use layout.xml.
 </RelativeLayout>
 ```
 
-* source - SVGA file path，relative assets directory。
-* autoPlay - defaults to true，play after load automatically。
-* loopCount - defaults to 0，Loop Count, 0 = Infinity Loop。
-* clearsAfterStop - Clears Canvas After Animation Stop
-* fillMode - defaults to Forward，optional Forward / Backward，fillMode = Forward，Animation will pause on last frame while finished，fillMode = Backward , Animation will pause on first frame.
+The following attributes is allowable:
 
-### Code
+#### source: String
 
-Add SVGAImageView via code.
+The svga file path, provide a path relative to Android assets directory, or provide a http url.
 
-#### Init ImageView
+#### autoPlay: Boolean
 
-```
+Defaults to `true`.
+
+After animation parsed, plays animation automatically.
+
+#### loopCount: Int
+
+Defaults to `0`.
+
+How many times should animation loops. `0` means Infinity Loop.
+
+#### clearsAfterStop: Boolean
+
+Defaults to `true`.
+
+Clears canvas after animation stop.
+
+#### fillMode: String
+
+Defaults to `Forward`. Could be `Forward`, `Backward`.
+
+`Forward` means animation will pause on last frame after finished.
+
+`Backward` means animation will pause on first frame after finished.
+
+### Using code
+
+You may use code to add `SVGAImageView` either.
+
+#### Create a `SVGAImageView` instance.
+
+```kotlin
 SVGAImageView imageView = new SVGAImageView(this);
 ```
 
-#### Init Parser & Load File
+#### Create a `SVGAParser` instance, parse from assets like this.
 
-```
+```kotlin
 parser = new SVGAParser(this);
-parser.parse(new URL("http://legox.yy.com/svga/svga-me/angel.svga"), new SVGAParser.ParseCompletion() {
+parser.parse("posche.svga", new SVGAParser.ParseCompletion() {
+    
+});
+```
+
+#### Create a `SVGAParser` instance, parse from remote server like this.
+
+```kotlin
+parser = new SVGAParser(this);
+parser.parse(new URL("https://github.com/yyued/SVGA-Samples/blob/master/posche.svga?raw=true"), new SVGAParser.ParseCompletion() {
+    
+});
+```
+
+#### Create a `SVGADrawable` instance then set to `SVGAImageView`, play it as you want.
+
+```kotlin
+parser = new SVGAParser(this);
+parser.parse(..., new SVGAParser.ParseCompletion() {
     @Override
     public void onComplete(@NotNull SVGAVideoEntity videoItem) {
         SVGADrawable drawable = new SVGADrawable(videoItem);
@@ -94,117 +137,29 @@ parser.parse(new URL("http://legox.yy.com/svga/svga-me/angel.svga"), new SVGAPar
 
 ### Cache
 
-Parser will not manage cache, you need to cache by yourself.
+`SVGAParser` will not manage any cache, you need to setup cacher by yourself.
 
-#### Install HttpResponseCache
+#### Setup HttpResponseCache
 
-Because SVGAParser depends URLConnection, and URLConnection uses HttpResponseCache.
+`SVGAParser` depends on `URLConnection`, `URLConnection` uses `HttpResponseCache` to cache things.
 
-Add following code to Application.java:onCreate is Okey to handle SVGA caches.
+Add codes to `Application.java:onCreate` to setup cacher.
 
 ```kotlin
 val cacheDir = File(context.applicationContext.cacheDir, "http")
 HttpResponseCache.install(cacheDir, 1024 * 1024 * 128)
 ```
 
-## API
+## Features
 
-### Properties Setter
+Here are many feature samples.
 
-* setLoops(int loops); - Loop Count，0 = Infinity Loop
-* setClearsAfterStop(boolean clearsAfterStop); - Clears Canvas After Animation Stop
-* setFillMode(FillMode fillMode); - Optional Forward / Backward，fillMode = Forward，Animation will pause on last frame while finished，fillMode = Backward , Animation will pause on first frame.
-* setCallback(SVGAPlayerCallback callback) - SET Callbacks
-* setVideoItem(SVGAVideoEntity videoItem) - SET animation instance
+* [Replace an element with Bitmap.](https://github.com/yyued/SVGAPlayer-Android/wiki/Dynamic-Image)
+* [Add text above an element.](https://github.com/yyued/SVGAPlayer-Android/wiki/Dynamic-Text)
+* [Add static layout text above an element.](https://github.com/yyued/SVGAPlayer-Android/wiki/Dynamic-Text-Layout)
+* [Hides an element dynamicaly.](https://github.com/yyued/SVGAPlayer-Android/wiki/Dynamic-Hidden)
+* [Use a custom drawer for element.](https://github.com/yyued/SVGAPlayer-Android/wiki/Dynamic-Drawer)
 
-### Methods
-* startAnimation() - Play Animation from 0 frame.
-* startAnimation(range: SVGARange?, reverse: Boolean = false) - Play Animation in [location, location + length] range, and reverse or not.
-* pauseAnimation() - Pause Animation and keep on current frame.
-* stopAnimation() - Stop Animation，Clears Canvas while clearsAfterStop == YES.
-* stepToFrame(int frame, boolean andPlay) - Step to N frame, and then Play Animation if andPlay === true.
-* stepToPercentage(float percentage, boolean andPlay) - Step to x%, and then Play Animation if andPlay === true.
+## APIs
 
-### SVGAPlayerCallback
-
-* void onPause() - Call after animation paused.
-* void onFinished() - Call after animation finished.
-* void onRepeat() - Call while animation repeat.
-* void onStep(int frame, float percentage) - Call after animation play to specific frame.
-
-## Dynamic Object
-
-You may replace Image or Text dynamically. To do this, you need to create a SVGADynamicEntity instance. (SVGAPlayer 支持动态图像和动态文本，要添加动态图像和动态文本，你需要创建一个 SVGADynamicEntity 对象，并传入 SVGDrawable 初始化方法。)
-
-```
-SVGADynamicEntity dynamicItem = new SVGADynamicEntity();
-SVGADrawable drawable = new SVGADrawable(videoItem, dynamicItem);
-```
-
-### Dynamic Image
-
-You need to create a bitmap instance, use setDynamicImage method, to replace specific image. Ask your designer to provide imageKey(or unzip the svga file, find it).
-
-```
-dynamicItem.setDynamicImage(bitmap or url, "99");
-```
-
-### Dynamic Text
-
-Use setDynamicText method, to add text on specific image. Ask your designer to provide imageKey(or unzip the svga file, find it).
-
-```java
-TextPaint textPaint = new TextPaint();
-textPaint.setTextSize(30);
-textPaint.setFakeBoldText(true);
-textPaint.setARGB(0xff, 0xff, 0xe0, 0xa4);
-textPaint.setShadowLayer((float)1.0, (float)0.0, (float)1.0, Color.BLACK); // 各种配置
-dynamicItem.setDynamicText("崔小姐不吃鱼 送了魔法奇缘", textPaint, "banner");
-```
-
-### Dynamic Text (Static Layout)
-
-You can set SpannableString as dynamic text now.
-
-```java
-SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder("Pony 送了一打风油精给主播");
-spannableStringBuilder.setSpan(new ForegroundColorSpan(Color.YELLOW), 0, 4, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-TextPaint textPaint = new TextPaint();
-textPaint.setColor(Color.WHITE);
-textPaint.setTextSize(28);
-dynamicItem.setDynamicText(new StaticLayout(
-        spannableStringBuilder,
-        0,
-        spannableStringBuilder.length(),
-        textPaint,
-        0,
-        Layout.Alignment.ALIGN_CENTER,
-        1.0f,
-        0.0f,
-        false
-), "banner");
-```
-
-### Dynamic Hidden Element
-
-Now use setHidden to hide an element prevents drawing.
-
-```java
-dynamicItem.setHidden(true, "ImageKey")
-```
-
-### Dynamic Drawer
-
-You can set a drawer function above specific item, draw over canvas by yourself.
-
-```java
-dynamicItem.setDynamicDrawer(new Function2<Canvas, Integer, Boolean>() {
-    @Override
-    public Boolean invoke(Canvas canvas, Integer frameIndex) {
-        Paint aPaint = new Paint();
-        aPaint.setColor(Color.WHITE);
-        canvas.drawCircle(50, 54, frameIndex % 5, aPaint);
-        return false;
-    }
-}, "banner");
-```
+Head on over to [https://github.com/yyued/SVGAPlayer-Android/wiki/APIs](https://github.com/yyued/SVGAPlayer-Android/wiki/APIs)
