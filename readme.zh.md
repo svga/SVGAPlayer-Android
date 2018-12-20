@@ -4,8 +4,8 @@
 
 SVGA 是一个遵循 Apache 开源协议的开源项目，目前该项目主要由 [PonyCui](https://github.com/ponycui/) 和 [errnull](https://github.com/errnull/) 负责维护。如果这个项目对你的公司或者应用有所帮助，你可以考虑：
 
-* 雇用 PonyCui 为顾问。
-* 通过支付宝或者微信一次性捐赠。
+* [雇用 PonyCui 为顾问。]((./backer/hire.md))
+* [通过支付宝或者微信一次性捐赠。]((./backer/donate.md))
 
 ## 介绍
 

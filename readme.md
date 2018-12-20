@@ -1,5 +1,7 @@
 # SVGAPlayer
 
+[简体中文](./readme.zh.md)
+
 ## Supporting SVGA Library
 
 SVGA is an Apache-licensed open source project. And now SVGA library with its ongoing development made possible entirely by the support of [PonyCui](https://github.com/ponycui/) and [errnull](https://github.com/errnull/). To support SVGA library development, please consider:
@@ -8,8 +10,6 @@ SVGA is an Apache-licensed open source project. And now SVGA library with its on
 * [One-time donation via AliPay or WeChat.](./backer/donate.md)
 
 ## Introduce
-
-[简体中文](./readme.zh.md)
 
 SVGAPlayer is a light-weight animation renderer. You use [tools](http://svga.io/designer.html) to export `svga` file from `Adobe Animate CC` or `Adobe After Effects`, and then use SVGAPlayer to render animation on mobile application.
 
