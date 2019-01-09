@@ -1,12 +1,5 @@
 # SVGAPlayer
 
-## Supporting SVGA Library
-
-SVGA 是一个遵循 Apache 开源协议的开源项目，目前该项目主要由 [PonyCui](https://github.com/ponycui/) 和 [errnull](https://github.com/errnull/) 负责维护。如果这个项目对你的公司或者应用有所帮助，你可以考虑：
-
-* [雇用 PonyCui 为顾问。](./backer/hire.md)
-* [通过支付宝或者微信一次性捐赠。](./backer/donate.md)
-
 ## 介绍
 
 `SVGAPlayer` 是一个轻量的动画渲染库。你可以使用[工具](http://svga.io/designer.html)从 `Adobe Animate CC` 或者 `Adobe After Effects` 中导出动画文件，然后使用 `SVGAPlayer` 在移动设备上渲染并播放。
