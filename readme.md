@@ -5,13 +5,6 @@
 [![Backers on Open Collective](https://opencollective.com/SVGAPlayer-Android/backers/badge.svg)](#backers)
 [![Sponsors on Open Collective](https://opencollective.com/SVGAPlayer-Android/sponsors/badge.svg)](#sponsors) 
 
-## Supporting SVGA Library
-
-SVGA is an Apache-licensed open source project. And now SVGA library with its ongoing development made possible entirely by the support of [PonyCui](https://github.com/ponycui/) and [errnull](https://github.com/errnull/). To support SVGA library development, please consider:
-
-* [Hire PonyCui as a counselor.](./backer/hire.md)
-* [One-time donation via AliPay or WeChat.](./backer/donate.md)
-
 ## Introduce
 
 SVGAPlayer is a light-weight animation renderer. You use [tools](http://svga.io/designer.html) to export `svga` file from `Adobe Animate CC` or `Adobe After Effects`, and then use SVGAPlayer to render animation on mobile application.
