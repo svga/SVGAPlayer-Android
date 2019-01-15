@@ -2,12 +2,8 @@
 
 [简体中文](./readme.zh.md)
 
-## Supporting SVGA Library
-
-SVGA is an Apache-licensed open source project. And now SVGA library with its ongoing development made possible entirely by the support of [PonyCui](https://github.com/ponycui/) and [errnull](https://github.com/errnull/). To support SVGA library development, please consider:
-
-* [Hire PonyCui as a counselor.](./backer/hire.md)
-* [One-time donation via AliPay or WeChat.](./backer/donate.md)
+[![Backers on Open Collective](https://opencollective.com/SVGAPlayer-Android/backers/badge.svg)](#backers)
+[![Sponsors on Open Collective](https://opencollective.com/SVGAPlayer-Android/sponsors/badge.svg)](#sponsors) 
 
 ## Introduce
 
@@ -174,3 +170,24 @@ Here are many feature samples.
 ## APIs
 
 Head on over to [https://github.com/yyued/SVGAPlayer-Android/wiki/APIs](https://github.com/yyued/SVGAPlayer-Android/wiki/APIs)
+
+## Credits
+
+### Contributors
+
+This project exists thanks to all the people who contribute. [[Contribute](CONTRIBUTING.md)].
+
+<a href="https://github.com/yyued/SVGAPlayer-Android/graphs/contributors"><img src="https://opencollective.com/SVGAPlayer-Android/contributors.svg?width=890&button=false" /></a>
+
+### Backers
+
+Thank you to all our backers! 🙏 [[Become a backer](https://opencollective.com/SVGAPlayer-Android#backer)]
+
+<a href="https://opencollective.com/SVGAPlayer-Android#backers" target="_blank"><img src="https://opencollective.com/SVGAPlayer-Android/backers.svg?width=890"></a>
+
+### Sponsors
+
+Support this project by becoming a sponsor. Your logo will show up here with a link to your website. [[Become a sponsor](https://opencollective.com/SVGAPlayer-Android#sponsor)]
+
+<a href="https://opencollective.com/SVGAPlayer-Android/sponsor/0/website" target="_blank"><img src="https://opencollective.com/SVGAPlayer-Android/sponsor/0/avatar.svg"></a>
+
