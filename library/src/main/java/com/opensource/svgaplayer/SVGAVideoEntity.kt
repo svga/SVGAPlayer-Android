@@ -80,7 +80,7 @@ class SVGAVideoEntity {
             resetAudios(it) {
                 callback()
             }
-        }
+        } ?: callback()
     }
 
     private fun resetImages(obj: JSONObject) {
