@@ -163,7 +163,7 @@ class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
         }
     }
 
-    private fun drawShape(sprite: SVGADrawerSprite, canvas :Canvas) {
+    private fun drawShape(sprite: SVGADrawerSprite, canvas: Canvas) {
         resetShareMatrix(sprite.frameEntity.transform)
         sprite.frameEntity.shapes.forEach { shape ->
             shape.buildPath()
@@ -199,10 +199,10 @@ class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
                         if (sprite.frameEntity.maskPath !== null) canvas.restore()
                     }
                 }
-
                 shape.styles?.strokeWidth?.let {
                     if (it > 0) {
                         resetShapeStrokePaint(shape)
+                        sharedPaint.alpha = Math.min(255, Math.max(0, (sprite.frameEntity.alpha * 255).toInt()))
                         if (sprite.frameEntity.maskPath !== null) canvas.save()
                         sprite.frameEntity.maskPath?.let { maskPath ->
                             sharedPath2.reset()
