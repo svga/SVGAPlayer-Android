@@ -28,7 +28,7 @@ allprojects {
 然后，在应用 `build.gradle` 中添加依赖。
 
 ```
-compile 'com.github.yyued:SVGAPlayer-Android:2.3.0'
+compile 'com.github.yyued:SVGAPlayer-Android:lastest'
 ```
 
 [![](https://jitpack.io/v/yyued/SVGAPlayer-Android.svg)](https://jitpack.io/#yyued/SVGAPlayer-Android)
@@ -95,7 +95,7 @@ SVGAImageView imageView = new SVGAImageView(this);
 
 ```kotlin
 parser = new SVGAParser(this);
-parser.parse("posche.svga", new SVGAParser.ParseCompletion() {
+parser.decodeFromAssets("posche.svga", new SVGAParser.ParseCompletion() {
     
 });
 ```
@@ -104,7 +104,7 @@ parser.parse("posche.svga", new SVGAParser.ParseCompletion() {
 
 ```kotlin
 parser = new SVGAParser(this);
-parser.parse(new URL("https://github.com/yyued/SVGA-Samples/blob/master/posche.svga?raw=true"), new SVGAParser.ParseCompletion() {
+parser.decodeFromURL(new URL("https://github.com/yyued/SVGA-Samples/blob/master/posche.svga?raw=true"), new SVGAParser.ParseCompletion() {
     
 });
 ```
@@ -113,7 +113,7 @@ parser.parse(new URL("https://github.com/yyued/SVGA-Samples/blob/master/posche.s
 
 ```kotlin
 parser = new SVGAParser(this);
-parser.parse(..., new SVGAParser.ParseCompletion() {
+parser.decodeFromURL(..., new SVGAParser.ParseCompletion() {
     @Override
     public void onComplete(@NotNull SVGAVideoEntity videoItem) {
         SVGADrawable drawable = new SVGADrawable(videoItem);
