@@ -18,7 +18,7 @@ import java.util.*
 private val options = BitmapFactory.Options()
 
 /**
- * Created by PonyCui_Home on 16/6/18.
+ * Created by PonyCui on 16/6/18.
  */
 class SVGAVideoEntity {
 
@@ -37,7 +37,6 @@ class SVGAVideoEntity {
     internal var audios: List<SVGAAudioEntity> = listOf()
     internal var soundPool: SoundPool? = null
     internal var images = HashMap<String, Bitmap>()
-
     private var cacheDir: File
 
     constructor(obj: JSONObject, cacheDir: File) {
@@ -53,10 +52,10 @@ class SVGAVideoEntity {
         resetSprites(obj)
     }
 
-    var _movieItem: MovieEntity? = null
+    var movieItem: MovieEntity? = null
 
-    constructor(obj: MovieEntity, cacheDir: File) {
-        this._movieItem = obj
+    internal constructor(obj: MovieEntity, cacheDir: File) {
+        this.movieItem = obj
         this.cacheDir = cacheDir
         obj.params?.let { movieParams ->
             videoSize = SVGARect(0.0, 0.0, (movieParams.viewBoxWidth
@@ -73,7 +72,7 @@ class SVGAVideoEntity {
     }
 
     internal fun prepare(callback: () -> Unit) {
-        this._movieItem?.let {
+        this.movieItem?.let {
             resetAudios(it) {
                 callback()
             }
@@ -161,7 +160,7 @@ class SVGAVideoEntity {
                 SoundPool(Math.min(12, audios.count()), AudioManager.STREAM_MUSIC, 0)
             }
             val audiosFile = HashMap<String, File>()
-            soundPool.setOnLoadCompleteListener { soundPool, _, _ ->
+            soundPool.setOnLoadCompleteListener { _, _, _ ->
                 soundLoaded++
                 if (soundLoaded >= audios.count()) {
                     completionBlock()

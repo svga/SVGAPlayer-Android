@@ -7,31 +7,24 @@ import com.opensource.svgaplayer.SVGADynamicEntity
 import com.opensource.svgaplayer.SVGAVideoEntity
 import com.opensource.svgaplayer.entities.SVGAVideoShapeEntity
 
-
 /**
  * Created by cuiminghui on 2017/3/29.
  */
 
 internal class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicEntity) : SGVADrawer(videoItem) {
 
-    private var canvasW = 0
-    private var canvasH = 0
-    private val sharedPaint = Paint()
-    private val sharedPath = Path()
-    private val sharedPath2 = Path()
-    private val sharedShapeMatrix= Matrix()
-    private val sharedFrameMatrix= Matrix()
+    private val sharedValues = ShareValues()
     private val drawTextCache: HashMap<String, Bitmap> = hashMapOf()
-    private val drawPathCache = HashMap<SVGAVideoShapeEntity,Path>()
+    private val pathCache = PathCache()
 
-    override fun drawFrame(canvas :Canvas, frameIndex: Int, scaleType: ImageView.ScaleType) {
+    override fun drawFrame(canvas: Canvas, frameIndex: Int, scaleType: ImageView.ScaleType) {
         super.drawFrame(canvas,frameIndex, scaleType)
-        resetCachePath(canvas)
+        this.pathCache.onSizeChanged(canvas)
         val sprites = requestFrameSprites(frameIndex)
         sprites.forEach {
             drawSprite(it, canvas, frameIndex)
         }
-        this.playAudio(frameIndex)
+        playAudio(frameIndex)
     }
 
     private fun playAudio(frameIndex: Int) {
@@ -52,19 +45,12 @@ internal class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVG
         }
     }
 
-    private fun resetCachePath(canvas :Canvas){
-        if(canvasW != canvas.width || canvasH != canvas.height){
-            drawPathCache.clear()
-        }
-        canvasW = canvas.width
-        canvasH = canvas.height
-    }
-
-    private fun resetShareMatrix(transform :Matrix){
-        sharedFrameMatrix.reset()
-        sharedFrameMatrix.postScale(scaleEntity.scaleFx, scaleEntity.scaleFy)
-        sharedFrameMatrix.postTranslate(scaleEntity.tranFx, scaleEntity.tranFy)
-        sharedFrameMatrix.preConcat(transform)
+    private fun shareFrameMatrix(transform: Matrix): Matrix {
+        val matrix = this.sharedValues.sharedMatrix()
+        matrix.postScale(scaleInfo.scaleFx, scaleInfo.scaleFy)
+        matrix.postTranslate(scaleInfo.tranFx, scaleInfo.tranFy)
+        matrix.preConcat(transform)
+        return matrix
     }
 
     private fun drawSprite(sprite: SVGADrawerSprite, canvas :Canvas, frameIndex: Int) {
@@ -75,33 +61,34 @@ internal class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVG
 
     private fun drawImage(sprite: SVGADrawerSprite, canvas :Canvas) {
         val imageKey = sprite.imageKey ?: return
-        dynamicItem.dynamicHidden[imageKey]?.takeIf { it }?.let { return }
-        (dynamicItem.dynamicImage[imageKey] ?: videoItem.images[imageKey])?.let {
-            resetShareMatrix(sprite.frameEntity.transform)
-            sharedPaint.reset()
-            sharedPaint.isAntiAlias = videoItem.antiAlias
-            sharedPaint.isFilterBitmap = videoItem.antiAlias
-            sharedPaint.alpha = (sprite.frameEntity.alpha * 255).toInt()
-            if (sprite.frameEntity.maskPath != null) {
-                val maskPath = sprite.frameEntity.maskPath ?: return@let
-                canvas.save()
-                sharedPath.reset()
-                maskPath.buildPath(sharedPath)
-                sharedPath.transform(sharedFrameMatrix)
-                canvas.clipPath(sharedPath)
-                sharedFrameMatrix.preScale((sprite.frameEntity.layout.width / it.width).toFloat(), (sprite.frameEntity.layout.width / it.width).toFloat())
-                canvas.drawBitmap(it, sharedFrameMatrix, sharedPaint)
-                canvas.restore()
-            }
-            else {
-                sharedFrameMatrix.preScale((sprite.frameEntity.layout.width / it.width).toFloat(), (sprite.frameEntity.layout.width / it.width).toFloat())
-                canvas.drawBitmap(it, sharedFrameMatrix, sharedPaint)
-            }
-            drawText(canvas,it, sprite)
+        val isHidden = dynamicItem.dynamicHidden[imageKey] == true
+        if (isHidden) { return }
+        val drawingBitmap = (dynamicItem.dynamicImage[imageKey] ?: videoItem.images[imageKey]) ?: return
+        val frameMatrix = shareFrameMatrix(sprite.frameEntity.transform)
+        val paint = this.sharedValues.sharedPaint()
+        paint.isAntiAlias = videoItem.antiAlias
+        paint.isFilterBitmap = videoItem.antiAlias
+        paint.alpha = (sprite.frameEntity.alpha * 255).toInt()
+        if (sprite.frameEntity.maskPath != null) {
+            val maskPath = sprite.frameEntity.maskPath ?: return
+            canvas.save()
+            paint.reset()
+            val path = this.sharedValues.sharedPath()
+            maskPath.buildPath(path)
+            path.transform(frameMatrix)
+            canvas.clipPath(path)
+            frameMatrix.preScale((sprite.frameEntity.layout.width / drawingBitmap.width).toFloat(), (sprite.frameEntity.layout.width / drawingBitmap.width).toFloat())
+            canvas.drawBitmap(drawingBitmap, frameMatrix, paint)
+            canvas.restore()
         }
+        else {
+            frameMatrix.preScale((sprite.frameEntity.layout.width / drawingBitmap.width).toFloat(), (sprite.frameEntity.layout.width / drawingBitmap.width).toFloat())
+            canvas.drawBitmap(drawingBitmap, frameMatrix, paint)
+        }
+        drawTextOnBitmap(canvas, drawingBitmap, sprite, frameMatrix)
     }
 
-    private fun drawText(canvas :Canvas, drawingBitmap: Bitmap, sprite: SVGADrawerSprite) {
+    private fun drawTextOnBitmap(canvas: Canvas, drawingBitmap: Bitmap, sprite: SVGADrawerSprite, frameMatrix: Matrix) {
         if (dynamicItem.isTextDirty) {
             this.drawTextCache.clear()
             dynamicItem.isTextDirty = false
@@ -141,75 +128,106 @@ internal class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVG
             }
         }
         textBitmap?.let { textBitmap ->
-            sharedPaint.reset()
-            sharedPaint.isAntiAlias = videoItem.antiAlias
+            val paint = this.sharedValues.sharedPaint()
+            paint.isAntiAlias = videoItem.antiAlias
             if (sprite.frameEntity.maskPath != null) {
                 val maskPath = sprite.frameEntity.maskPath ?: return@let
                 canvas.save()
-                canvas.concat(sharedFrameMatrix)
+                canvas.concat(frameMatrix)
                 canvas.clipRect(0, 0, drawingBitmap.width, drawingBitmap.height)
                 val bitmapShader = BitmapShader(textBitmap, Shader.TileMode.REPEAT, Shader.TileMode.REPEAT)
-                sharedPaint.shader = bitmapShader
-                sharedPath.reset()
-                maskPath.buildPath(sharedPath)
-                canvas.drawPath(sharedPath, sharedPaint)
+                paint.shader = bitmapShader
+                val path = this.sharedValues.sharedPath()
+                maskPath.buildPath(path)
+                canvas.drawPath(path, paint)
                 canvas.restore()
             }
             else {
-                sharedPaint.isFilterBitmap = videoItem.antiAlias
-                canvas.drawBitmap(textBitmap, sharedFrameMatrix, sharedPaint)
+                paint.isFilterBitmap = videoItem.antiAlias
+                canvas.drawBitmap(textBitmap, frameMatrix, paint)
             }
         }
     }
 
     private fun drawShape(sprite: SVGADrawerSprite, canvas: Canvas) {
-        resetShareMatrix(sprite.frameEntity.transform)
+        val frameMatrix = shareFrameMatrix(sprite.frameEntity.transform)
         sprite.frameEntity.shapes.forEach { shape ->
             shape.buildPath()
             shape.shapePath?.let {
-                sharedPaint.reset()
-                sharedPaint.isAntiAlias = videoItem.antiAlias
-                sharedPaint.alpha = (sprite.frameEntity.alpha * 255).toInt()
-                if(!drawPathCache.containsKey(shape)){
-                    val path = Path()
-                    path.set(shape.shapePath)
-                    drawPathCache.put(shape,path)
-                }
-                sharedPath.reset()
-                sharedPath.addPath(Path(drawPathCache[shape]))
-                sharedShapeMatrix.reset()
+                val paint = this.sharedValues.sharedPaint()
+                paint.reset()
+                paint.isAntiAlias = videoItem.antiAlias
+                paint.alpha = (sprite.frameEntity.alpha * 255).toInt()
+                val path = this.sharedValues.sharedPath()
+                path.reset()
+                path.addPath(this.pathCache.buildPath(shape))
+                val shapeMatrix = this.sharedValues.sharedMatrix2()
+                shapeMatrix.reset()
                 shape.transform?.let {
-                    sharedShapeMatrix.postConcat(it)
+                    shapeMatrix.postConcat(it)
                 }
-                sharedShapeMatrix.postConcat(sharedFrameMatrix)
-                sharedPath.transform(sharedShapeMatrix)
+                shapeMatrix.postConcat(frameMatrix)
+                path.transform(shapeMatrix)
                 shape.styles?.fill?.let {
                     if (it != 0x00000000) {
-                        sharedPaint.color = it
-                        sharedPaint.alpha = Math.min(255, Math.max(0, (sprite.frameEntity.alpha * 255).toInt()))
+                        paint.style = Paint.Style.FILL
+                        paint.color = it
+                        paint.alpha = Math.min(255, Math.max(0, (sprite.frameEntity.alpha * 255).toInt()))
                         if (sprite.frameEntity.maskPath !== null) canvas.save()
                         sprite.frameEntity.maskPath?.let { maskPath ->
-                            sharedPath2.reset()
-                            maskPath.buildPath(sharedPath2)
-                            sharedPath2.transform(this.sharedFrameMatrix)
-                            canvas.clipPath(sharedPath2)
+                            val path2 = this.sharedValues.sharedPath2()
+                            maskPath.buildPath(path2)
+                            path2.transform(frameMatrix)
+                            canvas.clipPath(path2)
                         }
-                        canvas.drawPath(sharedPath, sharedPaint)
+                        canvas.drawPath(path, paint)
                         if (sprite.frameEntity.maskPath !== null) canvas.restore()
                     }
                 }
                 shape.styles?.strokeWidth?.let {
                     if (it > 0) {
-                        resetShapeStrokePaint(shape)
-                        sharedPaint.alpha = Math.min(255, Math.max(0, (sprite.frameEntity.alpha * 255).toInt()))
+                        paint.style = Paint.Style.STROKE
+                        shape.styles?.stroke?.let {
+                            paint.color = it
+                            paint.alpha = Math.min(255, Math.max(0, (sprite.frameEntity.alpha * 255).toInt()))
+                        }
+                        val scale = matrixScale(frameMatrix)
+                        shape.styles?.strokeWidth?.let {
+                            paint.strokeWidth = it * scale
+                        }
+                        shape.styles?.lineCap?.let {
+                            when {
+                                it.equals("butt", true) -> paint.strokeCap = Paint.Cap.BUTT
+                                it.equals("round", true) -> paint.strokeCap = Paint.Cap.ROUND
+                                it.equals("square", true) -> paint.strokeCap = Paint.Cap.SQUARE
+                            }
+                        }
+                        shape.styles?.lineJoin?.let {
+                            when {
+                                it.equals("miter", true) -> paint.strokeJoin = Paint.Join.MITER
+                                it.equals("round", true) -> paint.strokeJoin = Paint.Join.ROUND
+                                it.equals("bevel", true) -> paint.strokeJoin = Paint.Join.BEVEL
+                            }
+                        }
+                        shape.styles?.miterLimit?.let {
+                            paint.strokeMiter = it.toFloat() * scale
+                        }
+                        shape.styles?.lineDash?.let {
+                            if (it.size == 3 && (it[0] > 0 || it[1] > 0)) {
+                                paint.pathEffect = DashPathEffect(floatArrayOf(
+                                        (if (it[0] < 1.0f) 1.0f else it[0]) * scale,
+                                        (if (it[1] < 0.1f) 0.1f else it[1]) * scale
+                                ), it[2] * scale)
+                            }
+                        }
                         if (sprite.frameEntity.maskPath !== null) canvas.save()
                         sprite.frameEntity.maskPath?.let { maskPath ->
-                            sharedPath2.reset()
-                            maskPath.buildPath(sharedPath2)
-                            sharedPath2.transform(this.sharedFrameMatrix)
-                            canvas.clipPath(sharedPath2)
+                            val path2 = this.sharedValues.sharedPath2()
+                            maskPath.buildPath(path2)
+                            path2.transform(frameMatrix)
+                            canvas.clipPath(path2)
                         }
-                        canvas.drawPath(sharedPath, sharedPaint)
+                        canvas.drawPath(path, paint)
                         if (sprite.frameEntity.maskPath !== null) canvas.restore()
                     }
                 }
@@ -218,17 +236,17 @@ internal class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVG
         }
     }
 
-    private val tValues = FloatArray(16)
+    private val matrixScaleTempValues = FloatArray(16)
 
-    private fun requestScale(): Float {
-        this.sharedFrameMatrix.getValues(tValues)
-        if (tValues[0] == 0f) {
+    private fun matrixScale(matrix: Matrix): Float {
+        matrix.getValues(matrixScaleTempValues)
+        if (matrixScaleTempValues[0] == 0f) {
             return 0f
         }
-        var A = tValues[0].toDouble()
-        var B = tValues[3].toDouble()
-        var C = tValues[1].toDouble()
-        var D = tValues[4].toDouble()
+        var A = matrixScaleTempValues[0].toDouble()
+        var B = matrixScaleTempValues[3].toDouble()
+        var C = matrixScaleTempValues[1].toDouble()
+        var D = matrixScaleTempValues[4].toDouble()
         if (A * D == B * C) return 0f
         var scaleX = Math.sqrt(A * A + B * B)
         A /= scaleX
@@ -243,57 +261,78 @@ internal class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVG
         if ( A * D < B * C ) {
             scaleX = -scaleX
         }
-        return if (scaleEntity.ratioX) scaleEntity.ratio / Math.abs(scaleX.toFloat()) else scaleEntity.ratio / Math.abs(scaleY.toFloat())
-    }
-
-    private fun resetShapeStrokePaint(shape: SVGAVideoShapeEntity) {
-        sharedPaint.reset()
-        sharedPaint.isAntiAlias = videoItem.antiAlias
-        sharedPaint.style = Paint.Style.STROKE
-        shape.styles?.stroke?.let {
-            sharedPaint.color = it
-        }
-
-        val scale = requestScale()
-        shape.styles?.strokeWidth?.let {
-            sharedPaint.strokeWidth = it * scale
-        }
-        shape.styles?.lineCap?.let {
-            when {
-                it.equals("butt", true) -> sharedPaint.strokeCap = Paint.Cap.BUTT
-                it.equals("round", true) -> sharedPaint.strokeCap = Paint.Cap.ROUND
-                it.equals("square", true) -> sharedPaint.strokeCap = Paint.Cap.SQUARE
-            }
-        }
-        shape.styles?.lineJoin?.let {
-            when {
-                it.equals("miter", true) -> sharedPaint.strokeJoin = Paint.Join.MITER
-                it.equals("round", true) -> sharedPaint.strokeJoin = Paint.Join.ROUND
-                it.equals("bevel", true) -> sharedPaint.strokeJoin = Paint.Join.BEVEL
-            }
-        }
-        shape.styles?.miterLimit?.let {
-            sharedPaint.strokeMiter = it.toFloat() * scale
-        }
-        shape.styles?.lineDash?.let {
-            if (it.size == 3 && (it[0] > 0 || it[1] > 0)) {
-                sharedPaint.pathEffect = DashPathEffect(floatArrayOf(
-                        (if (it[0] < 1.0f) 1.0f else it[0]) * scale,
-                        (if (it[1] < 0.1f) 0.1f else it[1]) * scale
-                ), it[2] * scale)
-            }
-        }
+        return if (scaleInfo.ratioX) Math.abs(scaleX.toFloat()) else Math.abs(scaleY.toFloat())
     }
 
     private fun drawDynamic(sprite: SVGADrawerSprite, canvas: Canvas, frameIndex: Int) {
         val imageKey = sprite.imageKey ?: return
         dynamicItem.dynamicDrawer[imageKey]?.let {
-            resetShareMatrix(sprite.frameEntity.transform)
+            val frameMatrix = shareFrameMatrix(sprite.frameEntity.transform)
             canvas.save()
-            canvas.concat(sharedFrameMatrix)
+            canvas.concat(frameMatrix)
             it.invoke(canvas, frameIndex)
             canvas.restore()
         }
+    }
+
+    class ShareValues {
+
+        private val sharedPaint = Paint()
+        private val sharedPath = Path()
+        private val sharedPath2 = Path()
+        private val sharedMatrix = Matrix()
+        private val sharedMatrix2 = Matrix()
+
+        fun sharedPaint(): Paint {
+            sharedPaint.reset()
+            return sharedPaint
+        }
+
+        fun sharedPath(): Path {
+            sharedPath.reset()
+            return sharedPath
+        }
+
+        fun sharedPath2(): Path {
+            sharedPath2.reset()
+            return sharedPath2
+        }
+
+        fun sharedMatrix(): Matrix {
+            sharedMatrix.reset()
+            return sharedMatrix
+        }
+
+        fun sharedMatrix2(): Matrix {
+            sharedMatrix2.reset()
+            return sharedMatrix2
+        }
+
+    }
+
+    class PathCache {
+
+        private var canvasWidth: Int = 0
+        private var canvasHeight: Int = 0
+        private val cache = HashMap<SVGAVideoShapeEntity,Path>()
+
+        fun onSizeChanged(canvas: Canvas) {
+            if(this.canvasWidth != canvas.width || this.canvasHeight != canvas.height){
+                this.cache.clear()
+            }
+            this.canvasWidth = canvas.width
+            this.canvasHeight = canvas.height
+        }
+
+        fun buildPath(shape: SVGAVideoShapeEntity): Path {
+            if(!this.cache.containsKey(shape)){
+                val path = Path()
+                path.set(shape.shapePath)
+                this.cache[shape] = path
+            }
+            return this.cache[shape]!!
+        }
+
     }
 
 }

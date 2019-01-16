@@ -5,10 +5,8 @@ import android.net.http.HttpResponseCache
 import android.os.Handler
 import android.util.Log
 import com.opensource.svgaplayer.proto.MovieEntity
-
 import org.json.JSONObject
 import java.io.*
-
 import java.net.HttpURLConnection
 import java.net.URL
 import java.security.MessageDigest
@@ -17,7 +15,7 @@ import java.util.zip.Inflater
 import java.util.zip.ZipInputStream
 
 /**
- * Created by PonyCui_Home on 16/6/18.
+ * Created by PonyCui 16/6/18.
  */
 
 private var fileLock: Int = 0
@@ -35,7 +33,11 @@ class SVGAParser(private val context: Context) {
 
         var noCache = false
 
-        open fun resume(url: URL, complete: (inputStream: InputStream) -> Unit, failure: (e: Exception) -> Unit) {
+        open fun resume(url: URL, complete: (inputStream: InputStream) -> Unit, failure: (e: Exception) -> Unit): () -> Unit {
+            var cancelled = false
+            val cancelBlock = {
+                cancelled = true
+            }
             Thread {
                 try {
                     if (HttpResponseCache.getInstalled() == null && !noCache) {
@@ -51,11 +53,17 @@ class SVGAParser(private val context: Context) {
                                 val buffer = ByteArray(4096)
                                 var count: Int
                                 while (true) {
+                                    if (cancelled) {
+                                        break
+                                    }
                                     count = inputStream.read(buffer, 0, 4096)
                                     if (count == -1) {
                                         break
                                     }
                                     outputStream.write(buffer, 0, count)
+                                }
+                                if (cancelled) {
+                                    return@Thread
                                 }
                                 ByteArrayInputStream(outputStream.toByteArray()).use {
                                     complete(it)
@@ -68,6 +76,7 @@ class SVGAParser(private val context: Context) {
                     failure(e)
                 }
             }.start()
+            return cancelBlock
         }
 
     }
@@ -87,14 +96,15 @@ class SVGAParser(private val context: Context) {
         }
     }
 
-    fun decodeFromURL(url: URL, callback: ParseCompletion) {
+    fun decodeFromURL(url: URL, callback: ParseCompletion): (() -> Unit)? {
         if (this.isCached(buildCacheKey(url))) {
             threadPoolExecutor.execute {
                 this.decodeFromCacheKey(buildCacheKey(url), callback)
             }
+            return null
         }
         else {
-            fileDownloader.resume(url, {
+            return fileDownloader.resume(url, {
                 this.decodeFromInputStream(it, this.buildCacheKey(url), callback)
             }, {
                 this.invokeErrorCallback(it, callback)
@@ -130,17 +140,26 @@ class SVGAParser(private val context: Context) {
         }
     }
 
-    // Deprecated from 2.4.0
+    /**
+     * @deprecated from 2.4.0
+     */
+    @Deprecated("This method has been deprecated from 2.4.0.", ReplaceWith("this.decodeFromAssets(assetsName, callback)"))
     fun parse(assetsName: String, callback: ParseCompletion) {
         this.decodeFromAssets(assetsName, callback)
     }
 
-    // Deprecated from 2.4.0
+    /**
+     * @deprecated from 2.4.0
+     */
+    @Deprecated("This method has been deprecated from 2.4.0.", ReplaceWith("this.decodeFromURL(url, callback)"))
     fun parse(url: URL, callback: ParseCompletion) {
         this.decodeFromURL(url, callback)
     }
 
-    // Deprecated from 2.4.0
+    /**
+     * @deprecated from 2.4.0
+     */
+    @Deprecated("This method has been deprecated from 2.4.0.", ReplaceWith("this.decodeFromInputStream(inputStream, cacheKey, callback, closeInputStream)"))
     fun parse(inputStream: InputStream, cacheKey: String, callback: ParseCompletion, closeInputStream: Boolean = false) {
         this.decodeFromInputStream(inputStream, cacheKey, callback, closeInputStream)
     }

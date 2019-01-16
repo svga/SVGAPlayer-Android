@@ -12,7 +12,7 @@ import com.opensource.svgaplayer.utils.SVGAScaleInfo
 
 open internal class SGVADrawer(val videoItem: SVGAVideoEntity) {
 
-    val scaleEntity = SVGAScaleInfo()
+    val scaleInfo = SVGAScaleInfo()
 
     inner class SVGADrawerSprite(val imageKey: String?, val frameEntity: SVGAVideoSpriteFrameEntity)
 
@@ -29,11 +29,7 @@ open internal class SGVADrawer(val videoItem: SVGAVideoEntity) {
     }
 
     open fun drawFrame(canvas : Canvas, frameIndex: Int, scaleType: ImageView.ScaleType) {
-        performScaleType(canvas,scaleType)
-    }
-
-    open fun performScaleType(canvas : Canvas,scaleType: ImageView.ScaleType) {
-        scaleEntity.performScaleType(canvas.width.toFloat(),canvas.height.toFloat(),videoItem.videoSize.width.toFloat(),videoItem.videoSize.height.toFloat(),scaleType)
+        scaleInfo.performScaleType(canvas.width.toFloat(),canvas.height.toFloat(), videoItem.videoSize.width.toFloat(), videoItem.videoSize.height.toFloat(), scaleType)
     }
 
 }

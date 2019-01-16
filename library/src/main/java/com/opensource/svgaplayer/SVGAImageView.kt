@@ -3,9 +3,6 @@ package com.opensource.svgaplayer
 import android.animation.Animator
 import android.animation.ValueAnimator
 import android.content.Context
-import android.graphics.Canvas
-import android.graphics.ColorFilter
-import android.graphics.PixelFormat
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.util.AttributeSet
@@ -13,13 +10,12 @@ import android.util.Log
 import android.view.View
 import android.view.animation.LinearInterpolator
 import android.widget.ImageView
-import com.opensource.svgaplayer.drawer.SVGACanvasDrawer
 import com.opensource.svgaplayer.utils.SVGARange
 import java.lang.ref.WeakReference
 import java.net.URL
 
 /**
- * Created by cuiminghui on 2017/3/29.
+ * Created by PonyCui on 2017/3/29.
  */
 
 open class SVGAImageView : ImageView {
