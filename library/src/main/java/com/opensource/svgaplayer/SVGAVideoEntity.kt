@@ -156,15 +156,13 @@ class SVGAVideoEntity {
     private fun resetAudios(obj: MovieEntity, completionBlock: () -> Unit) {
         obj.audios?.takeIf { it.isNotEmpty() }?.let { audios ->
             var soundLoaded = 0
-//            val soundPool = SoundPool(Math.min(12, audios.count()), AudioManager.STREAM_RING, 0)
-            //5.0以上版本建议使用builder方式创建SoundPool，在9.0以下还未发现使用new SoundPool有什么问题，9.0很多机型继续使用new SoundPool方式部分room已无效。
             val soundPool = if (android.os.Build.VERSION.SDK_INT >= 21) {
                 SoundPool.Builder().setAudioAttributes(AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).build())
                         .setMaxStreams(Math.min(12, audios.count()))
                         .build()
-            } else
+            } else {
                 SoundPool(Math.min(12, audios.count()), AudioManager.STREAM_MUSIC, 0)
-
+            }
             val audiosFile = HashMap<String, File>()
             soundPool.setOnLoadCompleteListener { soundPool, _, _ ->
                 soundLoaded++
@@ -185,7 +183,6 @@ class SVGAVideoEntity {
                 }
             }
             if (audiosData.count() > 0) {
-
                 audiosData.forEach {
                     val tmpFile = File.createTempFile(it.key, ".mp3")
                     val fos = FileOutputStream(tmpFile)
@@ -194,16 +191,6 @@ class SVGAVideoEntity {
                     fos.close()
                     audiosFile[it.key] = tmpFile
                 }
-
-                //Call requires API level 24 (current min is 14): java.util.HashMap#forEach
-                /*  audiosData.forEach { aKey, bytes ->
-                      val tmpFile = File.createTempFile(aKey, ".mp3")
-                      val fos = FileOutputStream(tmpFile)
-                      fos.write(bytes)
-                      fos.flush()
-                      fos.close()
-                      audiosFile[aKey] = tmpFile
-                  }*/
             }
             this.audios = audios.map { audio ->
                 val item = SVGAAudioEntity(audio)
