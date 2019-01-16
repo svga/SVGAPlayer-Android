@@ -28,7 +28,7 @@ allprojects {
 然后，在应用 `build.gradle` 中添加依赖。
 
 ```
-compile 'com.github.yyued:SVGAPlayer-Android:lastest'
+compile 'com.github.yyued:SVGAPlayer-Android:latest'
 ```
 
 [![](https://jitpack.io/v/yyued/SVGAPlayer-Android.svg)](https://jitpack.io/#yyued/SVGAPlayer-Android)

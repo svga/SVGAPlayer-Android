@@ -33,7 +33,7 @@ allprojects {
 Then, add dependency to app `build.gradle`.
 
 ```
-compile 'com.github.yyued:SVGAPlayer-Android:lastest'
+compile 'com.github.yyued:SVGAPlayer-Android:latest'
 ```
 
 [![](https://jitpack.io/v/yyued/SVGAPlayer-Android.svg)](https://jitpack.io/#yyued/SVGAPlayer-Android)
