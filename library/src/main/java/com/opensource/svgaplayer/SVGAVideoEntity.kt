@@ -5,10 +5,12 @@ import android.graphics.BitmapFactory
 import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.SoundPool
+import com.opensource.svgaplayer.entities.SVGAAudioEntity
+import com.opensource.svgaplayer.entities.SVGAVideoSpriteEntity
 import com.opensource.svgaplayer.proto.MovieEntity
+import com.opensource.svgaplayer.utils.SVGARect
 import org.json.JSONObject
 import java.io.File
-import java.io.FileDescriptor
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.util.*
@@ -31,15 +33,10 @@ class SVGAVideoEntity {
     var frames: Int = 0
         private set
 
-    var sprites: List<SVGAVideoSpriteEntity> = listOf()
-        private set
-
-    var audios: List<SVGAAudioEntity> = listOf()
-
-    var soundPool: SoundPool? = null
-
-    var images = HashMap<String, Bitmap>()
-        private set
+    internal var sprites: List<SVGAVideoSpriteEntity> = listOf()
+    internal var audios: List<SVGAAudioEntity> = listOf()
+    internal var soundPool: SoundPool? = null
+    internal var images = HashMap<String, Bitmap>()
 
     private var cacheDir: File
 

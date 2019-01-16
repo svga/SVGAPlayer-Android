@@ -1,4 +1,4 @@
-package com.opensource.svgaplayer
+package com.opensource.svgaplayer.entities
 
 import com.opensource.svgaplayer.proto.SpriteEntity
 import org.json.JSONObject
@@ -6,7 +6,7 @@ import org.json.JSONObject
 /**
  * Created by cuiminghui on 2016/10/17.
  */
-class SVGAVideoSpriteEntity {
+internal class SVGAVideoSpriteEntity {
 
     val imageKey: String?
 

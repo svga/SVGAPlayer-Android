@@ -1,4 +1,4 @@
-package com.opensource.svgaplayer
+package com.opensource.svgaplayer.entities
 
 import android.graphics.Color
 import android.graphics.Matrix
@@ -14,7 +14,7 @@ import java.util.HashMap
 
 val sharedPath = Path()
 
-class SVGAVideoShapeEntity {
+internal class SVGAVideoShapeEntity {
 
     enum class Type {
         shape,
@@ -248,12 +248,12 @@ class SVGAVideoShapeEntity {
             return
         }
         sharedPath.reset()
-        if (this.type == SVGAVideoShapeEntity.Type.shape) {
+        if (this.type == Type.shape) {
             (this.args?.get("d") as? String)?.let {
-                SVGAPath(it).buildPath(sharedPath)
+                SVGAPathEntity(it).buildPath(sharedPath)
             }
         }
-        else if (this.type == SVGAVideoShapeEntity.Type.ellipse) {
+        else if (this.type == Type.ellipse) {
             val xv = this.args?.get("x") as? Number ?: return
             val yv = this.args?.get("y") as? Number ?: return
             val rxv = this.args?.get("radiusX") as? Number ?: return
@@ -264,7 +264,7 @@ class SVGAVideoShapeEntity {
             val ry = ryv.toFloat()
             sharedPath.addOval(RectF(x - rx, y - ry, x + rx, y + ry), Path.Direction.CW)
         }
-        else if (this.type == SVGAVideoShapeEntity.Type.rect) {
+        else if (this.type == Type.rect) {
             val xv = this.args?.get("x") as? Number ?: return
             val yv = this.args?.get("y") as? Number ?: return
             val wv = this.args?.get("width") as? Number ?: return

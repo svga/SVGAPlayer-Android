@@ -1,9 +1,9 @@
-package com.opensource.svgaplayer
+package com.opensource.svgaplayer.entities
 
 import com.opensource.svgaplayer.proto.AudioEntity
 import java.io.FileInputStream
 
-class SVGAAudioEntity {
+internal class SVGAAudioEntity {
 
     val audioKey: String?
     val startFrame: Int

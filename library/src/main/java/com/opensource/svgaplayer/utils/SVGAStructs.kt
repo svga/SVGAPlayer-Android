@@ -1,4 +1,4 @@
-package com.opensource.svgaplayer
+package com.opensource.svgaplayer.utils
 
 /**
  * Created by cuiminghui on 2017/3/29.

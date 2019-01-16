@@ -1,15 +1,18 @@
-package com.opensource.svgaplayer
+package com.opensource.svgaplayer.drawer
 
 import android.graphics.Canvas
 import android.widget.ImageView
+import com.opensource.svgaplayer.SVGAVideoEntity
+import com.opensource.svgaplayer.entities.SVGAVideoSpriteFrameEntity
+import com.opensource.svgaplayer.utils.SVGAScaleInfo
 
 /**
  * Created by cuiminghui on 2017/3/29.
  */
 
-open class SGVADrawer(val videoItem: SVGAVideoEntity) {
+open internal class SGVADrawer(val videoItem: SVGAVideoEntity) {
 
-    val scaleEntity = ScaleEntity()
+    val scaleEntity = SVGAScaleInfo()
 
     inner class SVGADrawerSprite(val imageKey: String?, val frameEntity: SVGAVideoSpriteFrameEntity)
 

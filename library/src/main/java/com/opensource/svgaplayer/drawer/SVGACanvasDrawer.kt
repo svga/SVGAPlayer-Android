@@ -1,19 +1,18 @@
-package com.opensource.svgaplayer
+package com.opensource.svgaplayer.drawer
 
 import android.graphics.*
-import android.media.AudioManager
-import android.media.SoundPool
-import android.os.SystemClock
 import android.text.StaticLayout
 import android.widget.ImageView
-import java.io.FileInputStream
+import com.opensource.svgaplayer.SVGADynamicEntity
+import com.opensource.svgaplayer.SVGAVideoEntity
+import com.opensource.svgaplayer.entities.SVGAVideoShapeEntity
 
 
 /**
  * Created by cuiminghui on 2017/3/29.
  */
 
-class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicEntity) : SGVADrawer(videoItem) {
+internal class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicEntity) : SGVADrawer(videoItem) {
 
     private var canvasW = 0
     private var canvasH = 0

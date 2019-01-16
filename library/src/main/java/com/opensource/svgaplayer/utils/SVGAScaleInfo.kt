@@ -1,11 +1,12 @@
-package com.opensource.svgaplayer
+package com.opensource.svgaplayer.utils
 
 import android.widget.ImageView
 
 /**
  * Created by ubt on 2018/1/19.
  */
-class ScaleEntity {
+class SVGAScaleInfo {
+
     var tranFx : Float = 0.0f
     var tranFy : Float = 0.0f
     var scaleFx : Float = 1.0f

@@ -1,11 +1,12 @@
-package com.opensource.svgaplayer
+package com.opensource.svgaplayer.entities
 
 import android.graphics.Path
+import com.opensource.svgaplayer.utils.SVGAPoint
 import java.util.*
 
 private val VALID_METHODS: Set<String> = setOf("M", "L", "H", "V", "C", "S", "Q", "R", "A", "Z", "m", "l", "h", "v", "c", "s", "q", "r", "a", "z")
 
-class SVGAPath(originValue: String) {
+class SVGAPathEntity(originValue: String) {
 
     private val replacedValue: String = if (originValue.contains(",")) originValue.replace(",", " ") else originValue
 

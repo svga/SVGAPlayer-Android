@@ -1,25 +1,20 @@
-package com.opensource.svgaplayer
+package com.opensource.svgaplayer.entities
 
 import android.graphics.Matrix
-import android.graphics.Path
-import android.text.TextUtils
 import com.opensource.svgaplayer.proto.FrameEntity
+import com.opensource.svgaplayer.utils.SVGARect
 
-import org.json.JSONArray
-import org.json.JSONException
 import org.json.JSONObject
-
-import java.io.Serializable
 
 /**
  * Created by cuiminghui on 2016/10/17.
  */
-class SVGAVideoSpriteFrameEntity {
+internal class SVGAVideoSpriteFrameEntity {
 
     var alpha: Double
     var layout = SVGARect(0.0, 0.0, 0.0, 0.0)
     var transform = Matrix()
-    var maskPath: SVGAPath? = null
+    var maskPath: SVGAPathEntity? = null
     var shapes: List<SVGAVideoShapeEntity> = listOf()
 
     constructor(obj: JSONObject) {
@@ -48,7 +43,7 @@ class SVGAVideoSpriteFrameEntity {
         }
         obj.optString("clipPath")?.let { d ->
             if (d.isNotEmpty()) {
-                maskPath = SVGAPath(d)
+                maskPath = SVGAPathEntity(d)
             }
         }
         obj.optJSONArray("shapes")?.let {
@@ -65,7 +60,9 @@ class SVGAVideoSpriteFrameEntity {
     constructor(obj: FrameEntity) {
         this.alpha = (obj.alpha ?: 0.0f).toDouble()
         obj.layout?.let {
-            this.layout = SVGARect((it.x ?: 0.0f).toDouble(), (it.y ?: 0.0f).toDouble(), (it.width ?: 0.0f).toDouble(), (it.height ?: 0.0f).toDouble())
+            this.layout = SVGARect((it.x ?: 0.0f).toDouble(), (it.y
+                    ?: 0.0f).toDouble(), (it.width ?: 0.0f).toDouble(), (it.height
+                    ?: 0.0f).toDouble())
         }
         obj.transform?.let {
             val arr = FloatArray(9)
@@ -87,7 +84,7 @@ class SVGAVideoSpriteFrameEntity {
             transform.setValues(arr)
         }
         obj.clipPath?.takeIf { it.isNotEmpty() }?.let {
-            maskPath = SVGAPath(it)
+            maskPath = SVGAPathEntity(it)
         }
         this.shapes = obj.shapes.map {
             return@map SVGAVideoShapeEntity(it)

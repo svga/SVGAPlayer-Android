@@ -8,7 +8,7 @@ import android.os.Bundle;
  * 将 svga 文件打包到 assets 文件夹中，然后使用 layout.xml 加载动画。
  */
 
-public class SimpleActivity extends Activity {
+public class AnimationFromLayoutActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
