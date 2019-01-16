@@ -63,25 +63,11 @@ open class SVGAImageView : ImageView {
         }
     }
 
-    private var detachedDrawable: WeakReference<Drawable>? = null
-
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
-        this.drawable?.let {
-            this.detachedDrawable = WeakReference(it)
-        }
-        this.setImageDrawable(null)
         animator?.cancel()
         animator?.removeAllListeners()
         animator?.removeAllUpdateListeners()
-    }
-
-    override fun onAttachedToWindow() {
-        super.onAttachedToWindow()
-        this.detachedDrawable?.get()?.let {
-            this.setImageDrawable(it)
-            this.detachedDrawable = null
-        }
     }
 
     private fun loadAttrs(attrs: AttributeSet) {
@@ -213,12 +199,16 @@ open class SVGAImageView : ImageView {
         }
     }
 
-    fun setVideoItem(videoItem: SVGAVideoEntity) {
+    fun setVideoItem(videoItem: SVGAVideoEntity?) {
         setVideoItem(videoItem, SVGADynamicEntity())
     }
 
-    fun setVideoItem(videoItem: SVGAVideoEntity, dynamicItem: SVGADynamicEntity) {
-        val drawable = SVGADrawable(videoItem, dynamicItem)
+    fun setVideoItem(videoItem: SVGAVideoEntity?, dynamicItem: SVGADynamicEntity?) {
+        if (videoItem == null) {
+            setImageDrawable(null)
+            return
+        }
+        val drawable = SVGADrawable(videoItem, dynamicItem ?: SVGADynamicEntity())
         drawable.cleared = clearsAfterStop
         setImageDrawable(drawable)
     }
