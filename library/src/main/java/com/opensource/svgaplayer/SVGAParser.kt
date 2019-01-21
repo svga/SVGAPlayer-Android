@@ -126,7 +126,10 @@ class SVGAParser(private val context: Context) {
                     }
                     else {
                         inflate(bytes)?.let {
-                            this.invokeCompleteCallback(SVGAVideoEntity(MovieEntity.ADAPTER.decode(it), File(cacheKey)), callback)
+                            val videoItem = SVGAVideoEntity(MovieEntity.ADAPTER.decode(it), File(cacheKey))
+                            videoItem.prepare {
+                                this.invokeCompleteCallback(videoItem, callback)
+                            }
                         }
                     }
                 }
