@@ -22,6 +22,13 @@ private val options = BitmapFactory.Options()
  */
 class SVGAVideoEntity {
 
+    fun finalize() {
+        this.soundPool?.release()
+        this.soundPool = null
+        this.images.forEach { it.value.recycle() }
+        this.images.clear()
+    }
+
     var antiAlias = true
 
     var videoSize = SVGARect(0.0, 0.0, 0.0, 0.0)

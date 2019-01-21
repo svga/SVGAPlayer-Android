@@ -85,6 +85,10 @@ class SVGAParser(private val context: Context) {
     private var threadPoolBlockingQueue = LinkedBlockingQueue<Runnable>()
     private var threadPoolExecutor = ThreadPoolExecutor(3, 10, 60000, TimeUnit.MILLISECONDS, this.threadPoolBlockingQueue)
 
+    fun finalize() {
+        threadPoolExecutor.shutdown()
+    }
+
     fun decodeFromAssets(name: String, callback: ParseCompletion) {
         try {
             context.assets.open(name)?.let {
@@ -127,9 +131,9 @@ class SVGAParser(private val context: Context) {
                     else {
                         inflate(bytes)?.let {
                             val videoItem = SVGAVideoEntity(MovieEntity.ADAPTER.decode(it), File(cacheKey))
-                            videoItem.prepare {
+//                            videoItem.prepare {
                                 this.invokeCompleteCallback(videoItem, callback)
-                            }
+//                            }
                         }
                     }
                 }
