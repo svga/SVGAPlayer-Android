@@ -89,7 +89,7 @@ open class SVGAImageView : ImageView {
             Thread {
                 val callback: SVGAParser.ParseCompletion = object : SVGAParser.ParseCompletion {
                     override fun onComplete(videoItem: SVGAVideoEntity) {
-                        handler?.post {
+                        this@SVGAImageView.post {
                             videoItem.antiAlias = antiAlias
                             setVideoItem(videoItem)
                             if (autoPlay) {
