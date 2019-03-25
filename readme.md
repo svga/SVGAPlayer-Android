@@ -38,6 +38,13 @@ compile 'com.github.yyued:SVGAPlayer-Android:latest'
 
 [![](https://jitpack.io/v/yyued/SVGAPlayer-Android.svg)](https://jitpack.io/#yyued/SVGAPlayer-Android)
 
+### Proguard-rules
+
+```
+-keep class com.squareup.wire.** { *; }
+-keep class com.opensource.svgaplayer.proto.** { *; }
+```
+
 ### Locate files
 
 SVGAPlayer could load svga file from Android `assets` directory or remote server.
