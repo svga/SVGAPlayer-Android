@@ -33,6 +33,13 @@ compile 'com.github.yyued:SVGAPlayer-Android:latest'
 
 [![](https://jitpack.io/v/yyued/SVGAPlayer-Android.svg)](https://jitpack.io/#yyued/SVGAPlayer-Android)
 
+### 混淆规则
+
+```
+-keep class com.squareup.wire.** { *; }
+-keep class com.opensource.svgaplayer.proto.** { *; }
+```
+
 ### 放置 svga 文件
 
 SVGAPlayer 可以从本地 `assets` 目录，或者远端服务器上加载动画文件。
