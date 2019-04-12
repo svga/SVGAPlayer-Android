@@ -92,6 +92,7 @@ open class SVGAImageView : ImageView {
                         this@SVGAImageView.post {
                             videoItem.antiAlias = antiAlias
                             setVideoItem(videoItem)
+                            (drawable as? SVGADrawable)?.scaleType = scaleType
                             if (autoPlay) {
                                 startAnimation()
                             }
