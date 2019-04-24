@@ -39,18 +39,25 @@ class SVGADynamicEntity {
     fun setDynamicImage(url: String, forKey: String) {
         val handler = android.os.Handler()
         thread {
-            try {
-                (URL(url).openConnection() as? HttpURLConnection)?.let {
+            (URL(url).openConnection() as? HttpURLConnection)?.let {
+                try {
                     it.connectTimeout = 20 * 1000
                     it.requestMethod = "GET"
                     it.connect()
-                    BitmapFactory.decodeStream(it.inputStream)?.let {
-                        handler.post { setDynamicImage(it, forKey) }
+                    it.inputStream.use { stream ->
+                        BitmapFactory.decodeStream(stream)?.let {
+                            handler.post { setDynamicImage(it, forKey) }
+                        }
                     }
-                    it.inputStream.close()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                } finally {
+                    try {
+                        it.disconnect()
+                    } catch (disconnectException: Throwable) {
+                        // ignored here
+                    }
                 }
-            } catch (e: Exception) {
-                e.printStackTrace()
             }
         }
     }
