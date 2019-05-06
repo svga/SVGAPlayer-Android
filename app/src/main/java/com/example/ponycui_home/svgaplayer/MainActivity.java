@@ -1,38 +1,18 @@
 package com.example.ponycui_home.svgaplayer;
 
-import android.animation.ValueAnimator;
-import android.annotation.TargetApi;
-import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
-import android.graphics.Rect;
-import android.graphics.RectF;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.StrictMode;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.text.BoringLayout;
 import android.text.Layout;
 import android.text.Spannable;
-import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.StaticLayout;
 import android.text.TextPaint;
-import android.text.TextUtils;
-import android.text.style.AbsoluteSizeSpan;
 import android.text.style.ForegroundColorSpan;
-import android.util.AttributeSet;
-import android.view.View;
 
-import com.opensource.svgaplayer.SVGACallback;
-import com.opensource.svgaplayer.SVGACanvasDrawer;
 import com.opensource.svgaplayer.SVGADrawable;
 import com.opensource.svgaplayer.SVGADynamicEntity;
 import com.opensource.svgaplayer.SVGAImageView;
@@ -48,10 +28,6 @@ import java.net.URL;
 import kotlin.Unit;
 import kotlin.jvm.functions.Function1;
 import kotlin.jvm.functions.Function2;
-import kotlin.jvm.functions.Function3;
-import okhttp3.CacheControl;
-import okhttp3.Call;
-import okhttp3.Callback;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -94,13 +70,26 @@ public class MainActivity extends AppCompatActivity {
         SVGAParser parser = new SVGAParser(this);
         resetDownloader(parser);
         try {
-            parser.parse(new URL("https://github.com/yyued/SVGA-Samples/blob/master/kingset.svga?raw=true"), new SVGAParser.ParseCompletion() {
+//            parser.parse(new URL("https://github.com/yyued/SVGA-Samples/blob/master/kingset.svga?raw=true"), new SVGAParser.ParseCompletion() {
+//                @Override
+//                public void onComplete(@NotNull SVGAVideoEntity videoItem) {
+//                    SVGADrawable drawable = new SVGADrawable(videoItem, requestDynamicItemWithSpannableText());
+//                    testView.setImageDrawable(drawable);
+//                    testView.startAnimation();
+//                }
+//                @Override
+//                public void onError() {
+//
+//                }
+//            });
+            parser.parse("vector_alpha.svga", new SVGAParser.ParseCompletion() {
                 @Override
                 public void onComplete(@NotNull SVGAVideoEntity videoItem) {
                     SVGADrawable drawable = new SVGADrawable(videoItem, requestDynamicItemWithSpannableText());
                     testView.setImageDrawable(drawable);
                     testView.startAnimation();
                 }
+
                 @Override
                 public void onError() {
 
