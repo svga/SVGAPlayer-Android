@@ -197,17 +197,17 @@ class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
         }
     }
 
-    private val tValues = FloatArray(16)
+    private val matrixScaleTempValues = FloatArray(16)
 
     private fun requestScale(): Float {
-        this.sharedFrameMatrix.getValues(tValues)
-        if (tValues[0] == 0f) {
+        this.sharedFrameMatrix.getValues(matrixScaleTempValues)
+        if (matrixScaleTempValues[0] == 0f) {
             return 0f
         }
-        var A = tValues[0].toDouble()
-        var B = tValues[3].toDouble()
-        var C = tValues[1].toDouble()
-        var D = tValues[4].toDouble()
+        var A = matrixScaleTempValues[0].toDouble()
+        var B = matrixScaleTempValues[3].toDouble()
+        var C = matrixScaleTempValues[1].toDouble()
+        var D = matrixScaleTempValues[4].toDouble()
         if (A * D == B * C) return 0f
         var scaleX = Math.sqrt(A * A + B * B)
         A /= scaleX
@@ -222,7 +222,7 @@ class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
         if ( A * D < B * C ) {
             scaleX = -scaleX
         }
-        return if (scaleEntity.ratioX) scaleEntity.ratio / Math.abs(scaleX.toFloat()) else scaleEntity.ratio / Math.abs(scaleY.toFloat())
+        return if (scaleEntity.ratioX) Math.abs(scaleX.toFloat()) else Math.abs(scaleY.toFloat())
     }
 
     private fun resetShapeStrokePaint(shape: SVGAVideoShapeEntity) {
