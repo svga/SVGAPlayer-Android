@@ -10,7 +10,9 @@ import java.io.*
 import java.net.HttpURLConnection
 import java.net.URL
 import java.security.MessageDigest
-import java.util.concurrent.*
+import java.util.concurrent.LinkedBlockingQueue
+import java.util.concurrent.ThreadPoolExecutor
+import java.util.concurrent.TimeUnit
 import java.util.zip.Inflater
 import java.util.zip.ZipInputStream
 
@@ -82,11 +84,13 @@ class SVGAParser(private val context: Context) {
     }
 
     var fileDownloader = FileDownloader()
-    private var threadPoolBlockingQueue = LinkedBlockingQueue<Runnable>()
-    private var threadPoolExecutor = ThreadPoolExecutor(3, 10, 60000, TimeUnit.MILLISECONDS, this.threadPoolBlockingQueue)
 
-    protected fun finalize() {
-        threadPoolExecutor.shutdown()
+    companion object {
+        private val threadPoolBlockingQueue = LinkedBlockingQueue<Runnable>()
+        private var threadPoolExecutor = ThreadPoolExecutor(3, 10, 60000, TimeUnit.MILLISECONDS, threadPoolBlockingQueue)
+        fun setThreadPoolExecutor(executor: ThreadPoolExecutor) {
+            threadPoolExecutor = executor
+        }
     }
 
     fun decodeFromAssets(name: String, callback: ParseCompletion) {
