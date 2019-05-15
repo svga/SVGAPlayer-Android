@@ -25,7 +25,6 @@ class SVGAVideoEntity {
     protected fun finalize() {
         this.soundPool?.release()
         this.soundPool = null
-        this.images.forEach { it.value.recycle() }
         this.images.clear()
     }
 
