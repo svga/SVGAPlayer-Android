@@ -8,11 +8,14 @@ import org.json.JSONObject
  */
 internal class SVGAVideoSpriteEntity {
 
+    val matteKey: String?
+
     val imageKey: String?
 
     val frames: List<SVGAVideoSpriteFrameEntity>
 
     constructor(obj: JSONObject) {
+        this.matteKey = obj.optString("matteKey")
         this.imageKey = obj.optString("imageKey")
         val mutableFrames: MutableList<SVGAVideoSpriteFrameEntity> = mutableListOf()
         obj.optJSONArray("frames")?.let {
@@ -34,6 +37,7 @@ internal class SVGAVideoSpriteEntity {
     }
 
     constructor(obj: SpriteEntity) {
+        this.matteKey = obj.imageKey
         this.imageKey = obj.imageKey
         var lastFrame: SVGAVideoSpriteFrameEntity? = null
         frames = obj.frames?.map {
