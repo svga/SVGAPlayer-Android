@@ -231,15 +231,15 @@ internal class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVG
                         paint.style = Paint.Style.FILL
                         paint.color = it
                         paint.alpha = Math.min(255, Math.max(0, (sprite.frameEntity.alpha * 255).toInt()))
-//                        if (sprite.frameEntity.maskPath !== null) canvas.save()
-//                        sprite.frameEntity.maskPath?.let { maskPath ->
-//                            val path2 = this.sharedValues.sharedPath2()
-//                            maskPath.buildPath(path2)
-//                            path2.transform(frameMatrix)
-//                            canvas.clipPath(path2)
-//                        }
-//                        if (sprite.frameEntity.maskPath !== null) canvas.restore()
+                        if (sprite.frameEntity.maskPath !== null) canvas.save()
+                        sprite.frameEntity.maskPath?.let { maskPath ->
+                            val path2 = this.sharedValues.sharedPath2()
+                            maskPath.buildPath(path2)
+                            path2.transform(frameMatrix)
+                            canvas.clipPath(path2)
+                        }
                         canvas.drawPath(path, paint)
+                        if (sprite.frameEntity.maskPath !== null) canvas.restore()
                     }
                 }
                 shape.styles?.strokeWidth?.let {
@@ -278,15 +278,15 @@ internal class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVG
                                 ), it[2] * scale)
                             }
                         }
-//                        if (sprite.frameEntity.maskPath !== null) canvas.save()
-//                        sprite.frameEntity.maskPath?.let { maskPath ->
-//                            val path2 = this.sharedValues.sharedPath2()
-//                            maskPath.buildPath(path2)
-//                            path2.transform(frameMatrix)
-//                            canvas.clipPath(path2)
-//                        }
-//                        if (sprite.frameEntity.maskPath !== null) canvas.restore()
+                        if (sprite.frameEntity.maskPath !== null) canvas.save()
+                        sprite.frameEntity.maskPath?.let { maskPath ->
+                            val path2 = this.sharedValues.sharedPath2()
+                            maskPath.buildPath(path2)
+                            path2.transform(frameMatrix)
+                            canvas.clipPath(path2)
+                        }
                         canvas.drawPath(path, paint)
+                        if (sprite.frameEntity.maskPath !== null) canvas.restore()
                     }
                 }
             }
