@@ -22,8 +22,6 @@ public final class SpriteEntity extends Message<SpriteEntity, SpriteEntity.Build
 
   private static final long serialVersionUID = 0L;
 
-  public static final String DEFAULT_MATTEKEY = "";
-
   public static final String DEFAULT_IMAGEKEY = "";
 
   /**
@@ -33,34 +31,24 @@ public final class SpriteEntity extends Message<SpriteEntity, SpriteEntity.Build
       tag = 1,
       adapter = "com.squareup.wire.ProtoAdapter#STRING"
   )
-  public final String matteKey;
-
-  /**
-   * 元件所对应的位图键名, 如果 imageKey 含有 .vector 后缀，该 sprite 为矢量图层 含有 .matte 后缀，该 sprite 为遮罩图层。
-   */
-  @WireField(
-      tag = 2,
-      adapter = "com.squareup.wire.ProtoAdapter#STRING"
-  )
   public final String imageKey;
 
   /**
    * 帧列表
    */
   @WireField(
-      tag = 3,
+      tag = 2,
       adapter = "com.opensource.svgaplayer.proto.FrameEntity#ADAPTER",
       label = WireField.Label.REPEATED
   )
   public final List<FrameEntity> frames;
 
-  public SpriteEntity(String matteKey, String imageKey, List<FrameEntity> frames) {
-    this(matteKey, imageKey, frames, ByteString.EMPTY);
+  public SpriteEntity(String imageKey, List<FrameEntity> frames) {
+    this(imageKey, frames, ByteString.EMPTY);
   }
 
-  public SpriteEntity(String matteKey, String imageKey, List<FrameEntity> frames, ByteString unknownFields) {
+  public SpriteEntity(String imageKey, List<FrameEntity> frames, ByteString unknownFields) {
     super(ADAPTER, unknownFields);
-    this.matteKey = matteKey;
     this.imageKey = imageKey;
     this.frames = Internal.immutableCopyOf("frames", frames);
   }
@@ -68,7 +56,6 @@ public final class SpriteEntity extends Message<SpriteEntity, SpriteEntity.Build
   @Override
   public Builder newBuilder() {
     Builder builder = new Builder();
-    builder.matteKey = matteKey;
     builder.imageKey = imageKey;
     builder.frames = Internal.copyOf("frames", frames);
     builder.addUnknownFields(unknownFields());
@@ -81,7 +68,6 @@ public final class SpriteEntity extends Message<SpriteEntity, SpriteEntity.Build
     if (!(other instanceof SpriteEntity)) return false;
     SpriteEntity o = (SpriteEntity) other;
     return unknownFields().equals(o.unknownFields())
-        && Internal.equals(matteKey, o.matteKey)
         && Internal.equals(imageKey, o.imageKey)
         && frames.equals(o.frames);
   }
@@ -91,7 +77,6 @@ public final class SpriteEntity extends Message<SpriteEntity, SpriteEntity.Build
     int result = super.hashCode;
     if (result == 0) {
       result = unknownFields().hashCode();
-      result = result * 37 + (matteKey != null ? matteKey.hashCode() : 0);
       result = result * 37 + (imageKey != null ? imageKey.hashCode() : 0);
       result = result * 37 + frames.hashCode();
       super.hashCode = result;
@@ -102,15 +87,12 @@ public final class SpriteEntity extends Message<SpriteEntity, SpriteEntity.Build
   @Override
   public String toString() {
     StringBuilder builder = new StringBuilder();
-    if (matteKey != null) builder.append(", matteKey=").append(matteKey);
     if (imageKey != null) builder.append(", imageKey=").append(imageKey);
     if (!frames.isEmpty()) builder.append(", frames=").append(frames);
     return builder.replace(0, 2, "SpriteEntity{").append('}').toString();
   }
 
   public static final class Builder extends Message.Builder<SpriteEntity, Builder> {
-    public String matteKey;
-
     public String imageKey;
 
     public List<FrameEntity> frames;
@@ -121,14 +103,6 @@ public final class SpriteEntity extends Message<SpriteEntity, SpriteEntity.Build
 
     /**
      * 元件所对应的位图键名, 如果 imageKey 含有 .vector 后缀，该 sprite 为矢量图层。
-     */
-    public Builder matteKey(String matteKey) {
-      this.matteKey = matteKey;
-      return this;
-    }
-
-    /**
-     * 元件所对应的位图键名, 如果 imageKey 含有 .vector 后缀，该 sprite 为矢量图层 含有 .matte 后缀，该 sprite 为遮罩图层。
      */
     public Builder imageKey(String imageKey) {
       this.imageKey = imageKey;
@@ -146,7 +120,7 @@ public final class SpriteEntity extends Message<SpriteEntity, SpriteEntity.Build
 
     @Override
     public SpriteEntity build() {
-      return new SpriteEntity(matteKey, imageKey, frames, super.buildUnknownFields());
+      return new SpriteEntity(imageKey, frames, super.buildUnknownFields());
     }
   }
 
@@ -157,17 +131,15 @@ public final class SpriteEntity extends Message<SpriteEntity, SpriteEntity.Build
 
     @Override
     public int encodedSize(SpriteEntity value) {
-      return (value.matteKey != null ? ProtoAdapter.STRING.encodedSizeWithTag(1, value.matteKey) : 0)
-          + (value.imageKey != null ? ProtoAdapter.STRING.encodedSizeWithTag(2, value.imageKey) : 0)
-          + FrameEntity.ADAPTER.asRepeated().encodedSizeWithTag(3, value.frames)
+      return (value.imageKey != null ? ProtoAdapter.STRING.encodedSizeWithTag(1, value.imageKey) : 0)
+          + FrameEntity.ADAPTER.asRepeated().encodedSizeWithTag(2, value.frames)
           + value.unknownFields().size();
     }
 
     @Override
     public void encode(ProtoWriter writer, SpriteEntity value) throws IOException {
-      if (value.matteKey != null) ProtoAdapter.STRING.encodeWithTag(writer, 1, value.matteKey);
-      if (value.imageKey != null) ProtoAdapter.STRING.encodeWithTag(writer, 2, value.imageKey);
-      FrameEntity.ADAPTER.asRepeated().encodeWithTag(writer, 3, value.frames);
+      if (value.imageKey != null) ProtoAdapter.STRING.encodeWithTag(writer, 1, value.imageKey);
+      FrameEntity.ADAPTER.asRepeated().encodeWithTag(writer, 2, value.frames);
       writer.writeBytes(value.unknownFields());
     }
 
@@ -177,9 +149,8 @@ public final class SpriteEntity extends Message<SpriteEntity, SpriteEntity.Build
       long token = reader.beginMessage();
       for (int tag; (tag = reader.nextTag()) != -1;) {
         switch (tag) {
-          case 1: builder.matteKey(ProtoAdapter.STRING.decode(reader)); break;
-          case 2: builder.imageKey(ProtoAdapter.STRING.decode(reader)); break;
-          case 3: builder.frames.add(FrameEntity.ADAPTER.decode(reader)); break;
+          case 1: builder.imageKey(ProtoAdapter.STRING.decode(reader)); break;
+          case 2: builder.frames.add(FrameEntity.ADAPTER.decode(reader)); break;
           default: {
             FieldEncoding fieldEncoding = reader.peekFieldEncoding();
             Object value = fieldEncoding.rawProtoAdapter().decode(reader);
