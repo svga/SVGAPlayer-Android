@@ -29,6 +29,16 @@ internal class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVG
 
             // save matte sprite
             svgaDrawerSprite.imageKey?.let {
+
+                // no matte
+                sprites.get(0).imageKey?.let {
+                    if (!it.endsWith(".matte")) {
+                        drawSprite(svgaDrawerSprite, canvas, frameIndex)
+                        // continue
+                        return@forEachIndexed
+                    }
+                }
+                
                 if (it.endsWith(".matte")) {
                     matteSprites.put(it, svgaDrawerSprite)
                     // continue
