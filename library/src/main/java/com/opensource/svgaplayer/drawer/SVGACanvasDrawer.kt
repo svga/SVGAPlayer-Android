@@ -21,8 +21,58 @@ internal class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVG
         super.drawFrame(canvas,frameIndex, scaleType)
         this.pathCache.onSizeChanged(canvas)
         val sprites = requestFrameSprites(frameIndex)
-        sprites.forEach {
-            drawSprite(it, canvas, frameIndex)
+        val matteSprites = mutableMapOf<String, SVGADrawerSprite>()
+
+        var isMatteing = false
+
+        sprites.forEachIndexed { index, svgaDrawerSprite ->
+
+            // save matte sprite
+            svgaDrawerSprite.imageKey?.let {
+                if (it.endsWith(".matte")) {
+                    matteSprites.put(it, svgaDrawerSprite)
+                    // continue
+                    return@forEachIndexed
+                }
+            }
+
+            sprites.get(index - 1)?.let { lastSprite ->
+                if (isMatteing && (svgaDrawerSprite.matteKey == null || svgaDrawerSprite.matteKey != lastSprite.matteKey)) {
+                    isMatteing = false
+
+                    matteSprites.get(svgaDrawerSprite.matteKey)?.let {
+                        val matteBitmap = Bitmap.createBitmap(canvas.width, canvas.height, Bitmap.Config.ARGB_8888)
+                        val matteCanvas = Canvas(matteBitmap)
+                        val paint = Paint()
+                        paint.setXfermode(PorterDuffXfermode(PorterDuff.Mode.DST_IN))
+
+                        drawSprite(it, matteCanvas, frameIndex)
+                        canvas.drawBitmap(matteBitmap, 0f, 0f, paint)
+                        canvas.restore()
+                    }
+                }
+                if (svgaDrawerSprite.matteKey != null && (lastSprite.matteKey == null || lastSprite.matteKey != svgaDrawerSprite.matteKey)) {
+                    isMatteing = true
+                    canvas.save()
+                }
+            }
+
+            drawSprite(svgaDrawerSprite, canvas, frameIndex)
+
+            // if current sprite is the last one and isMatteing
+            if (isMatteing && index == sprites.count() - 1) {
+                matteSprites.get(svgaDrawerSprite.matteKey)?.let {
+                    val matteBitmap = Bitmap.createBitmap(canvas.width, canvas.height, Bitmap.Config.ARGB_8888)
+                    val matteCanvas = Canvas(matteBitmap)
+                    val paint = Paint()
+                    paint.setXfermode(PorterDuffXfermode(PorterDuff.Mode.DST_IN))
+
+                    drawSprite(it, matteCanvas, frameIndex)
+                    canvas.drawBitmap(matteBitmap, 0f, 0f, paint)
+                    canvas.restore()
+                }
+            }
+
         }
         playAudio(frameIndex)
     }
