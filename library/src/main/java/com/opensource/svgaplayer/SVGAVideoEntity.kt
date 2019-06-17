@@ -94,9 +94,16 @@ class SVGAVideoEntity {
                 if (bitmap != null) {
                     images.put(imageKey, bitmap)
                 } else {
-                    (cacheDir.absolutePath + "/" + imageKey + ".png").takeIf { File(it).exists() }?.let {
-                        BitmapFactory.decodeFile(it, options)?.let {
-                            images.put(imageKey, it)
+                    // bitmap.matte : bitmap
+                    var filePath = cacheDir.absolutePath + "/" + imgObjects[imageKey] + ".png"
+                    var bitmap = if (File(filePath).exists()) BitmapFactory.decodeFile(filePath, options) else null
+                    if (bitmap != null) {
+                        images.put(imageKey, bitmap)
+                    } else {
+                        (cacheDir.absolutePath + "/" + imageKey + ".png").takeIf { File(it).exists() }?.let {
+                            BitmapFactory.decodeFile(it, options)?.let {
+                                images.put(imageKey, it)
+                            }
                         }
                     }
                 }
