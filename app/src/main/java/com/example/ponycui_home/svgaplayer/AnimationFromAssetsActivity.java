@@ -37,7 +37,7 @@ public class AnimationFromAssetsActivity extends Activity {
 
     private void loadAnimation() {
         SVGAParser parser = new SVGAParser(this);
-        parser.decodeFromAssets("matteRect.svga", new SVGAParser.ParseCompletion() {
+        parser.decodeFromAssets(this.randomSample(), new SVGAParser.ParseCompletion() {
             @Override
             public void onComplete(@NotNull SVGAVideoEntity videoItem) {
                 animationView.setVideoItem(videoItem);
