@@ -91,18 +91,19 @@ class SVGAVideoEntity {
                 options.inPreferredConfig = Bitmap.Config.RGB_565
                 var filePath = cacheDir.absolutePath + "/" + imgObjects[imageKey]
                 var bitmap = if (File(filePath).exists()) BitmapFactory.decodeFile(filePath, options) else null
+                val bitmapKey = imageKey.replace(".matte", "")
                 if (bitmap != null) {
-                    images.put(imageKey, bitmap)
+                    images.put(bitmapKey, bitmap)
                 } else {
                     // bitmap.matte : bitmap
                     var filePath = cacheDir.absolutePath + "/" + imgObjects[imageKey] + ".png"
                     var bitmap = if (File(filePath).exists()) BitmapFactory.decodeFile(filePath, options) else null
                     if (bitmap != null) {
-                        images.put(imageKey, bitmap)
+                        images.put(bitmapKey, bitmap)
                     } else {
                         (cacheDir.absolutePath + "/" + imageKey + ".png").takeIf { File(it).exists() }?.let {
                             BitmapFactory.decodeFile(it, options)?.let {
-                                images.put(imageKey, it)
+                                images.put(bitmapKey, it)
                             }
                         }
                     }
