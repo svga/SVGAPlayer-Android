@@ -5,6 +5,7 @@ package com.opensource.svgaplayer.proto;
 import com.squareup.wire.AndroidMessage;
 import com.squareup.wire.Message;
 import com.squareup.wire.ProtoAdapter;
+import com.squareup.wire.ProtoAdapterJvm;
 import com.squareup.wire.WireEnum;
 import com.squareup.wire.WireField;
 import com.squareup.wire.internal.Internal;
@@ -12,7 +13,7 @@ import com.squareup.wire.internal.Internal;
 import okio.ByteString;
 
 public final class ShapeEntity extends AndroidMessage<ShapeEntity, ShapeEntity.Builder> {
-  public static final ProtoAdapter<ShapeEntity> ADAPTER = ProtoAdapter.newMessageAdapter(ShapeEntity.class);
+  public static final ProtoAdapter<ShapeEntity> ADAPTER = ProtoAdapterJvm.newMessageAdapter(ShapeEntity.class);
 
   public static final Creator<ShapeEntity> CREATOR = AndroidMessage.newCreator(ADAPTER);
 
@@ -217,7 +218,7 @@ public final class ShapeEntity extends AndroidMessage<ShapeEntity, ShapeEntity.B
      */
     KEEP(3);
 
-    public static final ProtoAdapter<ShapeType> ADAPTER = ProtoAdapter.newEnumAdapter(ShapeType.class);
+    public static final ProtoAdapter<ShapeType> ADAPTER = ProtoAdapterJvm.newEnumAdapter(ShapeType.class);
 
     private final int value;
 
@@ -245,7 +246,7 @@ public final class ShapeEntity extends AndroidMessage<ShapeEntity, ShapeEntity.B
   }
 
   public static final class ShapeArgs extends AndroidMessage<ShapeArgs, ShapeArgs.Builder> {
-    public static final ProtoAdapter<ShapeArgs> ADAPTER = ProtoAdapter.newMessageAdapter(ShapeArgs.class);
+    public static final ProtoAdapter<ShapeArgs> ADAPTER = ProtoAdapterJvm.newMessageAdapter(ShapeArgs.class);
 
     public static final Creator<ShapeArgs> CREATOR = AndroidMessage.newCreator(ADAPTER);
 
@@ -321,7 +322,7 @@ public final class ShapeEntity extends AndroidMessage<ShapeEntity, ShapeEntity.B
   }
 
   public static final class RectArgs extends AndroidMessage<RectArgs, RectArgs.Builder> {
-    public static final ProtoAdapter<RectArgs> ADAPTER = ProtoAdapter.newMessageAdapter(RectArgs.class);
+    public static final ProtoAdapter<RectArgs> ADAPTER = ProtoAdapterJvm.newMessageAdapter(RectArgs.class);
 
     public static final Creator<RectArgs> CREATOR = AndroidMessage.newCreator(ADAPTER);
 
@@ -474,7 +475,7 @@ public final class ShapeEntity extends AndroidMessage<ShapeEntity, ShapeEntity.B
   }
 
   public static final class EllipseArgs extends AndroidMessage<EllipseArgs, EllipseArgs.Builder> {
-    public static final ProtoAdapter<EllipseArgs> ADAPTER = ProtoAdapter.newMessageAdapter(EllipseArgs.class);
+    public static final ProtoAdapter<EllipseArgs> ADAPTER = ProtoAdapterJvm.newMessageAdapter(EllipseArgs.class);
 
     public static final Creator<EllipseArgs> CREATOR = AndroidMessage.newCreator(ADAPTER);
 
@@ -625,7 +626,7 @@ public final class ShapeEntity extends AndroidMessage<ShapeEntity, ShapeEntity.B
   }
 
   public static final class ShapeStyle extends AndroidMessage<ShapeStyle, ShapeStyle.Builder> {
-    public static final ProtoAdapter<ShapeStyle> ADAPTER = ProtoAdapter.newMessageAdapter(ShapeStyle.class);
+    public static final ProtoAdapter<ShapeStyle> ADAPTER = ProtoAdapterJvm.newMessageAdapter(ShapeStyle.class);
 
     public static final Creator<ShapeStyle> CREATOR = AndroidMessage.newCreator(ADAPTER);
 
@@ -899,7 +900,7 @@ public final class ShapeEntity extends AndroidMessage<ShapeEntity, ShapeEntity.B
     }
 
     public static final class RGBAColor extends AndroidMessage<RGBAColor, RGBAColor.Builder> {
-      public static final ProtoAdapter<RGBAColor> ADAPTER = ProtoAdapter.newMessageAdapter(RGBAColor.class);
+      public static final ProtoAdapter<RGBAColor> ADAPTER = ProtoAdapterJvm.newMessageAdapter(RGBAColor.class);
 
       public static final Creator<RGBAColor> CREATOR = AndroidMessage.newCreator(ADAPTER);
 
@@ -1032,7 +1033,7 @@ public final class ShapeEntity extends AndroidMessage<ShapeEntity, ShapeEntity.B
 
       LineCap_SQUARE(2);
 
-      public static final ProtoAdapter<LineCap> ADAPTER = ProtoAdapter.newEnumAdapter(LineCap.class);
+      public static final ProtoAdapter<LineCap> ADAPTER = ProtoAdapterJvm.newEnumAdapter(LineCap.class);
 
       private final int value;
 
@@ -1065,7 +1066,7 @@ public final class ShapeEntity extends AndroidMessage<ShapeEntity, ShapeEntity.B
 
       LineJoin_BEVEL(2);
 
-      public static final ProtoAdapter<LineJoin> ADAPTER = ProtoAdapter.newEnumAdapter(LineJoin.class);
+      public static final ProtoAdapter<LineJoin> ADAPTER = ProtoAdapterJvm.newEnumAdapter(LineJoin.class);
 
       private final int value;
 

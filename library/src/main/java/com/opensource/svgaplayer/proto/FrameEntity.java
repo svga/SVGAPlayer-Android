@@ -5,6 +5,7 @@ package com.opensource.svgaplayer.proto;
 import com.squareup.wire.AndroidMessage;
 import com.squareup.wire.Message;
 import com.squareup.wire.ProtoAdapter;
+import com.squareup.wire.ProtoAdapterJvm;
 import com.squareup.wire.WireField;
 import com.squareup.wire.internal.Internal;
 
@@ -13,7 +14,7 @@ import java.util.List;
 import okio.ByteString;
 
 public final class FrameEntity extends AndroidMessage<FrameEntity, FrameEntity.Builder> {
-  public static final ProtoAdapter<FrameEntity> ADAPTER = ProtoAdapter.newMessageAdapter(FrameEntity.class);
+  public static final ProtoAdapter<FrameEntity> ADAPTER = ProtoAdapterJvm.newMessageAdapter(FrameEntity.class);
 
   public static final Creator<FrameEntity> CREATOR = AndroidMessage.newCreator(ADAPTER);
 

@@ -5,6 +5,7 @@ package com.opensource.svgaplayer.proto;
 import com.squareup.wire.AndroidMessage;
 import com.squareup.wire.Message;
 import com.squareup.wire.ProtoAdapter;
+import com.squareup.wire.ProtoAdapterJvm;
 import com.squareup.wire.WireField;
 import com.squareup.wire.internal.Internal;
 
@@ -14,7 +15,7 @@ import java.util.Map;
 import okio.ByteString;
 
 public final class MovieEntity extends AndroidMessage<MovieEntity, MovieEntity.Builder> {
-  public static final ProtoAdapter<MovieEntity> ADAPTER = ProtoAdapter.newMessageAdapter(MovieEntity.class);
+  public static final ProtoAdapter<MovieEntity> ADAPTER = ProtoAdapterJvm.newMessageAdapter(MovieEntity.class);
 
   public static final Creator<MovieEntity> CREATOR = AndroidMessage.newCreator(ADAPTER);
 

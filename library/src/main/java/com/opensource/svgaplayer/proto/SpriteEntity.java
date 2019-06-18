@@ -5,6 +5,7 @@ package com.opensource.svgaplayer.proto;
 import com.squareup.wire.AndroidMessage;
 import com.squareup.wire.Message;
 import com.squareup.wire.ProtoAdapter;
+import com.squareup.wire.ProtoAdapterJvm;
 import com.squareup.wire.WireField;
 import com.squareup.wire.internal.Internal;
 
@@ -13,7 +14,7 @@ import java.util.List;
 import okio.ByteString;
 
 public final class SpriteEntity extends AndroidMessage<SpriteEntity, SpriteEntity.Builder> {
-  public static final ProtoAdapter<SpriteEntity> ADAPTER = ProtoAdapter.newMessageAdapter(SpriteEntity.class);
+  public static final ProtoAdapter<SpriteEntity> ADAPTER = ProtoAdapterJvm.newMessageAdapter(SpriteEntity.class);
 
   public static final Creator<SpriteEntity> CREATOR = AndroidMessage.newCreator(ADAPTER);
 

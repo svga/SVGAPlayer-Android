@@ -5,13 +5,14 @@ package com.opensource.svgaplayer.proto;
 import com.squareup.wire.AndroidMessage;
 import com.squareup.wire.Message;
 import com.squareup.wire.ProtoAdapter;
+import com.squareup.wire.ProtoAdapterJvm;
 import com.squareup.wire.WireField;
 import com.squareup.wire.internal.Internal;
 
 import okio.ByteString;
 
 public final class AudioEntity extends AndroidMessage<AudioEntity, AudioEntity.Builder> {
-  public static final ProtoAdapter<AudioEntity> ADAPTER = ProtoAdapter.newMessageAdapter(AudioEntity.class);
+  public static final ProtoAdapter<AudioEntity> ADAPTER = ProtoAdapterJvm.newMessageAdapter(AudioEntity.class);
 
   public static final Creator<AudioEntity> CREATOR = AndroidMessage.newCreator(ADAPTER);
 

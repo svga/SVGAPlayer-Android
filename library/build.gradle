@@ -29,9 +29,10 @@ android {
 }
 
 dependencies {
-    implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation 'com.squareup.wire:wire-runtime:3.0.0-alpha01'
+    provided fileTree(include: ['*.jar'], dir: 'libs')
+//    implementation 'com.squareup.wire:wire-runtime:3.0.0-alpha01'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation 'com.squareup.okio:okio:2.2.2'
 }
 repositories {
     mavenCentral()

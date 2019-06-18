@@ -5,13 +5,14 @@ package com.opensource.svgaplayer.proto;
 import com.squareup.wire.AndroidMessage;
 import com.squareup.wire.Message;
 import com.squareup.wire.ProtoAdapter;
+import com.squareup.wire.ProtoAdapterJvm;
 import com.squareup.wire.WireField;
 import com.squareup.wire.internal.Internal;
 
 import okio.ByteString;
 
 public final class Transform extends AndroidMessage<Transform, Transform.Builder> {
-  public static final ProtoAdapter<Transform> ADAPTER = ProtoAdapter.newMessageAdapter(Transform.class);
+  public static final ProtoAdapter<Transform> ADAPTER = ProtoAdapterJvm.newMessageAdapter(Transform.class);
 
   public static final Creator<Transform> CREATOR = AndroidMessage.newCreator(ADAPTER);
 
