@@ -19,6 +19,7 @@ import java.util.ArrayList;
 public class AnimationFromAssetsActivity extends Activity {
 
     SVGAImageView animationView = null;
+    int currentIndex = 0;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -28,7 +29,7 @@ public class AnimationFromAssetsActivity extends Activity {
         animationView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                loadAnimation();
+                animationView.stepToFrame(currentIndex++, false);
             }
         });
         loadAnimation();
@@ -41,7 +42,7 @@ public class AnimationFromAssetsActivity extends Activity {
             @Override
             public void onComplete(@NotNull SVGAVideoEntity videoItem) {
                 animationView.setVideoItem(videoItem);
-                animationView.startAnimation();
+                animationView.stepToFrame(0, true);
             }
             @Override
             public void onError() {

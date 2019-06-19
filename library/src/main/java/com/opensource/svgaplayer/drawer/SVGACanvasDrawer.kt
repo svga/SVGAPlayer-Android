@@ -21,8 +21,60 @@ internal class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVG
         super.drawFrame(canvas,frameIndex, scaleType)
         this.pathCache.onSizeChanged(canvas)
         val sprites = requestFrameSprites(frameIndex)
-        sprites.forEach {
-            drawSprite(it, canvas, frameIndex)
+        val matteSprites = mutableMapOf<String, SVGADrawerSprite>()
+
+        var isMatteing = false
+
+        sprites.forEachIndexed { index, svgaDrawerSprite ->
+
+            // save matte sprite
+            svgaDrawerSprite.imageKey?.let {
+
+                // no matte
+                sprites.get(0).imageKey?.let {
+                    if (!it.endsWith(".matte")) {
+                        drawSprite(svgaDrawerSprite, canvas, frameIndex)
+                        // continue
+                        return@forEachIndexed
+                    }
+                }
+                
+                if (it.endsWith(".matte")) {
+                    matteSprites.put(it, svgaDrawerSprite)
+                    // continue
+                    return@forEachIndexed
+                }
+            }
+
+            sprites.get(index - 1)?.let { lastSprite ->
+                if (isMatteing && (svgaDrawerSprite.matteKey == null || svgaDrawerSprite.matteKey != lastSprite.matteKey)) {
+                    isMatteing = false
+
+                    matteSprites.get(svgaDrawerSprite.matteKey)?.let {
+                        drawSprite(it, this.sharedValues.shareMatteCanvas(canvas.width, canvas.height), frameIndex)
+
+                        canvas.drawBitmap(this.sharedValues.sharedMatteBitmap(), 0f, 0f, this.sharedValues.shareMattePaint())
+                        canvas.restore()
+                    }
+                }
+                if (svgaDrawerSprite.matteKey != null && (lastSprite.matteKey == null || lastSprite.matteKey != svgaDrawerSprite.matteKey)) {
+                    isMatteing = true
+                    canvas.save()
+                }
+            }
+
+            drawSprite(svgaDrawerSprite, canvas, frameIndex)
+
+            // if current sprite is the last one and isMatteing
+            if (isMatteing && index == sprites.count() - 1) {
+                matteSprites.get(svgaDrawerSprite.matteKey)?.let {
+                    drawSprite(it, this.sharedValues.shareMatteCanvas(canvas.width, canvas.height), frameIndex)
+
+                    canvas.drawBitmap(this.sharedValues.sharedMatteBitmap(), 0f, 0f, this.sharedValues.shareMattePaint())
+                    canvas.restore()
+                }
+            }
+
         }
         playAudio(frameIndex)
     }
@@ -63,7 +115,8 @@ internal class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVG
         val imageKey = sprite.imageKey ?: return
         val isHidden = dynamicItem.dynamicHidden[imageKey] == true
         if (isHidden) { return }
-        val drawingBitmap = (dynamicItem.dynamicImage[imageKey] ?: videoItem.images[imageKey]) ?: return
+        val bitmapKey = imageKey.replace(".matte", "")
+        val drawingBitmap = (dynamicItem.dynamicImage[bitmapKey] ?: videoItem.images[bitmapKey]) ?: return
         val frameMatrix = shareFrameMatrix(sprite.frameEntity.transform)
         val paint = this.sharedValues.sharedPaint()
         paint.isAntiAlias = videoItem.antiAlias
@@ -283,6 +336,10 @@ internal class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVG
         private val sharedMatrix = Matrix()
         private val sharedMatrix2 = Matrix()
 
+        private val shareMattePaint = Paint()
+        private var shareMatteCanvas: Canvas? = null
+        private var sharedMatteBitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ALPHA_8)
+
         fun sharedPaint(): Paint {
             sharedPaint.reset()
             return sharedPaint
@@ -308,6 +365,24 @@ internal class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVG
             return sharedMatrix2
         }
 
+        fun shareMattePaint(): Paint {
+            shareMattePaint.setXfermode(PorterDuffXfermode(PorterDuff.Mode.DST_IN))
+            return shareMattePaint
+        }
+
+        fun sharedMatteBitmap(): Bitmap {
+            return sharedMatteBitmap
+        }
+
+        fun shareMatteCanvas(width: Int, height: Int): Canvas {
+            if (shareMatteCanvas == null) {
+                sharedMatteBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ALPHA_8)
+                shareMatteCanvas = Canvas(sharedMatteBitmap)
+            }
+            val matteCanvas = shareMatteCanvas as Canvas
+            matteCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+            return matteCanvas
+        }
     }
 
     class PathCache {
