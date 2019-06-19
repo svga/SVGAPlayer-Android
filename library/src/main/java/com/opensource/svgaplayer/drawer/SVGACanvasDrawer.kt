@@ -338,8 +338,7 @@ internal class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVG
 
         private val shareMattePaint = Paint()
         private var shareMatteCanvas: Canvas? = null
-        private var sharedMatteBitmap: Bitmap? = null
-        private var sharedClearBitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ALPHA_8)
+        private var sharedMatteBitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ALPHA_8)
 
         fun sharedPaint(): Paint {
             sharedPaint.reset()
@@ -372,10 +371,7 @@ internal class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVG
         }
 
         fun sharedMatteBitmap(): Bitmap {
-            sharedMatteBitmap?.let {
-                return it
-            }
-            return sharedClearBitmap
+            return sharedMatteBitmap
         }
 
         fun shareMatteCanvas(width: Int, height: Int): Canvas {
