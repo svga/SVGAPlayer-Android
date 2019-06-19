@@ -19,10 +19,12 @@ open internal class SGVADrawer(val videoItem: SVGAVideoEntity) {
     internal fun requestFrameSprites(frameIndex: Int): List<SVGADrawerSprite> {
         return videoItem.sprites.mapNotNull {
             if (frameIndex >= 0 && frameIndex < it.frames.size) {
-                if (it.frames[frameIndex].alpha <= 0.0) {
-                    return@mapNotNull null
+                it.imageKey?.let { imageKey ->
+                    if (!imageKey.endsWith(".matte") && it.frames[frameIndex].alpha <= 0.0) {
+                        return@mapNotNull null
+                    }
+                    return@mapNotNull SVGADrawerSprite(it.matteKey, it.imageKey, it.frames[frameIndex])
                 }
-                return@mapNotNull SVGADrawerSprite(it.matteKey, it.imageKey, it.frames[frameIndex])
             }
             return@mapNotNull null
         }
