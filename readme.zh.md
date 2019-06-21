@@ -160,3 +160,7 @@ HttpResponseCache.install(cacheDir, 1024 * 1024 * 128)
 ## APIs
 
 请参阅此处 [https://github.com/yyued/SVGAPlayer-Android/wiki/APIs](https://github.com/yyued/SVGAPlayer-Android/wiki/APIs)
+
+## CHANGELOG
+
+请参阅此处 [CHANGELOG](./CHANGELOG.md)

@@ -178,6 +178,10 @@ Here are many feature samples.
 
 Head on over to [https://github.com/yyued/SVGAPlayer-Android/wiki/APIs](https://github.com/yyued/SVGAPlayer-Android/wiki/APIs)
 
+## CHANGELOG
+
+Head on over to [CHANGELOG](./CHANGELOG.md)
+
 ## Credits
 
 ### Contributors
