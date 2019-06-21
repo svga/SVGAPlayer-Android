@@ -138,6 +138,16 @@ internal class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVG
             frameMatrix.preScale((sprite.frameEntity.layout.width / drawingBitmap.width).toFloat(), (sprite.frameEntity.layout.width / drawingBitmap.width).toFloat())
             canvas.drawBitmap(drawingBitmap, frameMatrix, paint)
         }
+        dynamicItem.dynamicIClickArea.let {
+            it.get(imageKey)?.let { listener ->
+                val matrixArray = floatArrayOf(0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f)
+                frameMatrix.getValues(matrixArray)
+                listener.onResponseArea(imageKey, matrixArray[2].toInt()
+                        , matrixArray[5].toInt()
+                        , (drawingBitmap.width * matrixArray[0] + matrixArray[2]).toInt()
+                        , (drawingBitmap.height * matrixArray[4] + matrixArray[5]).toInt())
+            }
+        }
         drawTextOnBitmap(canvas, drawingBitmap, sprite, frameMatrix)
     }
 
