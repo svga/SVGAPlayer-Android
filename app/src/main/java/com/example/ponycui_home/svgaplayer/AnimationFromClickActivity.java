@@ -31,7 +31,6 @@ public class AnimationFromClickActivity extends Activity {
         animationView.setOnAnimKeyClickListener(new SVGAClickAreaListener() {
             @Override
             public void onClick(@NotNull String clickKey) {
-                System.out.println("触发点中---"+clickKey);
                 Toast.makeText(AnimationFromClickActivity.this,clickKey,Toast.LENGTH_SHORT).show();
             }
         });
