@@ -3,6 +3,7 @@ package com.opensource.svgaplayer
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
+import android.text.BoringLayout
 import android.text.StaticLayout
 import android.text.TextPaint
 import java.net.HttpURLConnection
@@ -22,7 +23,9 @@ class SVGADynamicEntity {
 
     internal var dynamicTextPaint: HashMap<String, TextPaint> = hashMapOf()
 
-    internal var dynamicLayoutText: HashMap<String, StaticLayout> = hashMapOf()
+    internal var dynamicStaticLayoutText: HashMap<String, StaticLayout> = hashMapOf()
+
+    internal var dynamicBoringLayoutText: HashMap<String, BoringLayout> = hashMapOf()
 
     internal var dynamicDrawer: HashMap<String, (canvas: Canvas, frameIndex: Int) -> Boolean> = hashMapOf()
 
@@ -75,7 +78,14 @@ class SVGADynamicEntity {
 
     fun setDynamicText(layoutText: StaticLayout, forKey: String) {
         this.isTextDirty = true
-        this.dynamicLayoutText.put(forKey, layoutText)
+        this.dynamicStaticLayoutText.put(forKey, layoutText)
+    }
+
+    fun setDynamicText(layoutText: BoringLayout, forKey: String) {
+        this.isTextDirty = true
+        BoringLayout.isBoring(layoutText.text,layoutText.paint)?.let {
+            this.dynamicBoringLayoutText.put(forKey,layoutText)
+        }
     }
 
     fun setDynamicDrawer(drawer: (canvas: Canvas, frameIndex: Int) -> Boolean, forKey: String) {
@@ -130,7 +140,8 @@ class SVGADynamicEntity {
         this.dynamicImage.clear()
         this.dynamicText.clear()
         this.dynamicTextPaint.clear()
-        this.dynamicLayoutText.clear()
+        this.dynamicStaticLayoutText.clear()
+        this.dynamicBoringLayoutText.clear()
         this.dynamicDrawer.clear()
         this.dynamicIClickArea.clear()
         this.mClickMap.clear()

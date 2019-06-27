@@ -1,6 +1,7 @@
 package com.opensource.svgaplayer.drawer
 
 import android.graphics.*
+import android.text.BoringLayout
 import android.text.StaticLayout
 import android.widget.ImageView
 import com.opensource.svgaplayer.SVGADynamicEntity
@@ -177,7 +178,22 @@ internal class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVG
                 }
             }
         }
-        dynamicItem.dynamicLayoutText[imageKey]?.let {
+
+        dynamicItem.dynamicBoringLayoutText[imageKey]?.let {
+            drawTextCache[imageKey]?.let {
+                textBitmap = it
+            } ?: kotlin.run {
+                it.paint.isAntiAlias = true
+
+                textBitmap = Bitmap.createBitmap(drawingBitmap.width, drawingBitmap.height, Bitmap.Config.ARGB_4444)
+                val textCanvas = Canvas(textBitmap)
+                textCanvas.translate(0f, ((drawingBitmap.height - it.height) / 2).toFloat())
+                it.draw(textCanvas)
+                drawTextCache.put(imageKey, textBitmap as Bitmap)
+            }
+        }
+
+        dynamicItem.dynamicStaticLayoutText[imageKey]?.let {
             drawTextCache[imageKey]?.let {
                 textBitmap = it
             } ?: kotlin.run {
