@@ -209,6 +209,7 @@ internal class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVG
         textBitmap?.let { textBitmap ->
             val paint = this.sharedValues.sharedPaint()
             paint.isAntiAlias = videoItem.antiAlias
+            paint.alpha = (sprite.frameEntity.alpha * 255).toInt()
             if (sprite.frameEntity.maskPath != null) {
                 val maskPath = sprite.frameEntity.maskPath ?: return@let
                 canvas.save()
