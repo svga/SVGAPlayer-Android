@@ -273,6 +273,13 @@ internal class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVG
             it.invoke(canvas, frameIndex)
             canvas.restore()
         }
+        dynamicItem.dynamicDrawerSized[imageKey]?.let {
+            val frameMatrix = shareFrameMatrix(sprite.frameEntity.transform)
+            canvas.save()
+            canvas.concat(frameMatrix)
+            it.invoke(canvas, frameIndex, sprite.frameEntity.layout.width.toInt(), sprite.frameEntity.layout.height.toInt())
+            canvas.restore()
+        }
     }
 
     class ShareValues {
