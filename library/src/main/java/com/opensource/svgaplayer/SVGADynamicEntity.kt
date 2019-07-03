@@ -26,6 +26,8 @@ class SVGADynamicEntity {
 
     internal var dynamicDrawer: HashMap<String, (canvas: Canvas, frameIndex: Int) -> Boolean> = hashMapOf()
 
+    internal var dynamicDrawerSized: HashMap<String, (canvas: Canvas, frameIndex: Int, width: Int, height: Int) -> Boolean> = hashMapOf()
+
     internal var isTextDirty = false
 
     fun setHidden(value: Boolean, forKey: String) {
@@ -77,6 +79,10 @@ class SVGADynamicEntity {
         this.dynamicDrawer.put(forKey, drawer)
     }
 
+    fun setDynamicDrawerSized(drawer: (canvas: Canvas, frameIndex: Int, width: Int, height: Int) -> Boolean, forKey: String) {
+        this.dynamicDrawerSized.put(forKey, drawer)
+    }
+
     fun clearDynamicObjects() {
         this.isTextDirty = true
         this.dynamicHidden.clear()
@@ -85,6 +91,7 @@ class SVGADynamicEntity {
         this.dynamicTextPaint.clear()
         this.dynamicLayoutText.clear()
         this.dynamicDrawer.clear()
+        this.dynamicDrawerSized.clear()
     }
 
 }
