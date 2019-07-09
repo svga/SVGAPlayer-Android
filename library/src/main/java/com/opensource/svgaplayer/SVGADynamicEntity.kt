@@ -30,9 +30,13 @@ class SVGADynamicEntity {
     internal var dynamicDrawer: HashMap<String, (canvas: Canvas, frameIndex: Int) -> Boolean> = hashMapOf()
 
 
+
     //点击事件回调map
     internal var mClickMap : HashMap<String, IntArray> = hashMapOf()
     internal var dynamicIClickArea: HashMap<String, IClickAreaListener> = hashMapOf()
+
+    internal var dynamicDrawerSized: HashMap<String, (canvas: Canvas, frameIndex: Int, width: Int, height: Int) -> Boolean> = hashMapOf()
+
 
     internal var isTextDirty = false
 
@@ -92,6 +96,7 @@ class SVGADynamicEntity {
         this.dynamicDrawer.put(forKey, drawer)
     }
 
+
     fun setClickArea(clickKey: List<String>) {
         for(itemKey in clickKey){
             dynamicIClickArea.put(itemKey,object : IClickAreaListener{
@@ -132,6 +137,10 @@ class SVGADynamicEntity {
             }
 
         })
+
+    fun setDynamicDrawerSized(drawer: (canvas: Canvas, frameIndex: Int, width: Int, height: Int) -> Boolean, forKey: String) {
+        this.dynamicDrawerSized.put(forKey, drawer)
+
     }
 
     fun clearDynamicObjects() {
@@ -145,6 +154,8 @@ class SVGADynamicEntity {
         this.dynamicDrawer.clear()
         this.dynamicIClickArea.clear()
         this.mClickMap.clear()
+        this.dynamicDrawerSized.clear()
+
     }
 
 }
