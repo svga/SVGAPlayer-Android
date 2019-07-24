@@ -38,7 +38,7 @@ class SVGAParser(private val context: Context) {
             val cancelBlock = {
                 cancelled = true
             }
-            Thread {
+            threadPoolExecutor.execute {
                 try {
                     if (HttpResponseCache.getInstalled() == null && !noCache) {
                         Log.e("SVGAParser", "SVGAParser can not handle cache before install HttpResponseCache. see https://github.com/yyued/SVGAPlayer-Android#cache")
@@ -63,7 +63,7 @@ class SVGAParser(private val context: Context) {
                                     outputStream.write(buffer, 0, count)
                                 }
                                 if (cancelled) {
-                                    return@Thread
+                                    return@execute
                                 }
                                 ByteArrayInputStream(outputStream.toByteArray()).use {
                                     complete(it)
@@ -75,18 +75,20 @@ class SVGAParser(private val context: Context) {
                     e.printStackTrace()
                     failure(e)
                 }
-            }.start()
+            }
             return cancelBlock
         }
 
     }
 
     var fileDownloader = FileDownloader()
-    private var threadPoolBlockingQueue = LinkedBlockingQueue<Runnable>()
-    private var threadPoolExecutor = ThreadPoolExecutor(3, 10, 60000, TimeUnit.MILLISECONDS, this.threadPoolBlockingQueue)
 
-    protected fun finalize() {
-        threadPoolExecutor.shutdown()
+    companion object {
+        private val threadPoolBlockingQueue = LinkedBlockingQueue<Runnable>()
+        internal var threadPoolExecutor = ThreadPoolExecutor(3, 10, 60000, TimeUnit.MILLISECONDS, threadPoolBlockingQueue)
+        fun setThreadPoolExecutor(executor: ThreadPoolExecutor) {
+            threadPoolExecutor = executor
+        }
     }
 
     fun decodeFromAssets(name: String, callback: ParseCompletion) {

@@ -40,7 +40,7 @@ class SVGADynamicEntity {
 
     fun setDynamicImage(url: String, forKey: String) {
         val handler = android.os.Handler()
-        thread {
+        SVGAParser.threadPoolExecutor.execute {
             (URL(url).openConnection() as? HttpURLConnection)?.let {
                 try {
                     it.connectTimeout = 20 * 1000
