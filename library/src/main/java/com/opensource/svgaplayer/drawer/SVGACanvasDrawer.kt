@@ -125,7 +125,6 @@ internal class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVG
         if (sprite.frameEntity.maskPath != null) {
             val maskPath = sprite.frameEntity.maskPath ?: return
             canvas.save()
-            paint.reset()
             val path = this.sharedValues.sharedPath()
             maskPath.buildPath(path)
             path.transform(frameMatrix)
