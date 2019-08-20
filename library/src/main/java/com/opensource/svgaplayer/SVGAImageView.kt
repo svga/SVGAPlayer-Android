@@ -235,4 +235,20 @@ open class SVGAImageView : ImageView {
         stepToFrame(frame, andPlay)
     }
 
+    
+    override fun onDraw(canvas: Canvas?) {
+        super.onDraw(canvas)
+        
+        /**
+         * Fix the bounds of SVGADrawable
+         */
+        if (drawable != null && drawable is SVGADrawable) {
+            var svgaDrawable = drawable as SVGADrawable
+            var w = svgaDrawable.videoItem.videoSize.width
+            var h = svgaDrawable.videoItem.videoSize.height
+            var scaleInfo = SVGAScaleInfo()
+            scaleInfo.performScaleType(canvas!!.width.toFloat(), canvas!!.height.toFloat(), svgaDrawable.videoItem.videoSize.width.toFloat(), svgaDrawable.videoItem.videoSize.height.toFloat(), scaleType)
+            svgaDrawable.setBounds(scaleInfo.tranFx.toInt(), scaleInfo.tranFy.toInt(), (scaleInfo.tranFx + w * scaleInfo.scaleFx).toInt(), (scaleInfo.tranFy + h * scaleInfo.scaleFy).toInt())
+        }
+    }
 }
