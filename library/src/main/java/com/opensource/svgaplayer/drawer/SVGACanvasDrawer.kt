@@ -1,6 +1,7 @@
 package com.opensource.svgaplayer.drawer
 
 import android.graphics.*
+import android.text.BoringLayout
 import android.text.StaticLayout
 import android.widget.ImageView
 import com.opensource.svgaplayer.SVGADynamicEntity
@@ -137,6 +138,16 @@ internal class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVG
             frameMatrix.preScale((sprite.frameEntity.layout.width / drawingBitmap.width).toFloat(), (sprite.frameEntity.layout.width / drawingBitmap.width).toFloat())
             canvas.drawBitmap(drawingBitmap, frameMatrix, paint)
         }
+        dynamicItem.dynamicIClickArea.let {
+            it.get(imageKey)?.let { listener ->
+                val matrixArray = floatArrayOf(0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f)
+                frameMatrix.getValues(matrixArray)
+                listener.onResponseArea(imageKey, matrixArray[2].toInt()
+                        , matrixArray[5].toInt()
+                        , (drawingBitmap.width * matrixArray[0] + matrixArray[2]).toInt()
+                        , (drawingBitmap.height * matrixArray[4] + matrixArray[5]).toInt())
+            }
+        }
         drawTextOnBitmap(canvas, drawingBitmap, sprite, frameMatrix)
     }
 
@@ -166,7 +177,22 @@ internal class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVG
                 }
             }
         }
-        dynamicItem.dynamicLayoutText[imageKey]?.let {
+
+        dynamicItem.dynamicBoringLayoutText[imageKey]?.let {
+            drawTextCache[imageKey]?.let {
+                textBitmap = it
+            } ?: kotlin.run {
+                it.paint.isAntiAlias = true
+
+                textBitmap = Bitmap.createBitmap(drawingBitmap.width, drawingBitmap.height, Bitmap.Config.ARGB_8888)
+                val textCanvas = Canvas(textBitmap)
+                textCanvas.translate(0f, ((drawingBitmap.height - it.height) / 2).toFloat())
+                it.draw(textCanvas)
+                drawTextCache.put(imageKey, textBitmap as Bitmap)
+            }
+        }
+
+        dynamicItem.dynamicStaticLayoutText[imageKey]?.let {
             drawTextCache[imageKey]?.let {
                 textBitmap = it
             } ?: kotlin.run {
@@ -182,6 +208,7 @@ internal class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVG
         textBitmap?.let { textBitmap ->
             val paint = this.sharedValues.sharedPaint()
             paint.isAntiAlias = videoItem.antiAlias
+            paint.alpha = (sprite.frameEntity.alpha * 255).toInt()
             if (sprite.frameEntity.maskPath != null) {
                 val maskPath = sprite.frameEntity.maskPath ?: return@let
                 canvas.save()

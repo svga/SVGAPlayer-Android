@@ -2,11 +2,13 @@ package com.opensource.svgaplayer
 
 import android.animation.Animator
 import android.animation.ValueAnimator
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.util.AttributeSet
 import android.util.Log
+import android.view.MotionEvent
 import android.view.View
 import android.view.animation.LinearInterpolator
 import android.widget.ImageView
@@ -37,6 +39,8 @@ open class SVGAImageView : ImageView {
     var callback: SVGACallback? = null
 
     private var animator: ValueAnimator? = null
+
+    private var mItemClickAreaListener : SVGAClickAreaListener? = null
 
     constructor(context: Context?) : super(context) {
         setSoftwareLayerType()
@@ -233,6 +237,32 @@ open class SVGAImageView : ImageView {
             frame = drawable.videoItem.frames - 1
         }
         stepToFrame(frame, andPlay)
+    }
+
+    fun setOnAnimKeyClickListener(clickListener : SVGAClickAreaListener){
+        mItemClickAreaListener = clickListener
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
+        event?.let {
+            if(event.action == MotionEvent.ACTION_DOWN){
+                val drawable = drawable as? SVGADrawable ?: return false
+                for((key,value) in drawable.dynamicItem.mClickMap){
+                    if (event.x >= value[0] && event.x <= value[2] && event.y >= value[1] && event.y <= value[3]) {
+                        mItemClickAreaListener?.let {
+                            it.onClick(key)
+                            return true
+                        }
+                    }
+                }
+
+
+
+            }
+        }
+
+        return super.onTouchEvent(event)
     }
 
 }
