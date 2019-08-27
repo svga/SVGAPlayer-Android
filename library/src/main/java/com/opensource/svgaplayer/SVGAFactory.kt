@@ -7,8 +7,10 @@ import java.util.concurrent.ThreadPoolExecutor
 
 /**
  * Created by guojunjie on 2019-08-26.
- * svga 的初始化操作
- * 目前只是为了注入log
+ * svga 的初始化操作， 通常是做一些配置操作
+ * 目前主要的作用是：
+ * 1.将log 托管
+ * 2.将threadpool 托管
  */
 object SVGAFactory {
 

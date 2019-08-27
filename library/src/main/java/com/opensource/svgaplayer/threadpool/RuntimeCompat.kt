@@ -1,20 +1,10 @@
 package com.opensource.svgaplayer.threadpool
 
-/**
- * copy from glideExecutor
- *
- * @author eastern
- * @date 31/07/2018
- */
-
 import android.os.Build
 import android.os.StrictMode
 import android.util.Log
-
 import com.opensource.svgaplayer.log.SLog
-
 import java.io.File
-import java.io.FilenameFilter
 import java.util.regex.Pattern
 
 /**

@@ -14,7 +14,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by lulong on 2017/7/28.
- * Email:lulong@yy.com
  */
 public class FifoPriorityThreadPoolExecutor extends ThreadPoolExecutor {
     static final int THREAD_PRIORITY_LOW = (Process.THREAD_PRIORITY_BACKGROUND + Process.THREAD_PRIORITY_LOWEST) / 2;
