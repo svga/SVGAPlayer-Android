@@ -2,9 +2,9 @@ package com.opensource.svgaplayer
 
 import android.content.Context
 import android.net.http.HttpResponseCache
-import android.os.Handler
 import com.opensource.svgaplayer.log.SLog
 import com.opensource.svgaplayer.proto.MovieEntity
+import com.opensource.svgaplayer.threadpool.SVGATaskExecutor
 import org.json.JSONObject
 import java.io.BufferedInputStream
 import java.io.ByteArrayInputStream
@@ -40,7 +40,7 @@ class SVGAParser(private val context: Context) {
 
         open fun resume(url: URL, complete: (inputStream: InputStream) -> Unit, failure: (e: Exception) -> Unit) {
             SLog.i(TAG, "resume $url")
-            Thread {
+            SVGATaskExecutor.execute {
                 try {
                     if (HttpResponseCache.getInstalled() == null && !noCache) {
                         SLog.e(TAG,
@@ -74,7 +74,7 @@ class SVGAParser(private val context: Context) {
                     SLog.e(TAG, "", e)
                     failure(e)
                 }
-            }.start()
+            }
         }
     }
 
@@ -90,21 +90,23 @@ class SVGAParser(private val context: Context) {
         if (cacheDir(cacheKey(url)).exists()) {
             parseWithCacheKey(cacheKey(url))?.let {
                 SLog.i(TAG, "parse url in cache")
-                Handler(context.mainLooper).post {
+                SVGATaskExecutor.postToMainThread {
                     callback.onComplete(it)
                 }
                 return
             }
         }
         fileDownloader.resume(url, {
-            val videoItem = parse(it, cacheKey(url)) ?: return@resume (Handler(
-                context.mainLooper).post { callback.onError() } as? Unit ?: Unit)
-            Handler(context.mainLooper).post {
+            val videoItem = parse(it, cacheKey(url)) ?: return@resume (
+                SVGATaskExecutor.postToMainThread {
+                    callback.onError()
+                } as? Unit ?: Unit)
+            SVGATaskExecutor.postToMainThread {
                 callback.onComplete(videoItem)
             }
         }, {
             SLog.e(TAG, "parse url exception", it)
-            Handler(context.mainLooper).post {
+            SVGATaskExecutor.execute {
                 callback.onError()
             }
         })
@@ -114,22 +116,23 @@ class SVGAParser(private val context: Context) {
         inputStream: InputStream, cacheKey: String, callback: ParseCompletion, closeInputStream: Boolean = false
     ) {
         SLog.i(TAG, "parse input stream cacheKey:$cacheKey, close:$closeInputStream")
-        Thread {
+        SVGATaskExecutor.execute {
             val videoItem = parse(inputStream, cacheKey)
             if (closeInputStream) {
                 inputStream.close()
             }
+
             if (videoItem != null) {
-                Handler(context.mainLooper).post {
+                SVGATaskExecutor.postToMainThread {
                     callback.onComplete(videoItem)
                 }
             } else {
                 SLog.e(TAG, "parse input stream videoItem is null")
-                Handler(context.mainLooper).post {
+                SVGATaskExecutor.postToMainThread {
                     callback.onError()
                 }
             }
-        }.start()
+        }
     }
 
     private fun parse(inputStream: InputStream, cacheKey: String): SVGAVideoEntity? {
