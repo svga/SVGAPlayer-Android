@@ -13,18 +13,19 @@ import android.util.Log
 import android.view.View
 import android.view.animation.LinearInterpolator
 import android.widget.ImageView
+import com.opensource.svgaplayer.threadpool.SVGATaskExecutor
 import java.net.URL
 
 /**
  * Created by cuiminghui on 2017/3/29.
  */
 
-class SVGADrawable(val videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicEntity): Drawable() {
+class SVGADrawable(val videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicEntity) : Drawable() {
 
-    constructor(videoItem: SVGAVideoEntity): this(videoItem, SVGADynamicEntity())
+    constructor(videoItem: SVGAVideoEntity) : this(videoItem, SVGADynamicEntity())
 
     var cleared = true
-        internal set (value) {
+        internal set(value) {
             if (field == value) {
                 return
             }
@@ -33,7 +34,7 @@ class SVGADrawable(val videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
         }
 
     var currentFrame = 0
-        internal set (value) {
+        internal set(value) {
             if (field == value) {
                 return
             }
@@ -50,20 +51,18 @@ class SVGADrawable(val videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
             return
         }
         canvas?.let {
-            drawer.drawFrame(it,currentFrame, scaleType)
+            drawer.drawFrame(it, currentFrame, scaleType)
         }
     }
 
-    override fun setAlpha(alpha: Int) { }
+    override fun setAlpha(alpha: Int) {}
 
     override fun getOpacity(): Int {
         return PixelFormat.TRANSPARENT
     }
 
     override fun setColorFilter(colorFilter: ColorFilter?) {
-
     }
-
 }
 
 open class SVGAImageView : ImageView {
@@ -99,11 +98,12 @@ open class SVGAImageView : ImageView {
         setSoftwareLayerType()
         attrs?.let { loadAttrs(it) }
     }
-
-    constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes) {
-        setSoftwareLayerType()
-        attrs?.let { loadAttrs(it) }
-    }
+//
+//    constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int)
+//        : super(context, attrs, defStyleAttr, defStyleRes) {
+//        setSoftwareLayerType()
+//        attrs?.let { loadAttrs(it) }
+//    }
 
     private fun setSoftwareLayerType() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR2) {
@@ -127,14 +127,13 @@ open class SVGAImageView : ImageView {
         typedArray.getString(R.styleable.SVGAImageView_fillMode)?.let {
             if (it == "0") {
                 fillMode = FillMode.Backward
-            }
-            else if (it == "1") {
+            } else if (it == "1") {
                 fillMode = FillMode.Forward
             }
         }
         typedArray.getString(R.styleable.SVGAImageView_source)?.let {
             val parser = SVGAParser(context)
-            Thread({
+            SVGATaskExecutor.execute {
                 val callback: SVGAParser.ParseCompletion = object : SVGAParser.ParseCompletion {
                     override fun onComplete(videoItem: SVGAVideoEntity) {
                         handler?.post {
@@ -148,12 +147,12 @@ open class SVGAImageView : ImageView {
 
                     override fun onError() {}
                 }
-                if(it.startsWith("http://") || it.startsWith("https://")) {
+                if (it.startsWith("http://") || it.startsWith("https://")) {
                     parser.parse(URL(it), callback)
                 } else {
                     parser.parse(it, callback)
                 }
-            }).start()
+            }
         }
         typedArray.recycle()
     }
@@ -183,46 +182,51 @@ open class SVGAImageView : ImageView {
                         if (durationScale == 0.0) {
                             it.setFloat(animatorClass, 1.0f)
                             durationScale = 1.0
-                            Log.e("SVGAPlayer", "The animation duration scale has been reset to 1.0x, because you closed it on developer options.")
+                            Log.e("SVGAPlayer",
+                                "The animation duration scale has been reset to 1.0x, " +
+                                    "because you closed it on developer options.")
                         }
                     }
                 }
-            } catch (e: Exception) {}
+            } catch (e: Exception) {
+            }
             animator.interpolator = LinearInterpolator()
             animator.duration = ((endFrame - startFrame + 1) * (1000 / it.FPS) / durationScale).toLong()
             animator.repeatCount = if (loops <= 0) 99999 else loops - 1
             animator.addUpdateListener {
                 drawable.currentFrame = animator.animatedValue as Int
-                callback?.onStep(drawable.currentFrame, ((drawable.currentFrame + 1).toDouble() / drawable.videoItem.frames.toDouble()))
+                callback?.onStep(drawable.currentFrame,
+                    ((drawable.currentFrame + 1).toDouble() / drawable.videoItem.frames.toDouble()))
             }
             animator.addListener(object : Animator.AnimatorListener {
                 override fun onAnimationRepeat(animation: Animator?) {
                     callback?.onRepeat()
                 }
+
                 override fun onAnimationEnd(animation: Animator?) {
                     isAnimating = false
                     stopAnimation()
                     if (!clearsAfterStop) {
                         if (fillMode == FillMode.Backward) {
                             drawable.currentFrame = startFrame
-                        }
-                        else if (fillMode == FillMode.Forward) {
+                        } else if (fillMode == FillMode.Forward) {
                             drawable.currentFrame = endFrame
                         }
                     }
                     callback?.onFinished()
                 }
+
                 override fun onAnimationCancel(animation: Animator?) {
                     isAnimating = false
                 }
+
                 override fun onAnimationStart(animation: Animator?) {
                     isAnimating = true
                 }
             })
             if (reverse) {
                 animator.reverse()
-            }
-            else {
+            } else {
                 animator.start()
             }
             this.animator = animator
@@ -264,7 +268,8 @@ open class SVGAImageView : ImageView {
         if (andPlay) {
             startAnimation()
             animator?.let {
-                it.currentPlayTime = (Math.max(0.0f, Math.min(1.0f, (frame.toFloat() / drawable.videoItem.frames.toFloat()))) * it.duration).toLong()
+                it.currentPlayTime = (Math.max(0.0f,
+                    Math.min(1.0f, (frame.toFloat() / drawable.videoItem.frames.toFloat()))) * it.duration).toLong()
             }
         }
     }
@@ -277,5 +282,4 @@ open class SVGAImageView : ImageView {
         }
         stepToFrame(frame, andPlay)
     }
-
 }

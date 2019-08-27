@@ -3,15 +3,11 @@ package com.opensource.svgaplayer
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
-import android.text.Layout
-import android.text.SpannableString
 import android.text.StaticLayout
 import android.text.TextPaint
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
+import com.opensource.svgaplayer.threadpool.SVGATaskExecutor
 import java.net.HttpURLConnection
 import java.net.URL
-import java.util.logging.Handler
 
 /**
  * Created by cuiminghui on 2017/3/30.
@@ -41,22 +37,23 @@ class SVGADynamicEntity {
     }
 
     fun setDynamicImage(url: String, forKey: String) {
-        val handler = android.os.Handler()
-        Thread({
+        SVGATaskExecutor.execute {
             try {
                 (URL(url).openConnection() as? HttpURLConnection)?.let {
                     it.connectTimeout = 20 * 1000
                     it.requestMethod = "GET"
                     it.connect()
                     BitmapFactory.decodeStream(it.inputStream)?.let {
-                        handler.post { setDynamicImage(it, forKey) }
+                        SVGATaskExecutor.postToMainThread {
+                            setDynamicImage(it, forKey)
+                        }
                     }
                     it.inputStream.close()
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
             }
-        }).start()
+        }
     }
 
     fun setDynamicText(text: String, textPaint: TextPaint, forKey: String) {
@@ -83,5 +80,4 @@ class SVGADynamicEntity {
         this.dynamicLayoutText.clear()
         this.dynamicDrawer.clear()
     }
-
 }
