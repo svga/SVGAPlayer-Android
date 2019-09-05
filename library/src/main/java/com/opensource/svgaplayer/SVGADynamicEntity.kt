@@ -96,7 +96,6 @@ class SVGADynamicEntity {
         this.dynamicDrawer.put(forKey, drawer)
     }
 
-
     fun setClickArea(clickKey: List<String>) {
         for(itemKey in clickKey){
             dynamicIClickArea.put(itemKey,object : IClickAreaListener{
@@ -114,18 +113,17 @@ class SVGADynamicEntity {
                         }
                     }
                 }
-
             })
         }
     }
 
     fun setClickArea(clickKey: String) {
-        dynamicIClickArea.put(clickKey,object : IClickAreaListener{
+        dynamicIClickArea.put(clickKey, object : IClickAreaListener {
             override fun onResponseArea(key: String, x0: Int, y0: Int, x1: Int, y1: Int) {
                 mClickMap.let {
-                    if(it.get(key) == null){
-                        it.put(key, intArrayOf(x0,y0,x1,y1))
-                    }else{
+                    if (it.get(key) == null) {
+                        it.put(key, intArrayOf(x0, y0, x1, y1))
+                    } else {
                         it.get(key)?.let {
                             it[0] = x0
                             it[1] = y0
@@ -135,12 +133,11 @@ class SVGADynamicEntity {
                     }
                 }
             }
-
         })
+    }
 
     fun setDynamicDrawerSized(drawer: (canvas: Canvas, frameIndex: Int, width: Int, height: Int) -> Boolean, forKey: String) {
         this.dynamicDrawerSized.put(forKey, drawer)
-
     }
 
     fun clearDynamicObjects() {
@@ -155,7 +152,5 @@ class SVGADynamicEntity {
         this.dynamicIClickArea.clear()
         this.mClickMap.clear()
         this.dynamicDrawerSized.clear()
-
     }
-
 }
