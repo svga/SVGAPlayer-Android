@@ -23,6 +23,7 @@ import org.jetbrains.annotations.NotNull;
 public class AnimationFromClickActivity extends Activity {
 
     SVGAImageView animationView = null;
+    SVGAParser parser = new SVGAParser(this);
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -40,7 +41,6 @@ public class AnimationFromClickActivity extends Activity {
     }
 
     private void loadAnimation() {
-        SVGAParser parser = new SVGAParser(this);
         parser.decodeFromAssets("test2.svga",new SVGAParser.ParseCompletion() {
             @Override
             public void onComplete(@NotNull SVGAVideoEntity videoItem) {

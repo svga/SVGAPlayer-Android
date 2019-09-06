@@ -18,8 +18,9 @@ import java.util.ArrayList;
 
 public class AnimationFromAssetsActivity extends Activity {
 
-    SVGAImageView animationView = null;
     int currentIndex = 0;
+    SVGAImageView animationView = null;
+    SVGAParser parser = new SVGAParser(this);
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -37,7 +38,6 @@ public class AnimationFromAssetsActivity extends Activity {
     }
 
     private void loadAnimation() {
-        SVGAParser parser = new SVGAParser(this);
         parser.decodeFromAssets(this.randomSample(), new SVGAParser.ParseCompletion() {
             @Override
             public void onComplete(@NotNull SVGAVideoEntity videoItem) {
