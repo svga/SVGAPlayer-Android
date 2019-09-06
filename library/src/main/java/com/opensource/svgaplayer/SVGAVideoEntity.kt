@@ -54,7 +54,11 @@ class SVGAVideoEntity {
             FPS = it.optInt("fps", 20)
             frames = it.optInt("frames", 0)
         }
-        resetImages(obj)
+        try {
+            resetImages(obj)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
         resetSprites(obj)
     }
 
