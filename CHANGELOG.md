@@ -11,7 +11,7 @@
 ### Features
 
 * Add 2.x proto support for matte. ([741eb01](https://github.com/yyued/SVGAPlayer-Android/commit/741eb01))
-* draw matte sprite with PorterDuffXfermode(PorterDuff.Mode.DST_IN). ([3a39ff6](https://github.com/yyued/SVGAPlayer-Android/commit/3a39ff6))
+* Draw matte sprite with PorterDuffXfermode(PorterDuff.Mode.DST_IN). ([3a39ff6](https://github.com/yyued/SVGAPlayer-Android/commit/3a39ff6))
 
 ## [2.4.4](https://github.com/yyued/SVGAPlayer-Android/compare/2.4.3...2.4.4) (2019-05-15)
 
@@ -33,15 +33,30 @@
 
 
 
-# [2.4.0](https://github.com/yyued/SVGAPlayer-Android/compare/2.3.0...2.4.0) (2019-01-16)
+## [2.4.0](https://github.com/yyued/SVGAPlayer-Android/compare/2.3.0...2.4.0) (2019-01-16)
 
 
 ### Bug Fixes
 
-* fail to play 1.0 format file. ([7fad1cd](https://github.com/yyued/SVGAPlayer-Android/commit/7fad1cd))
-* Memory issue, due to android.view.ImageView drawable cycle reference, let drawable sets to WeakReference if ImageView detached. ([d040e36](https://github.com/yyued/SVGAPlayer-Android/commit/d040e36))
+* Fix fail to play 1.0 format file. ([7fad1cd](https://github.com/yyued/SVGAPlayer-Android/commit/7fad1cd))
+* Fix memory issue, due to android.view.ImageView drawable cycle reference, let drawable sets to WeakReference if ImageView detached. ([d040e36](https://github.com/yyued/SVGAPlayer-Android/commit/d040e36))
 * Remove unnecessary code. ([cd31b1b](https://github.com/yyued/SVGAPlayer-Android/commit/cd31b1b))
-* Stroke color did not apply sprite alpha. ([2077be9](https://github.com/yyued/SVGAPlayer-Android/commit/2077be9))
+* Fix stroke color did not apply sprite alpha. ([2077be9](https://github.com/yyued/SVGAPlayer-Android/commit/2077be9))
+ 
+## 2.3.0 
 
+*  Add audio support. 
+
+## 2.1.10 
+
+* Fix vector stroke width scale for old version.
+
+## 2.1.9
+
+* Fix alpha not set while drawing shapes.
+
+## 2.1.8 
+
+* Handle null return for func readAsBytes
 
 
