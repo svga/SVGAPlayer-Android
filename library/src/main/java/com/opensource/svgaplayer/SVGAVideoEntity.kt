@@ -58,6 +58,8 @@ class SVGAVideoEntity {
             resetImages(obj)
         } catch (e: Exception) {
             e.printStackTrace()
+        } catch (e: OutOfMemoryError) {
+            e.printStackTrace()
         }
         resetSprites(obj)
     }
@@ -76,6 +78,8 @@ class SVGAVideoEntity {
         try {
             resetImages(obj)
         } catch (e: Exception) {
+            e.printStackTrace()
+        } catch (e: OutOfMemoryError) {
             e.printStackTrace()
         }
         resetSprites(obj)
