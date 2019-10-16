@@ -6,14 +6,12 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.View;
 
-import com.opensource.svgaplayer.SVGADrawable;
 import com.opensource.svgaplayer.SVGAImageView;
 import com.opensource.svgaplayer.SVGAParser;
 import com.opensource.svgaplayer.SVGAVideoEntity;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.net.URL;
 import java.util.ArrayList;
 
 public class AnimationFromAssetsActivity extends Activity {
@@ -55,6 +53,8 @@ public class AnimationFromAssetsActivity extends Activity {
 
     private String randomSample() {
         if (samples.size() == 0) {
+            samples.add("Goddess.svga");
+            samples.add("Rocket.svga");
             samples.add("angel.svga");
             samples.add("alarm.svga");
             samples.add("EmptyState.svga");
