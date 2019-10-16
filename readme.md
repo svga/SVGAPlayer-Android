@@ -38,6 +38,9 @@ compile 'com.github.yyued:SVGAPlayer-Android:latest'
 
 [![](https://jitpack.io/v/yyued/SVGAPlayer-Android.svg)](https://jitpack.io/#yyued/SVGAPlayer-Android)
 
+### Matte Support
+Head on over to [Dynamic · Matte Layer](https://github.com/yyued/SVGAPlayer-Android/wiki/Dynamic-%C2%B7-Matte-Layer)
+
 ### Proguard-rules
 
 ```
