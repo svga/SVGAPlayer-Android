@@ -29,11 +29,11 @@ internal class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVG
         this.pathCache.onSizeChanged(canvas)
         val sprites = requestFrameSprites(frameIndex)
         val matteSprites = mutableMapOf<String, SVGADrawerSprite>()
-        var saveID = 0
+        var saveID = -1
         beginIndexList = null
         endIndexList = null
 
-        // Filte no matte layer
+        // Filter no matte layer
         var hasMatteLayer = false
         sprites.get(0).imageKey?.let {
             if (it.endsWith(".matte")) {
@@ -42,10 +42,10 @@ internal class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVG
         }
         sprites.forEachIndexed { index, svgaDrawerSprite ->
 
-            // save matte sprite
+            // Save matte sprite
             svgaDrawerSprite.imageKey?.let {
-                /// No matte layer included
-                if (!hasMatteLayer) {
+                /// No matte layer included or VERSION Unsopport matte
+                if (!hasMatteLayer || Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
                     // Normal sprite
                     drawSprite(svgaDrawerSprite, canvas, frameIndex)
                     // Continue
@@ -62,6 +62,8 @@ internal class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVG
             if (isMatteBegin(index, sprites)) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     saveID = canvas.saveLayer(0f, 0f, canvas.width.toFloat(), canvas.height.toFloat(), null)
+                } else {
+                    canvas.save()
                 }
             }
             /// Normal matte
@@ -72,7 +74,11 @@ internal class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVG
                 matteSprites.get(svgaDrawerSprite.matteKey)?.let {
                     drawSprite(it, this.sharedValues.shareMatteCanvas(canvas.width, canvas.height), frameIndex)
                     canvas.drawBitmap(this.sharedValues.sharedMatteBitmap(), 0f, 0f, this.sharedValues.shareMattePaint())
-                    canvas.restoreToCount(saveID)
+                    if (saveID != -1) {
+                        canvas.restoreToCount(saveID)
+                    } else {
+                        canvas.restore()
+                    }
                     // Continue
                     return@forEachIndexed
                 }

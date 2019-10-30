@@ -53,6 +53,7 @@ public class AnimationFromAssetsActivity extends Activity {
 
     private String randomSample() {
         if (samples.size() == 0) {
+            samples.add("gradientBorder.svga");
             samples.add("Goddess.svga");
             samples.add("Rocket.svga");
             samples.add("angel.svga");
