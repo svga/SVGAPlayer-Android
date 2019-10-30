@@ -24,7 +24,6 @@ internal class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVG
     private var beginIndexList: Array<Boolean>? = null
     private var endIndexList: Array<Boolean>? = null
 
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     override fun drawFrame(canvas: Canvas, frameIndex: Int, scaleType: ImageView.ScaleType) {
         super.drawFrame(canvas,frameIndex, scaleType)
         this.pathCache.onSizeChanged(canvas)
@@ -61,9 +60,10 @@ internal class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVG
             }
             /// Is matte begin
             if (isMatteBegin(index, sprites)) {
-                saveID = canvas.saveLayer(0f, 0f, canvas.width.toFloat(), canvas.height.toFloat(), null)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    saveID = canvas.saveLayer(0f, 0f, canvas.width.toFloat(), canvas.height.toFloat(), null)
+                }
             }
-
             /// Normal matte
             drawSprite(svgaDrawerSprite, canvas, frameIndex)
 
