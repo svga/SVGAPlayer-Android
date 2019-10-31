@@ -28,6 +28,8 @@ internal class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVG
         super.drawFrame(canvas,frameIndex, scaleType)
         this.pathCache.onSizeChanged(canvas)
         val sprites = requestFrameSprites(frameIndex)
+        // Filter null sprites
+        if (sprites.count() <= 0) return
         val matteSprites = mutableMapOf<String, SVGADrawerSprite>()
         var saveID = -1
         beginIndexList = null
