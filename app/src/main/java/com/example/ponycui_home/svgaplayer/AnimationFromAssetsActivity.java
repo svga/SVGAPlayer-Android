@@ -6,20 +6,19 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.View;
 
-import com.opensource.svgaplayer.SVGADrawable;
 import com.opensource.svgaplayer.SVGAImageView;
 import com.opensource.svgaplayer.SVGAParser;
 import com.opensource.svgaplayer.SVGAVideoEntity;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.net.URL;
 import java.util.ArrayList;
 
 public class AnimationFromAssetsActivity extends Activity {
 
-    SVGAImageView animationView = null;
     int currentIndex = 0;
+    SVGAImageView animationView = null;
+    SVGAParser parser = new SVGAParser(this);
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -37,7 +36,6 @@ public class AnimationFromAssetsActivity extends Activity {
     }
 
     private void loadAnimation() {
-        SVGAParser parser = new SVGAParser(this);
         parser.decodeFromAssets(this.randomSample(), new SVGAParser.ParseCompletion() {
             @Override
             public void onComplete(@NotNull SVGAVideoEntity videoItem) {
@@ -55,12 +53,14 @@ public class AnimationFromAssetsActivity extends Activity {
 
     private String randomSample() {
         if (samples.size() == 0) {
+            samples.add("gradientBorder.svga");
+            samples.add("Goddess.svga");
+            samples.add("Rocket.svga");
             samples.add("angel.svga");
             samples.add("alarm.svga");
             samples.add("EmptyState.svga");
             samples.add("heartbeat.svga");
             samples.add("posche.svga");
-            samples.add("rose_1.5.0.svga");
             samples.add("rose_2.0.0.svga");
             samples.add("test.svga");
             samples.add("test2.svga");

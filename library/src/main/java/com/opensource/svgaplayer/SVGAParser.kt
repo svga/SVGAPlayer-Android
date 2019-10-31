@@ -93,7 +93,7 @@ class SVGAParser(private val context: Context) {
         }
     }
 
-    fun decodeFromAssets(name: String, callback: ParseCompletion) {
+    fun decodeFromAssets(name: String, callback: ParseCompletion?) {
         try {
             context.assets.open(name)?.let {
                 this.decodeFromInputStream(it, buildCacheKey("file:///assets/$name"), callback, true)
@@ -104,7 +104,7 @@ class SVGAParser(private val context: Context) {
         }
     }
 
-    fun decodeFromURL(url: URL, callback: ParseCompletion): (() -> Unit)? {
+    fun decodeFromURL(url: URL, callback: ParseCompletion?): (() -> Unit)? {
         if (this.isCached(buildCacheKey(url))) {
             threadPoolExecutor.execute {
                 this.decodeFromCacheKey(buildCacheKey(url), callback)
@@ -120,7 +120,7 @@ class SVGAParser(private val context: Context) {
         }
     }
 
-    fun decodeFromInputStream(inputStream: InputStream, cacheKey: String, callback: ParseCompletion, closeInputStream: Boolean = false) {
+    fun decodeFromInputStream(inputStream: InputStream, cacheKey: String, callback: ParseCompletion?, closeInputStream: Boolean = false) {
         threadPoolExecutor.execute {
             try {
                 readAsBytes(inputStream)?.let { bytes ->
@@ -155,7 +155,7 @@ class SVGAParser(private val context: Context) {
      * @deprecated from 2.4.0
      */
     @Deprecated("This method has been deprecated from 2.4.0.", ReplaceWith("this.decodeFromAssets(assetsName, callback)"))
-    fun parse(assetsName: String, callback: ParseCompletion) {
+    fun parse(assetsName: String, callback: ParseCompletion?) {
         this.decodeFromAssets(assetsName, callback)
     }
 
@@ -163,7 +163,7 @@ class SVGAParser(private val context: Context) {
      * @deprecated from 2.4.0
      */
     @Deprecated("This method has been deprecated from 2.4.0.", ReplaceWith("this.decodeFromURL(url, callback)"))
-    fun parse(url: URL, callback: ParseCompletion) {
+    fun parse(url: URL, callback: ParseCompletion?) {
         this.decodeFromURL(url, callback)
     }
 
@@ -171,20 +171,20 @@ class SVGAParser(private val context: Context) {
      * @deprecated from 2.4.0
      */
     @Deprecated("This method has been deprecated from 2.4.0.", ReplaceWith("this.decodeFromInputStream(inputStream, cacheKey, callback, closeInputStream)"))
-    fun parse(inputStream: InputStream, cacheKey: String, callback: ParseCompletion, closeInputStream: Boolean = false) {
+    fun parse(inputStream: InputStream, cacheKey: String, callback: ParseCompletion?, closeInputStream: Boolean = false) {
         this.decodeFromInputStream(inputStream, cacheKey, callback, closeInputStream)
     }
 
-    private fun invokeCompleteCallback(videoItem: SVGAVideoEntity, callback: ParseCompletion) {
+    private fun invokeCompleteCallback(videoItem: SVGAVideoEntity, callback: ParseCompletion?) {
         Handler(context.mainLooper).post {
-            callback.onComplete(videoItem)
+            callback?.onComplete(videoItem)
         }
     }
 
-    private fun invokeErrorCallback(e: java.lang.Exception, callback: ParseCompletion) {
+    private fun invokeErrorCallback(e: java.lang.Exception, callback: ParseCompletion?) {
         e.printStackTrace()
         Handler(context.mainLooper).post {
-            callback.onError()
+            callback?.onError()
         }
     }
 
@@ -192,7 +192,7 @@ class SVGAParser(private val context: Context) {
         return buildCacheDir(cacheKey).exists()
     }
 
-    private fun decodeFromCacheKey(cacheKey: String, callback: ParseCompletion) {
+    private fun decodeFromCacheKey(cacheKey: String, callback: ParseCompletion?) {
         try {
             val cacheDir = File(context.cacheDir.absolutePath + "/" + cacheKey + "/")
             File(cacheDir, "movie.binary").takeIf { it.isFile }?.let { binaryFile ->

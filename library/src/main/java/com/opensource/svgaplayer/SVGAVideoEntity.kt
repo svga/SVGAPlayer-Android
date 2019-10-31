@@ -54,7 +54,13 @@ class SVGAVideoEntity {
             FPS = it.optInt("fps", 20)
             frames = it.optInt("frames", 0)
         }
-        resetImages(obj)
+        try {
+            resetImages(obj)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } catch (e: OutOfMemoryError) {
+            e.printStackTrace()
+        }
         resetSprites(obj)
     }
 
@@ -72,6 +78,8 @@ class SVGAVideoEntity {
         try {
             resetImages(obj)
         } catch (e: Exception) {
+            e.printStackTrace()
+        } catch (e: OutOfMemoryError) {
             e.printStackTrace()
         }
         resetSprites(obj)
