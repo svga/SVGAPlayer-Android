@@ -5,11 +5,14 @@ import android.graphics.*
 import android.os.Build
 import android.text.BoringLayout
 import android.text.StaticLayout
+import android.text.TextUtils
 import android.widget.FrameLayout
 import android.widget.ImageView
 import com.opensource.svgaplayer.SVGADynamicEntity
 import com.opensource.svgaplayer.SVGAVideoEntity
 import com.opensource.svgaplayer.entities.SVGAVideoShapeEntity
+import java.lang.Exception
+import java.lang.reflect.Field
 
 /**
  * Created by cuiminghui on 2017/3/29.
@@ -271,7 +274,21 @@ internal class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVG
                 textBitmap = it
             } ?: kotlin.run {
                 it.paint.isAntiAlias = true
-                var layout = StaticLayout(it.text, 0, it.text.length, it.paint, drawingBitmap.width, it.alignment, it.spacingMultiplier, it.spacingAdd, false)
+                var layout = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    var lineMax = try {
+                        val field = StaticLayout::class.java.getDeclaredField("mMaximumVisibleLineCount")
+                        field.isAccessible = true
+                        field.getInt(it)
+                    } catch (e: Exception) { Int.MAX_VALUE }
+                    StaticLayout.Builder
+                            .obtain(it.text, 0, it.text.length, it.paint, drawingBitmap.width)
+                            .setAlignment(it.alignment)
+                            .setMaxLines(lineMax)
+                            .setEllipsize(TextUtils.TruncateAt.END)
+                            .build()
+                } else {
+                    StaticLayout(it.text, 0, it.text.length, it.paint, drawingBitmap.width, it.alignment, it.spacingMultiplier, it.spacingAdd, false)
+                }
                 textBitmap = Bitmap.createBitmap(drawingBitmap.width, drawingBitmap.height, Bitmap.Config.ARGB_8888)
                 val textCanvas = Canvas(textBitmap)
                 textCanvas.translate(0f, ((drawingBitmap.height - layout.height) / 2).toFloat())
