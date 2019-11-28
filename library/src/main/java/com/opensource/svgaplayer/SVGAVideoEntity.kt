@@ -222,7 +222,7 @@ class SVGAVideoEntity {
                 return@map item
             }
             this.soundPool = soundPool
-        } ?: kotlin.run(completionBlock)
+        }.run { completionBlock() }
     }
 
 }
