@@ -129,7 +129,7 @@ class SVGAVideoEntity {
                 return@forEach
             }
             val fileTag = byteArray.slice(IntRange(0, 3))
-            if (fileTag[0].toInt() == 73 && fileTag[1].toInt() == 68 && fileTag[2].toInt() == 51 && fileTag[3].toInt() == 3) {
+            if (fileTag[0].toInt() == 73 && fileTag[1].toInt() == 68 && fileTag[2].toInt() == 51) {
             } else {
                 val bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.count(), options)
                 if (bitmap != null) {
@@ -196,7 +196,7 @@ class SVGAVideoEntity {
                     return@forEach
                 }
                 val fileTag = byteArray.slice(IntRange(0, 3))
-                if (fileTag[0].toInt() == 73 && fileTag[1].toInt() == 68 && fileTag[2].toInt() == 51 && fileTag[3].toInt() == 3) {
+                if (fileTag[0].toInt() == 73 && fileTag[1].toInt() == 68 && fileTag[2].toInt() == 51) {
                     audiosData[imageKey] = byteArray
                 }
             }
