@@ -208,12 +208,16 @@ internal class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVG
             path.transform(frameMatrix)
             canvas.clipPath(path)
             frameMatrix.preScale((sprite.frameEntity.layout.width / drawingBitmap.width).toFloat(), (sprite.frameEntity.layout.width / drawingBitmap.width).toFloat())
-            canvas.drawBitmap(drawingBitmap, frameMatrix, paint)
+            if (!drawingBitmap.isRecycled) {
+                canvas.drawBitmap(drawingBitmap, frameMatrix, paint)
+            }
             canvas.restore()
         }
         else {
             frameMatrix.preScale((sprite.frameEntity.layout.width / drawingBitmap.width).toFloat(), (sprite.frameEntity.layout.width / drawingBitmap.width).toFloat())
-            canvas.drawBitmap(drawingBitmap, frameMatrix, paint)
+            if (!drawingBitmap.isRecycled) {
+                canvas.drawBitmap(drawingBitmap, frameMatrix, paint)
+            }
         }
         dynamicItem.dynamicIClickArea.let {
             it.get(imageKey)?.let { listener ->
