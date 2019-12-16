@@ -54,7 +54,13 @@ class SVGAVideoEntity {
             FPS = it.optInt("fps", 20)
             frames = it.optInt("frames", 0)
         }
-        resetImages(obj)
+        try {
+            resetImages(obj)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } catch (e: OutOfMemoryError) {
+            e.printStackTrace()
+        }
         resetSprites(obj)
     }
 
@@ -72,6 +78,8 @@ class SVGAVideoEntity {
         try {
             resetImages(obj)
         } catch (e: Exception) {
+            e.printStackTrace()
+        } catch (e: OutOfMemoryError) {
             e.printStackTrace()
         }
         resetSprites(obj)
@@ -91,12 +99,20 @@ class SVGAVideoEntity {
                 options.inPreferredConfig = Bitmap.Config.RGB_565
                 var filePath = cacheDir.absolutePath + "/" + imgObjects[imageKey]
                 var bitmap = if (File(filePath).exists()) BitmapFactory.decodeFile(filePath, options) else null
+                val bitmapKey = imageKey.replace(".matte", "")
                 if (bitmap != null) {
-                    images.put(imageKey, bitmap)
+                    images.put(bitmapKey, bitmap)
                 } else {
-                    (cacheDir.absolutePath + "/" + imageKey + ".png").takeIf { File(it).exists() }?.let {
-                        BitmapFactory.decodeFile(it, options)?.let {
-                            images.put(imageKey, it)
+                    // bitmap.matte : bitmap
+                    var filePath = cacheDir.absolutePath + "/" + imgObjects[imageKey] + ".png"
+                    var bitmap = if (File(filePath).exists()) BitmapFactory.decodeFile(filePath, options) else null
+                    if (bitmap != null) {
+                        images.put(bitmapKey, bitmap)
+                    } else {
+                        (cacheDir.absolutePath + "/" + imageKey + ".png").takeIf { File(it).exists() }?.let {
+                            BitmapFactory.decodeFile(it, options)?.let {
+                                images.put(bitmapKey, it)
+                            }
                         }
                     }
                 }
@@ -113,7 +129,7 @@ class SVGAVideoEntity {
                 return@forEach
             }
             val fileTag = byteArray.slice(IntRange(0, 3))
-            if (fileTag[0].toInt() == 73 && fileTag[1].toInt() == 68 && fileTag[2].toInt() == 51 && fileTag[3].toInt() == 3) {
+            if (fileTag[0].toInt() == 73 && fileTag[1].toInt() == 68 && fileTag[2].toInt() == 51) {
             } else {
                 val bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.count(), options)
                 if (bitmap != null) {
@@ -180,7 +196,7 @@ class SVGAVideoEntity {
                     return@forEach
                 }
                 val fileTag = byteArray.slice(IntRange(0, 3))
-                if (fileTag[0].toInt() == 73 && fileTag[1].toInt() == 68 && fileTag[2].toInt() == 51 && fileTag[3].toInt() == 3) {
+                if (fileTag[0].toInt() == 73 && fileTag[1].toInt() == 68 && fileTag[2].toInt() == 51) {
                     audiosData[imageKey] = byteArray
                 }
             }

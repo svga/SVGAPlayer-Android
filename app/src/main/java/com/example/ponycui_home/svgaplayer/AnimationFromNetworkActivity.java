@@ -17,6 +17,7 @@ import java.net.URL;
 public class AnimationFromNetworkActivity extends Activity {
 
     SVGAImageView animationView = null;
+    SVGAParser parser = new SVGAParser(this);
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -28,7 +29,6 @@ public class AnimationFromNetworkActivity extends Activity {
     }
 
     private void loadAnimation() {
-        SVGAParser parser = new SVGAParser(this);
         try { // new URL needs try catch.
             parser.decodeFromURL(new URL("https://github.com/yyued/SVGA-Samples/blob/master/posche.svga?raw=true"), new SVGAParser.ParseCompletion() {
                 @Override

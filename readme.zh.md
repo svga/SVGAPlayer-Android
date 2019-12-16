@@ -33,6 +33,9 @@ compile 'com.github.yyued:SVGAPlayer-Android:latest'
 
 [![](https://jitpack.io/v/yyued/SVGAPlayer-Android.svg)](https://jitpack.io/#yyued/SVGAPlayer-Android)
 
+### 遮罩支持
+请参阅此处 [Dynamic · Matte Layer](https://github.com/yyued/SVGAPlayer-Android/wiki/Dynamic-%C2%B7-Matte-Layer)
+
 ### 混淆规则
 
 ```
@@ -160,3 +163,7 @@ HttpResponseCache.install(cacheDir, 1024 * 1024 * 128)
 ## APIs
 
 请参阅此处 [https://github.com/yyued/SVGAPlayer-Android/wiki/APIs](https://github.com/yyued/SVGAPlayer-Android/wiki/APIs)
+
+## CHANGELOG
+
+请参阅此处 [CHANGELOG](./CHANGELOG.md)

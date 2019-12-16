@@ -10,10 +10,13 @@ internal class SVGAVideoSpriteEntity {
 
     val imageKey: String?
 
+    val matteKey: String?
+
     val frames: List<SVGAVideoSpriteFrameEntity>
 
     constructor(obj: JSONObject) {
         this.imageKey = obj.optString("imageKey")
+        this.matteKey = obj.optString("matteKey")
         val mutableFrames: MutableList<SVGAVideoSpriteFrameEntity> = mutableListOf()
         obj.optJSONArray("frames")?.let {
             for (i in 0 until it.length()) {
@@ -35,6 +38,7 @@ internal class SVGAVideoSpriteEntity {
 
     constructor(obj: SpriteEntity) {
         this.imageKey = obj.imageKey
+        this.matteKey = obj.matteKey
         var lastFrame: SVGAVideoSpriteFrameEntity? = null
         frames = obj.frames?.map {
             val frameItem = SVGAVideoSpriteFrameEntity(it)
