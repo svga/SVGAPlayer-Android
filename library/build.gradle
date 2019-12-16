@@ -26,6 +26,10 @@ android {
         exclude 'META-INF/LICENSE.txt'
         exclude 'META-INF/MANIFEST.MF'
     }
+
+    lintOptions {
+        abortOnError false
+    }
 }
 
 dependencies {
