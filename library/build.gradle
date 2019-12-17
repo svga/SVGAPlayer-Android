@@ -26,12 +26,17 @@ android {
         exclude 'META-INF/LICENSE.txt'
         exclude 'META-INF/MANIFEST.MF'
     }
+
+    lintOptions {
+        abortOnError false
+    }
 }
 
 dependencies {
-    implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation 'com.squareup.wire:wire-runtime:2.3.0-RC1'
+    provided fileTree(include: ['*.jar'], dir: 'libs')
+//    implementation 'com.squareup.wire:wire-runtime:3.0.0-alpha01'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation 'com.squareup.okio:okio:2.2.2'
 }
 repositories {
     mavenCentral()
