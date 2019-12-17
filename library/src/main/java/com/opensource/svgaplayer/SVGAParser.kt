@@ -6,13 +6,16 @@ import android.os.Handler
 import android.util.Log
 import com.opensource.svgaplayer.proto.MovieEntity
 import org.json.JSONObject
-import java.io.*
+import java.io.BufferedInputStream
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.URL
 import java.security.MessageDigest
-import java.util.concurrent.LinkedBlockingQueue
-import java.util.concurrent.ThreadPoolExecutor
-import java.util.concurrent.TimeUnit
 import java.util.zip.Inflater
 import java.util.zip.ZipInputStream
 
@@ -28,23 +31,27 @@ class SVGAParser(private val context: Context) {
 
         fun onComplete(videoItem: SVGAVideoEntity)
         fun onError()
-
     }
 
     open class FileDownloader {
 
         var noCache = false
 
-        open fun resume(url: URL, complete: (inputStream: InputStream) -> Unit, failure: (e: Exception) -> Unit): () -> Unit {
+        open fun resume(
+            url: URL, complete: (inputStream: InputStream) -> Unit, failure: (e: Exception) -> Unit
+        ): () -> Unit {
             var cancelled = false
             val cancelBlock = {
                 cancelled = true
             }
-            threadPoolExecutor.execute {
+
+            SVGAExecutorService.executorTask(Runnable {
                 try {
                     if (HttpResponseCache.getInstalled() == null && !noCache) {
-                        Log.e("SVGAParser", "SVGAParser can not handle cache before install HttpResponseCache. see https://github.com/yyued/SVGAPlayer-Android#cache")
-                        Log.e("SVGAParser", "在配置 HttpResponseCache 前 SVGAParser 无法缓存. 查看 https://github.com/yyued/SVGAPlayer-Android#cache ")
+                        Log.e("SVGAParser",
+                            "SVGAParser can not handle cache before install HttpResponseCache. see https://github.com/yyued/SVGAPlayer-Android#cache")
+                        Log.e("SVGAParser",
+                            "在配置 HttpResponseCache 前 SVGAParser 无法缓存. 查看 https://github.com/yyued/SVGAPlayer-Android#cache ")
                     }
                     (url.openConnection() as? HttpURLConnection)?.let {
                         it.connectTimeout = 20 * 1000
@@ -65,7 +72,7 @@ class SVGAParser(private val context: Context) {
                                     outputStream.write(buffer, 0, count)
                                 }
                                 if (cancelled) {
-                                    return@execute
+                                    return@Runnable
                                 }
                                 ByteArrayInputStream(outputStream.toByteArray()).use {
                                     complete(it)
@@ -77,41 +84,87 @@ class SVGAParser(private val context: Context) {
                     e.printStackTrace()
                     failure(e)
                 }
-            }
+
+            })
+
+//            threadPoolExecutor.execute {
+//                try {
+//                    if (HttpResponseCache.getInstalled() == null && !noCache) {
+//                        Log.e("SVGAParser",
+//                            "SVGAParser can not handle cache before install HttpResponseCache. see https://github.com/yyued/SVGAPlayer-Android#cache")
+//                        Log.e("SVGAParser",
+//                            "在配置 HttpResponseCache 前 SVGAParser 无法缓存. 查看 https://github.com/yyued/SVGAPlayer-Android#cache ")
+//                    }
+//                    (url.openConnection() as? HttpURLConnection)?.let {
+//                        it.connectTimeout = 20 * 1000
+//                        it.requestMethod = "GET"
+//                        it.connect()
+//                        it.inputStream.use { inputStream ->
+//                            ByteArrayOutputStream().use { outputStream ->
+//                                val buffer = ByteArray(4096)
+//                                var count: Int
+//                                while (true) {
+//                                    if (cancelled) {
+//                                        break
+//                                    }
+//                                    count = inputStream.read(buffer, 0, 4096)
+//                                    if (count == -1) {
+//                                        break
+//                                    }
+//                                    outputStream.write(buffer, 0, count)
+//                                }
+//                                if (cancelled) {
+//                                    return@execute
+//                                }
+//                                ByteArrayInputStream(outputStream.toByteArray()).use {
+//                                    complete(it)
+//                                }
+//                            }
+//                        }
+//                    }
+//                } catch (e: Exception) {
+//                    e.printStackTrace()
+//                    failure(e)
+//                }
+//
+//            }
             return cancelBlock
         }
-
     }
 
     var fileDownloader = FileDownloader()
 
-    companion object {
-        private val threadPoolBlockingQueue = LinkedBlockingQueue<Runnable>()
-        internal var threadPoolExecutor = ThreadPoolExecutor(3, 10, 60000, TimeUnit.MILLISECONDS, threadPoolBlockingQueue)
-        fun setThreadPoolExecutor(executor: ThreadPoolExecutor) {
-            threadPoolExecutor = executor
-        }
-    }
+//    companion object {
+//        private val threadPoolBlockingQueue = LinkedBlockingQueue<Runnable>()
+//        internal var threadPoolExecutor =
+//            ThreadPoolExecutor(3, 10, 60000, TimeUnit.MILLISECONDS, threadPoolBlockingQueue)
+//
+//        fun setThreadPoolExecutor(executor: ThreadPoolExecutor) {
+//            threadPoolExecutor = executor
+//        }
+//    }
 
     fun decodeFromAssets(name: String, callback: ParseCompletion?) {
         try {
             context.assets.open(name)?.let {
-                this.decodeFromInputStream(it, buildCacheKey("file:///assets/$name"), callback, true)
+                this.decodeFromInputStream(it, buildCacheKey("file:///assets/$name"), callback,
+                    true)
             }
-        }
-        catch (e: java.lang.Exception) {
+        } catch (e: java.lang.Exception) {
             this.invokeErrorCallback(e, callback)
         }
     }
 
     fun decodeFromURL(url: URL, callback: ParseCompletion?): (() -> Unit)? {
         if (this.isCached(buildCacheKey(url))) {
-            threadPoolExecutor.execute {
+//            threadPoolExecutor.execute {
+//                this.decodeFromCacheKey(buildCacheKey(url), callback)
+//            }
+            SVGAExecutorService.executorTask(Runnable {
                 this.decodeFromCacheKey(buildCacheKey(url), callback)
-            }
+            })
             return null
-        }
-        else {
+        } else {
             return fileDownloader.resume(url, {
                 this.decodeFromInputStream(it, this.buildCacheKey(url), callback)
             }, {
@@ -120,8 +173,12 @@ class SVGAParser(private val context: Context) {
         }
     }
 
-    fun decodeFromInputStream(inputStream: InputStream, cacheKey: String, callback: ParseCompletion?, closeInputStream: Boolean = false) {
-        threadPoolExecutor.execute {
+    fun decodeFromInputStream(
+        inputStream: InputStream, cacheKey: String, callback: ParseCompletion?,
+        closeInputStream: Boolean = false
+    ) {
+
+        SVGAExecutorService.executorTask(Runnable {
             try {
                 readAsBytes(inputStream)?.let { bytes ->
                     if (bytes.size > 4 && bytes[0].toInt() == 80 && bytes[1].toInt() == 75 && bytes[2].toInt() == 3 && bytes[3].toInt() == 4) {
@@ -131,10 +188,10 @@ class SVGAParser(private val context: Context) {
                             }
                         }
                         this.decodeFromCacheKey(cacheKey, callback)
-                    }
-                    else {
+                    } else {
                         inflate(bytes)?.let {
-                            val videoItem = SVGAVideoEntity(MovieEntity.ADAPTER.decode(it), File(cacheKey))
+                            val videoItem =
+                                SVGAVideoEntity(MovieEntity.ADAPTER.decode(it), File(cacheKey))
                             videoItem.prepare {
                                 this.invokeCompleteCallback(videoItem, callback)
                             }
@@ -148,13 +205,43 @@ class SVGAParser(private val context: Context) {
                     inputStream.close()
                 }
             }
-        }
+
+        })
+//        threadPoolExecutor.execute {
+//            try {
+//                readAsBytes(inputStream)?.let { bytes ->
+//                    if (bytes.size > 4 && bytes[0].toInt() == 80 && bytes[1].toInt() == 75 && bytes[2].toInt() == 3 && bytes[3].toInt() == 4) {
+//                        if (!buildCacheDir(cacheKey).exists()) {
+//                            ByteArrayInputStream(bytes).use {
+//                                unzip(it, cacheKey)
+//                            }
+//                        }
+//                        this.decodeFromCacheKey(cacheKey, callback)
+//                    } else {
+//                        inflate(bytes)?.let {
+//                            val videoItem =
+//                                SVGAVideoEntity(MovieEntity.ADAPTER.decode(it), File(cacheKey))
+//                            videoItem.prepare {
+//                                this.invokeCompleteCallback(videoItem, callback)
+//                            }
+//                        }
+//                    }
+//                }
+//            } catch (e: java.lang.Exception) {
+//                this.invokeErrorCallback(e, callback)
+//            } finally {
+//                if (closeInputStream) {
+//                    inputStream.close()
+//                }
+//            }
+//        }
     }
 
     /**
      * @deprecated from 2.4.0
      */
-    @Deprecated("This method has been deprecated from 2.4.0.", ReplaceWith("this.decodeFromAssets(assetsName, callback)"))
+    @Deprecated("This method has been deprecated from 2.4.0.",
+        ReplaceWith("this.decodeFromAssets(assetsName, callback)"))
     fun parse(assetsName: String, callback: ParseCompletion?) {
         this.decodeFromAssets(assetsName, callback)
     }
@@ -162,7 +249,8 @@ class SVGAParser(private val context: Context) {
     /**
      * @deprecated from 2.4.0
      */
-    @Deprecated("This method has been deprecated from 2.4.0.", ReplaceWith("this.decodeFromURL(url, callback)"))
+    @Deprecated("This method has been deprecated from 2.4.0.",
+        ReplaceWith("this.decodeFromURL(url, callback)"))
     fun parse(url: URL, callback: ParseCompletion?) {
         this.decodeFromURL(url, callback)
     }
@@ -170,8 +258,12 @@ class SVGAParser(private val context: Context) {
     /**
      * @deprecated from 2.4.0
      */
-    @Deprecated("This method has been deprecated from 2.4.0.", ReplaceWith("this.decodeFromInputStream(inputStream, cacheKey, callback, closeInputStream)"))
-    fun parse(inputStream: InputStream, cacheKey: String, callback: ParseCompletion?, closeInputStream: Boolean = false) {
+    @Deprecated("This method has been deprecated from 2.4.0.", ReplaceWith(
+        "this.decodeFromInputStream(inputStream, cacheKey, callback, closeInputStream)"))
+    fun parse(
+        inputStream: InputStream, cacheKey: String, callback: ParseCompletion?,
+        closeInputStream: Boolean = false
+    ) {
         this.decodeFromInputStream(inputStream, cacheKey, callback, closeInputStream)
     }
 
@@ -199,7 +291,8 @@ class SVGAParser(private val context: Context) {
                 try {
                     FileInputStream(binaryFile).use {
                         readAsBytes(it)?.let {
-                            this.invokeCompleteCallback(SVGAVideoEntity(MovieEntity.ADAPTER.decode(it), cacheDir), callback)
+                            this.invokeCompleteCallback(
+                                SVGAVideoEntity(MovieEntity.ADAPTER.decode(it), cacheDir), callback)
                         }
 //                        this.invokeCompleteCallback(SVGAVideoEntity(MovieEntity.ADAPTER.decode(it), cacheDir), callback)
                     }
@@ -223,7 +316,8 @@ class SVGAParser(private val context: Context) {
                             }
                             byteArrayOutputStream.toString().let {
                                 JSONObject(it).let {
-                                    this.invokeCompleteCallback(SVGAVideoEntity(it, cacheDir), callback)
+                                    this.invokeCompleteCallback(SVGAVideoEntity(it, cacheDir),
+                                        callback)
                                 }
                             }
                         }
@@ -252,7 +346,8 @@ class SVGAParser(private val context: Context) {
 
     private fun buildCacheKey(url: URL): String = buildCacheKey(url.toString())
 
-    private fun buildCacheDir(cacheKey: String): File = File(context.cacheDir.absolutePath + "/" + cacheKey + "/")
+    private fun buildCacheDir(cacheKey: String): File =
+        File(context.cacheDir.absolutePath + "/" + cacheKey + "/")
 
     private fun readAsBytes(inputStream: InputStream): ByteArray? {
         ByteArrayOutputStream().use { byteArrayOutputStream ->
@@ -261,8 +356,7 @@ class SVGAParser(private val context: Context) {
                 val count = inputStream.read(byteArray, 0, 2048)
                 if (count <= 0) {
                     break
-                }
-                else {
+                } else {
                     byteArrayOutputStream.write(byteArray, 0, count)
                 }
             }
@@ -279,8 +373,7 @@ class SVGAParser(private val context: Context) {
                 val count = inflater.inflate(inflatedBytes, 0, 2048)
                 if (count <= 0) {
                     break
-                }
-                else {
+                } else {
                     inflatedOutputStream.write(inflatedBytes, 0, count)
                 }
             }

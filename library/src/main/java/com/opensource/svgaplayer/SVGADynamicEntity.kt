@@ -27,15 +27,16 @@ class SVGADynamicEntity {
 
     internal var dynamicBoringLayoutText: HashMap<String, BoringLayout> = hashMapOf()
 
-    internal var dynamicDrawer: HashMap<String, (canvas: Canvas, frameIndex: Int) -> Boolean> = hashMapOf()
-
+    internal var dynamicDrawer: HashMap<String, (canvas: Canvas, frameIndex: Int) -> Boolean> =
+        hashMapOf()
 
 
     //点击事件回调map
-    internal var mClickMap : HashMap<String, IntArray> = hashMapOf()
+    internal var mClickMap: HashMap<String, IntArray> = hashMapOf()
     internal var dynamicIClickArea: HashMap<String, IClickAreaListener> = hashMapOf()
 
-    internal var dynamicDrawerSized: HashMap<String, (canvas: Canvas, frameIndex: Int, width: Int, height: Int) -> Boolean> = hashMapOf()
+    internal var dynamicDrawerSized: HashMap<String, (canvas: Canvas, frameIndex: Int, width: Int, height: Int) -> Boolean> =
+        hashMapOf()
 
 
     internal var isTextDirty = false
@@ -50,7 +51,30 @@ class SVGADynamicEntity {
 
     fun setDynamicImage(url: String, forKey: String) {
         val handler = android.os.Handler()
-        SVGAParser.threadPoolExecutor.execute {
+//        SVGAParser.threadPoolExecutor.execute {
+//            (URL(url).openConnection() as? HttpURLConnection)?.let {
+//                try {
+//                    it.connectTimeout = 20 * 1000
+//                    it.requestMethod = "GET"
+//                    it.connect()
+//                    it.inputStream.use { stream ->
+//                        BitmapFactory.decodeStream(stream)?.let {
+//                            handler.post { setDynamicImage(it, forKey) }
+//                        }
+//                    }
+//                } catch (e: Exception) {
+//                    e.printStackTrace()
+//                } finally {
+//                    try {
+//                        it.disconnect()
+//                    } catch (disconnectException: Throwable) {
+//                        // ignored here
+//                    }
+//                }
+//            }
+//
+//        }
+        SVGAExecutorService.executorTask(Runnable {
             (URL(url).openConnection() as? HttpURLConnection)?.let {
                 try {
                     it.connectTimeout = 20 * 1000
@@ -71,7 +95,7 @@ class SVGADynamicEntity {
                     }
                 }
             }
-        }
+        })
     }
 
     fun setDynamicText(text: String, textPaint: TextPaint, forKey: String) {
@@ -87,8 +111,8 @@ class SVGADynamicEntity {
 
     fun setDynamicText(layoutText: BoringLayout, forKey: String) {
         this.isTextDirty = true
-        BoringLayout.isBoring(layoutText.text,layoutText.paint)?.let {
-            this.dynamicBoringLayoutText.put(forKey,layoutText)
+        BoringLayout.isBoring(layoutText.text, layoutText.paint)?.let {
+            this.dynamicBoringLayoutText.put(forKey, layoutText)
         }
     }
 
@@ -97,13 +121,13 @@ class SVGADynamicEntity {
     }
 
     fun setClickArea(clickKey: List<String>) {
-        for(itemKey in clickKey){
-            dynamicIClickArea.put(itemKey,object : IClickAreaListener{
+        for (itemKey in clickKey) {
+            dynamicIClickArea.put(itemKey, object : IClickAreaListener {
                 override fun onResponseArea(key: String, x0: Int, y0: Int, x1: Int, y1: Int) {
                     mClickMap.let {
-                        if(it.get(key) == null){
-                            it.put(key, intArrayOf(x0,y0,x1,y1))
-                        }else{
+                        if (it.get(key) == null) {
+                            it.put(key, intArrayOf(x0, y0, x1, y1))
+                        } else {
                             it.get(key)?.let {
                                 it[0] = x0
                                 it[1] = y0
@@ -136,7 +160,10 @@ class SVGADynamicEntity {
         })
     }
 
-    fun setDynamicDrawerSized(drawer: (canvas: Canvas, frameIndex: Int, width: Int, height: Int) -> Boolean, forKey: String) {
+    fun setDynamicDrawerSized(
+        drawer: (canvas: Canvas, frameIndex: Int, width: Int, height: Int) -> Boolean,
+        forKey: String
+    ) {
         this.dynamicDrawerSized.put(forKey, drawer)
     }
 
