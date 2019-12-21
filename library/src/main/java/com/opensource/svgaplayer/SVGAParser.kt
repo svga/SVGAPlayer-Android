@@ -221,9 +221,11 @@ class SVGAParser(private val context: Context) {
             val cacheDir = File(context.cacheDir.absolutePath + "/" + cacheKey + "/")
             File(cacheDir, "movie.binary").takeIf { it.isFile }?.let { binaryFile ->
                 try {
-                    FileInputStream(binaryFile).use {
-                        this.invokeCompleteCallback(
-                            SVGAVideoEntity(MovieEntity.ADAPTER.decode(it), cacheDir), callback)
+                    FileInputStream(binaryFile).use { fs ->
+                        readAsBytes(fs)?.let {
+                            this.invokeCompleteCallback(
+                                SVGAVideoEntity(MovieEntity.ADAPTER.decode(it), cacheDir), callback)
+                        }
                     }
                 } catch (e: Exception) {
                     cacheDir.delete()
