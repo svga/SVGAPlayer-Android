@@ -30,7 +30,7 @@ android {
 
 dependencies {
 //    api fileTree(include: ['*.jar'], dir: 'libs')
-    provided fileTree(include: ['*.jar'], dir: 'libs')
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'com.squareup.okio:okio:2.4.2'
 
 //    implementation 'com.squareup.wire:wire-runtime:3.0.2'
