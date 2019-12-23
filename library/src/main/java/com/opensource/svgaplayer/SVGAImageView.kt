@@ -4,7 +4,6 @@ import android.animation.Animator
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.drawable.Drawable
 import android.os.Build
 import android.util.AttributeSet
 import android.util.Log
@@ -13,7 +12,6 @@ import android.view.View
 import android.view.animation.LinearInterpolator
 import android.widget.ImageView
 import com.opensource.svgaplayer.utils.SVGARange
-import java.lang.ref.WeakReference
 import java.net.URL
 
 /**
@@ -90,7 +88,7 @@ open class SVGAImageView : ImageView {
         }
         typedArray.getString(R.styleable.SVGAImageView_source)?.let {
             val parser = SVGAParser(context)
-            Thread {
+            SVGAExecutorService.executorTask(Runnable {
                 val callback: SVGAParser.ParseCompletion = object : SVGAParser.ParseCompletion {
                     override fun onComplete(videoItem: SVGAVideoEntity) {
                         this@SVGAImageView.post {
@@ -110,7 +108,10 @@ open class SVGAImageView : ImageView {
                 } else {
                     parser.parse(it, callback)
                 }
-            }.start()
+            })
+//            Thread {
+//
+//            }.start()
         }
         typedArray.recycle()
     }
