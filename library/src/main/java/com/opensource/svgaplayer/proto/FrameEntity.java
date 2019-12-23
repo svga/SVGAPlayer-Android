@@ -75,12 +75,12 @@ public final class FrameEntity extends AndroidMessage<FrameEntity, FrameEntity.B
   public final List<ShapeEntity> shapes;
 
   public FrameEntity(Float alpha, Layout layout, Transform transform, String clipPath,
-                     List<ShapeEntity> shapes) {
+      List<ShapeEntity> shapes) {
     this(alpha, layout, transform, clipPath, shapes, ByteString.EMPTY);
   }
 
   public FrameEntity(Float alpha, Layout layout, Transform transform, String clipPath,
-                     List<ShapeEntity> shapes, ByteString unknownFields) {
+      List<ShapeEntity> shapes, ByteString unknownFields) {
     super(ADAPTER, unknownFields);
     this.alpha = alpha;
     this.layout = layout;
@@ -130,7 +130,7 @@ public final class FrameEntity extends AndroidMessage<FrameEntity, FrameEntity.B
   }
 
   public static final class Builder extends Message.Builder<FrameEntity, Builder> {
-    public Float alpha;
+    public float alpha;
 
     public Layout layout;
 

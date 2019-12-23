@@ -116,13 +116,13 @@ public final class MovieParams extends AndroidMessage<MovieParams, MovieParams.B
   }
 
   public static final class Builder extends Message.Builder<MovieParams, Builder> {
-    public Float viewBoxWidth;
+    public float viewBoxWidth;
 
-    public Float viewBoxHeight;
+    public float viewBoxHeight;
 
-    public Integer fps;
+    public int fps;
 
-    public Integer frames;
+    public int frames;
 
     public Builder() {
     }

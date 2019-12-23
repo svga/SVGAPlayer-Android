@@ -437,15 +437,15 @@ public final class ShapeEntity extends AndroidMessage<ShapeEntity, ShapeEntity.B
     }
 
     public static final class Builder extends Message.Builder<RectArgs, Builder> {
-      public Float x;
+      public float x;
 
-      public Float y;
+      public float y;
 
-      public Float width;
+      public float width;
 
-      public Float height;
+      public float height;
 
-      public Float cornerRadius;
+      public float cornerRadius;
 
       public Builder() {
       }
@@ -590,13 +590,13 @@ public final class ShapeEntity extends AndroidMessage<ShapeEntity, ShapeEntity.B
     }
 
     public static final class Builder extends Message.Builder<EllipseArgs, Builder> {
-      public Float x;
+      public float x;
 
-      public Float y;
+      public float y;
 
-      public Float radiusX;
+      public float radiusX;
 
-      public Float radiusY;
+      public float radiusY;
 
       public Builder() {
       }
@@ -828,19 +828,19 @@ public final class ShapeEntity extends AndroidMessage<ShapeEntity, ShapeEntity.B
 
       public RGBAColor stroke;
 
-      public Float strokeWidth;
+      public float strokeWidth;
 
       public LineCap lineCap;
 
       public LineJoin lineJoin;
 
-      public Float miterLimit;
+      public float miterLimit;
 
-      public Float lineDashI;
+      public float lineDashI;
 
-      public Float lineDashII;
+      public float lineDashII;
 
-      public Float lineDashIII;
+      public float lineDashIII;
 
       public Builder() {
       }
@@ -1016,13 +1016,13 @@ public final class ShapeEntity extends AndroidMessage<ShapeEntity, ShapeEntity.B
       }
 
       public static final class Builder extends Message.Builder<RGBAColor, Builder> {
-        public Float r;
+        public float r;
 
-        public Float g;
+        public float g;
 
-        public Float b;
+        public float b;
 
-        public Float a;
+        public float a;
 
         public Builder() {
         }

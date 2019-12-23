@@ -59,7 +59,7 @@ public final class SpriteEntity extends AndroidMessage<SpriteEntity, SpriteEntit
   }
 
   public SpriteEntity(String imageKey, List<FrameEntity> frames, String matteKey,
-      ByteString unknownFields) {
+                      ByteString unknownFields) {
     super(ADAPTER, unknownFields);
     this.imageKey = imageKey;
     this.frames = Internal.immutableCopyOf("frames", frames);

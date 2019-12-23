@@ -103,13 +103,13 @@ public final class Layout extends AndroidMessage<Layout, Layout.Builder> {
   }
 
   public static final class Builder extends Message.Builder<Layout, Builder> {
-    public Float x;
+    public float x;
 
-    public Float y;
+    public float y;
 
-    public Float width;
+    public float width;
 
-    public Float height;
+    public float height;
 
     public Builder() {
     }

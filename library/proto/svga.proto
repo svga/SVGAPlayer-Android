@@ -1,0 +1,131 @@
+syntax = "proto3";
+package com.opensource.svga;
+option objc_class_prefix = "SVGAProto";
+option java_package = "com.opensource.svgaplayer.proto";
+
+message MovieParams {
+    float viewBoxWidth = 1;     // 画布宽
+    float viewBoxHeight = 2;    // 画布高
+    int32 fps = 3;              // 动画每秒播放帧数，合法值是 [1, 2, 3, 5, 6, 10, 12, 15, 20, 30, 60] 中的任意一个。
+    int32 frames = 4;           // 动画总帧数
+}
+
+message SpriteEntity {
+    string imageKey = 1;                // 元件所对应的位图键名, 如果 imageKey 含有 .vector 后缀，该 sprite 为矢量图层 含有 .matte 后缀，该 sprite 为遮罩图层。
+    repeated FrameEntity frames = 2;    // 帧列表
+    string matteKey = 3;                // 被遮罩图层的 matteKey 对应的是其遮罩图层的 imageKey.
+}
+
+message AudioEntity {
+    string audioKey = 1;        // 音频文件名
+    int32 startFrame = 2;       // 音频播放起始帧
+    int32 endFrame = 3;         // 音频播放结束帧
+    int32 startTime = 4;        // 音频播放起始时间（相对音频长度）
+    int32 totalTime = 5;        // 音频总长度
+}
+
+message Layout {
+    float x = 1;
+    float y = 2;
+    float width = 3;
+    float height = 4;
+}
+
+message Transform {
+    float a = 1;
+    float b = 2;
+    float c = 3;
+    float d = 4;
+    float tx = 5;
+    float ty = 6;
+}
+
+message ShapeEntity {
+
+    enum ShapeType {
+        SHAPE = 0;      // 路径
+        RECT = 1;       // 矩形
+        ELLIPSE = 2;    // 圆形
+        KEEP = 3;       // 与前帧一致
+    }
+
+    message ShapeArgs {
+        string d = 1;   // SVG 路径
+    }
+
+    message RectArgs {
+        float x = 1;
+        float y = 2;
+        float width = 3;
+        float height = 4;
+        float cornerRadius = 5; // 圆角半径
+    }
+
+    message EllipseArgs {
+        float x = 1;            // 圆中心点 X
+        float y = 2;            // 圆中心点 Y
+        float radiusX = 3;      // 横向半径
+        float radiusY = 4;      // 纵向半径
+    }
+
+    message ShapeStyle {
+
+        message RGBAColor {
+            float r = 1;
+            float g = 2;
+            float b = 3;
+            float a = 4;
+        }
+
+        enum LineCap {
+            LineCap_BUTT = 0;
+            LineCap_ROUND = 1;
+            LineCap_SQUARE = 2;
+        }
+
+        enum LineJoin {
+            LineJoin_MITER = 0;
+            LineJoin_ROUND = 1;
+            LineJoin_BEVEL = 2;
+        }
+
+        RGBAColor fill = 1;         // 填充色
+        RGBAColor stroke = 2;       // 描边色
+        float strokeWidth = 3;      // 描边宽
+        LineCap lineCap = 4;        // 线段端点样式
+        LineJoin lineJoin = 5;      // 线段连接样式
+        float miterLimit = 6;       // 尖角限制
+        float lineDashI = 7;        // 虚线参数 Dash
+        float lineDashII = 8;       // 虚线参数 Gap
+        float lineDashIII = 9;      // 虚线参数 Offset
+
+    }
+
+    ShapeType type = 1;                 // 矢量类型
+    oneof args {
+        ShapeArgs shape = 2;
+        RectArgs rect = 3;
+        EllipseArgs ellipse = 4;
+    }                                   // 矢量参数
+    ShapeStyle styles = 10;             // 渲染参数
+    Transform transform = 11;           // 矢量图层 2D 变换矩阵
+    
+}
+
+message FrameEntity {
+    float alpha = 1;                    // 透明度
+    Layout layout = 2;                  // 初始约束大小
+    Transform transform = 3;            // 2D 变换矩阵
+    string clipPath = 4;                // 遮罩路径，使用 SVG 标准 Path 绘制图案进行 Mask 遮罩。
+    repeated ShapeEntity shapes = 5;                // 矢量元素列表
+}
+
+message MovieEntity {
+
+    string version = 1;                 // SVGA 格式版本号
+    MovieParams params = 2;             // 动画参数
+    map<string, bytes> images = 3;      // Key 是位图键名，Value 是位图文件名或二进制 PNG 数据。
+    repeated SpriteEntity sprites = 4;  // 元素列表
+    repeated AudioEntity audios = 5;    // 音频列表
+
+}

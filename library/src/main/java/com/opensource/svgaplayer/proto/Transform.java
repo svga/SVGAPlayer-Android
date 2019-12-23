@@ -130,17 +130,17 @@ public final class Transform extends AndroidMessage<Transform, Transform.Builder
   }
 
   public static final class Builder extends Message.Builder<Transform, Builder> {
-    public Float a;
+    public float a;
 
-    public Float b;
+    public float b;
 
-    public Float c;
+    public float c;
 
-    public Float d;
+    public float d;
 
-    public Float tx;
+    public float tx;
 
-    public Float ty;
+    public float ty;
 
     public Builder() {
     }

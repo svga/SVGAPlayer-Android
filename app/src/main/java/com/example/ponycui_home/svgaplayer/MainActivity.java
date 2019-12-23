@@ -18,6 +18,7 @@ import android.widget.TextView;
 
 import com.opensource.svgaplayer.proto.AudioEntity;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 
 import ikxd.cproxy.InnerV2;
@@ -61,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
         ser1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AudioEntity entity = new AudioEntity.Builder().audioKey("dsds").totalTime(33).build();
+                AudioEntity entity = new AudioEntity.Builder().totalTime(33).build();
                 byte[] payload = entity.encode();
                 InnerV2 innerV2 = new InnerV2.Builder().payload(ByteString.of(payload)).build();
                 bytes = innerV2.encode();

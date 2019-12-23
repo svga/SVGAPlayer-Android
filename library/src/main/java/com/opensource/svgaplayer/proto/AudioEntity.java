@@ -135,13 +135,13 @@ public final class AudioEntity extends AndroidMessage<AudioEntity, AudioEntity.B
   public static final class Builder extends Message.Builder<AudioEntity, Builder> {
     public String audioKey;
 
-    public Integer startFrame;
+    public int startFrame;
 
-    public Integer endFrame;
+    public int endFrame;
 
-    public Integer startTime;
+    public int startTime;
 
-    public Integer totalTime;
+    public int totalTime;
 
     public Builder() {
     }
