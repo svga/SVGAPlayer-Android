@@ -61,8 +61,8 @@ public class AnimationFromAssetsActivity extends Activity {
             samples.add("heartbeat.svga");
             samples.add("posche.svga");
             samples.add("rose_2.0.0.svga");
-            samples.add("test.svga");
-            samples.add("test2.svga");
+            samples.add("Castle.svga");
+            samples.add("MerryChristmas.svga");
         }
         return samples.get((int) Math.floor(Math.random() * samples.size()));
     }

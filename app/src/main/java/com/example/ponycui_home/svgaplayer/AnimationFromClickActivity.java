@@ -40,7 +40,7 @@ public class AnimationFromClickActivity extends Activity {
     }
 
     private void loadAnimation() {
-        SVGAParser.Companion.shareParser().decodeFromAssets("test2.svga",new SVGAParser.ParseCompletion() {
+        SVGAParser.Companion.shareParser().decodeFromAssets("MerryChristmas.svga",new SVGAParser.ParseCompletion() {
             @Override
             public void onComplete(@NotNull SVGAVideoEntity videoItem) {
                 SVGADynamicEntity dynamicEntity = new SVGADynamicEntity();
