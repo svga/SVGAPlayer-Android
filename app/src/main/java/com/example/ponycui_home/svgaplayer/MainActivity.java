@@ -67,6 +67,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         this.setupData();
         this.setupListView();
+        this.setupSVGAParser();
         setContentView(listView);
     }
 
@@ -154,6 +155,9 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         this.listView.setBackgroundColor(Color.WHITE);
+    }
+    void setupSVGAParser() {
+        SVGAParser.Companion.shareParser().init(this);
     }
 
 
