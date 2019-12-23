@@ -10,6 +10,7 @@ import java.io.*
 import java.net.HttpURLConnection
 import java.net.URL
 import java.security.MessageDigest
+import java.util.concurrent.Executors
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
@@ -86,8 +87,7 @@ class SVGAParser(private val context: Context) {
     var fileDownloader = FileDownloader()
 
     companion object {
-        private val threadPoolBlockingQueue = LinkedBlockingQueue<Runnable>()
-        internal var threadPoolExecutor = ThreadPoolExecutor(3, 10, 60000, TimeUnit.MILLISECONDS, threadPoolBlockingQueue)
+        internal var threadPoolExecutor = Executors.newCachedThreadPool()
         fun setThreadPoolExecutor(executor: ThreadPoolExecutor) {
             threadPoolExecutor = executor
         }
