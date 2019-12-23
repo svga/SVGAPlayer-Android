@@ -50,7 +50,7 @@ class SVGADynamicEntity {
 
     fun setDynamicImage(url: String, forKey: String) {
         val handler = android.os.Handler()
-        SVGAParser.threadPoolExecutor.execute {
+        SVGAExecutorService.executorTask(Runnable {
             (URL(url).openConnection() as? HttpURLConnection)?.let {
                 try {
                     it.connectTimeout = 20 * 1000
@@ -71,7 +71,10 @@ class SVGADynamicEntity {
                     }
                 }
             }
-        }
+        })
+//        SVGAParser.threadPoolExecutor.execute {
+//
+//        }
     }
 
     fun setDynamicText(text: String, textPaint: TextPaint, forKey: String) {
