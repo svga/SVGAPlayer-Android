@@ -29,6 +29,7 @@ internal class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVG
 
     override fun drawFrame(canvas: Canvas, frameIndex: Int, scaleType: ImageView.ScaleType) {
         super.drawFrame(canvas,frameIndex, scaleType)
+        playAudio(frameIndex)
         this.pathCache.onSizeChanged(canvas)
         val sprites = requestFrameSprites(frameIndex)
         // Filter null sprites
@@ -89,7 +90,6 @@ internal class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVG
                 }
             }
         }
-        playAudio(frameIndex)
     }
 
     private fun isMatteBegin(spriteIndex: Int, sprites: List<SVGADrawerSprite>): Boolean {
