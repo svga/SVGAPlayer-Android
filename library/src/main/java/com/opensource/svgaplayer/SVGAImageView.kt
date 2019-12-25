@@ -36,6 +36,8 @@ open class SVGAImageView : ImageView {
 
     var callback: SVGACallback? = null
 
+    private var mVideoItem: SVGAVideoEntity? = null
+
     private var animator: ValueAnimator? = null
 
     private var mItemClickAreaListener : SVGAClickAreaListener? = null
@@ -67,9 +69,19 @@ open class SVGAImageView : ImageView {
 
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
+        clearAudio()
         animator?.cancel()
         animator?.removeAllListeners()
         animator?.removeAllUpdateListeners()
+    }
+
+    private fun clearAudio() {
+        this.mVideoItem?.audios?.forEach { audio ->
+            audio.playID?.let {
+                this.mVideoItem?.soundPool?.stop(it)
+            }
+            audio.playID = null
+        }
     }
 
     private fun loadAttrs(attrs: AttributeSet) {
@@ -214,6 +226,7 @@ open class SVGAImageView : ImageView {
         val drawable = SVGADrawable(videoItem, dynamicItem ?: SVGADynamicEntity())
         drawable.cleared = clearsAfterStop
         setImageDrawable(drawable)
+        this.mVideoItem = videoItem
     }
 
     fun stepToFrame(frame: Int, andPlay: Boolean) {
