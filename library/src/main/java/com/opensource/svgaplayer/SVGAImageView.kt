@@ -4,7 +4,6 @@ import android.animation.Animator
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.drawable.Drawable
 import android.os.Build
 import android.util.AttributeSet
 import android.util.Log
@@ -13,7 +12,6 @@ import android.view.View
 import android.view.animation.LinearInterpolator
 import android.widget.ImageView
 import com.opensource.svgaplayer.utils.SVGARange
-import java.lang.ref.WeakReference
 import java.net.URL
 
 /**
@@ -37,6 +35,8 @@ open class SVGAImageView : ImageView {
     var fillMode: FillMode = FillMode.Forward
 
     var callback: SVGACallback? = null
+
+    private var mVideoItem: SVGAVideoEntity? = null
 
     private var animator: ValueAnimator? = null
 
@@ -69,9 +69,19 @@ open class SVGAImageView : ImageView {
 
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
+        clearAudio()
         animator?.cancel()
         animator?.removeAllListeners()
         animator?.removeAllUpdateListeners()
+    }
+
+    private fun clearAudio() {
+        this.mVideoItem?.audios?.forEach { audio ->
+            audio.playID?.let {
+                this.mVideoItem?.soundPool?.stop(it)
+            }
+            audio.playID = null
+        }
     }
 
     private fun loadAttrs(attrs: AttributeSet) {
@@ -216,6 +226,7 @@ open class SVGAImageView : ImageView {
         val drawable = SVGADrawable(videoItem, dynamicItem ?: SVGADynamicEntity())
         drawable.cleared = clearsAfterStop
         setImageDrawable(drawable)
+        this.mVideoItem = videoItem
     }
 
     fun stepToFrame(frame: Int, andPlay: Boolean) {

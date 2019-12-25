@@ -18,7 +18,6 @@ public class AnimationFromAssetsActivity extends Activity {
 
     int currentIndex = 0;
     SVGAImageView animationView = null;
-    SVGAParser parser = new SVGAParser(this);
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -36,13 +35,13 @@ public class AnimationFromAssetsActivity extends Activity {
     }
 
     private void loadAnimation() {
-        parser.decodeFromAssets(this.randomSample(), new SVGAParser.ParseCompletion() {
-            @Override
-            public void onComplete(@NotNull SVGAVideoEntity videoItem) {
-                animationView.setVideoItem(videoItem);
-                animationView.stepToFrame(0, true);
-            }
-            @Override
+        SVGAParser.Companion.shareParser().decodeFromAssets(this.randomSample(), new SVGAParser.ParseCompletion() {
+                @Override
+                public void onComplete(@NotNull SVGAVideoEntity videoItem) {
+                    animationView.setVideoItem(videoItem);
+                    animationView.stepToFrame(0, true);
+                }
+                @Override
             public void onError() {
 
             }
@@ -62,8 +61,8 @@ public class AnimationFromAssetsActivity extends Activity {
             samples.add("heartbeat.svga");
             samples.add("posche.svga");
             samples.add("rose_2.0.0.svga");
-            samples.add("test.svga");
-            samples.add("test2.svga");
+            samples.add("Castle.svga");
+            samples.add("MerryChristmas.svga");
         }
         return samples.get((int) Math.floor(Math.random() * samples.size()));
     }
