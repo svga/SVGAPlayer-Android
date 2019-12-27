@@ -115,7 +115,7 @@ parser = SVGAParser.shareParser()
 
 #### 初始化 `SVGAParser` 单例
 
-必须要使用 `SVGAParser` 单例前初始化，
+必须在使用 `SVGAParser` 单例前初始化，
 ```
 SVGAParser.shareParser().init(this);
 ```
