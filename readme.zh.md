@@ -33,6 +33,12 @@ compile 'com.github.yyued:SVGAPlayer-Android:latest'
 
 [![](https://jitpack.io/v/yyued/SVGAPlayer-Android.svg)](https://jitpack.io/#yyued/SVGAPlayer-Android)
 
+### Parser 单例支持
+SVGAParser 单例需要在使用之前初始化，
+否则会上报错误信息：
+`Log.e("SVGAParser", "在配置 SVGAParser context 前, 无法解析 SVGA 文件。")`
+
+
 ### 遮罩支持
 请参阅此处 [Dynamic · Matte Layer](https://github.com/yyued/SVGAPlayer-Android/wiki/Dynamic-%C2%B7-Matte-Layer)
 
@@ -100,6 +106,24 @@ SVGAPlayer 可以从本地 `assets` 目录，或者远端服务器上加载动�
 ```kotlin
 SVGAImageView imageView = new SVGAImageView(this);
 ```
+
+#### 声明一个 `SVGAParser` 单例.
+
+```kotlin
+parser = SVGAParser.shareParser()
+```
+
+#### 初始化 `SVGAParser` 单例
+
+必须在使用 `SVGAParser` 单例前初始化，
+```
+SVGAParser.shareParser().init(this);
+```
+
+否则会上报错误信息：
+`Log.e("SVGAParser", "在配置 SVGAParser context 前, 无法解析 SVGA 文件。")`
+
+你也可以自行创建 `SVGAParser` 实例。
 
 #### 创建一个 `SVGAParser` 实例，加载 assets 中的动画。
 
