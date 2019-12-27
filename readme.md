@@ -38,6 +38,12 @@ compile 'com.github.yyued:SVGAPlayer-Android:latest'
 
 [![](https://jitpack.io/v/yyued/SVGAPlayer-Android.svg)](https://jitpack.io/#yyued/SVGAPlayer-Android)
 
+### Static Parser Support
+Perser#shareParser should be init(context) in Application or other Activity.
+Otherwise it will report an error:
+`Log.e("SVGAParser", "在配置 SVGAParser context 前, 无法解析 SVGA 文件。")`
+
+
 ### Matte Support
 Head on over to [Dynamic · Matte Layer](https://github.com/yyued/SVGAPlayer-Android/wiki/Dynamic-%C2%B7-Matte-Layer)
 
@@ -115,6 +121,24 @@ You may use code to add `SVGAImageView` either.
 ```kotlin
 SVGAImageView imageView = new SVGAImageView(this);
 ```
+
+#### Declare a static Parser instance.
+
+```kotlin
+parser = SVGAParser.shareParser()
+```
+
+#### Init parser instance 
+
+You should initialize the parser instance with context before usage.
+```
+SVGAParser.shareParser().init(this);
+```
+
+Otherwise it will report an error:
+`Log.e("SVGAParser", "在配置 SVGAParser context 前, 无法解析 SVGA 文件。")`
+
+You can also create `SVGAParser` instance by yourself.
 
 #### Create a `SVGAParser` instance, parse from assets like this.
 
