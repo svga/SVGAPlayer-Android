@@ -30,9 +30,8 @@ class SVGADynamicEntity {
     internal var dynamicDrawer: HashMap<String, (canvas: Canvas, frameIndex: Int) -> Boolean> = hashMapOf()
 
 
-
     //点击事件回调map
-    internal var mClickMap : HashMap<String, IntArray> = hashMapOf()
+    internal var mClickMap: HashMap<String, IntArray> = hashMapOf()
     internal var dynamicIClickArea: HashMap<String, IClickAreaListener> = hashMapOf()
 
     internal var dynamicDrawerSized: HashMap<String, (canvas: Canvas, frameIndex: Int, width: Int, height: Int) -> Boolean> = hashMapOf()
@@ -87,8 +86,8 @@ class SVGADynamicEntity {
 
     fun setDynamicText(layoutText: BoringLayout, forKey: String) {
         this.isTextDirty = true
-        BoringLayout.isBoring(layoutText.text,layoutText.paint)?.let {
-            this.dynamicBoringLayoutText.put(forKey,layoutText)
+        BoringLayout.isBoring(layoutText.text, layoutText.paint)?.let {
+            this.dynamicBoringLayoutText.put(forKey, layoutText)
         }
     }
 
@@ -98,13 +97,13 @@ class SVGADynamicEntity {
 
 
     fun setClickArea(clickKey: List<String>) {
-        for(itemKey in clickKey){
-            dynamicIClickArea.put(itemKey,object : IClickAreaListener{
+        for (itemKey in clickKey) {
+            dynamicIClickArea.put(itemKey, object : IClickAreaListener {
                 override fun onResponseArea(key: String, x0: Int, y0: Int, x1: Int, y1: Int) {
                     mClickMap.let {
-                        if(it.get(key) == null){
-                            it.put(key, intArrayOf(x0,y0,x1,y1))
-                        }else{
+                        if (it.get(key) == null) {
+                            it.put(key, intArrayOf(x0, y0, x1, y1))
+                        } else {
                             it.get(key)?.let {
                                 it[0] = x0
                                 it[1] = y0
@@ -120,12 +119,12 @@ class SVGADynamicEntity {
     }
 
     fun setClickArea(clickKey: String) {
-        dynamicIClickArea.put(clickKey,object : IClickAreaListener{
+        dynamicIClickArea.put(clickKey, object : IClickAreaListener {
             override fun onResponseArea(key: String, x0: Int, y0: Int, x1: Int, y1: Int) {
                 mClickMap.let {
-                    if(it.get(key) == null){
-                        it.put(key, intArrayOf(x0,y0,x1,y1))
-                    }else{
+                    if (it.get(key) == null) {
+                        it.put(key, intArrayOf(x0, y0, x1, y1))
+                    } else {
                         it.get(key)?.let {
                             it[0] = x0
                             it[1] = y0
@@ -138,24 +137,25 @@ class SVGADynamicEntity {
 
         })
 
-    fun setDynamicDrawerSized(drawer: (canvas: Canvas, frameIndex: Int, width: Int, height: Int) -> Boolean, forKey: String) {
-        this.dynamicDrawerSized.put(forKey, drawer)
+        fun setDynamicDrawerSized(drawer: (canvas: Canvas, frameIndex: Int, width: Int, height: Int) -> Boolean, forKey: String) {
+            this.dynamicDrawerSized.put(forKey, drawer)
+
+        }
+
+        fun clearDynamicObjects() {
+            this.isTextDirty = true
+            this.dynamicHidden.clear()
+            this.dynamicImage.clear()
+            this.dynamicText.clear()
+            this.dynamicTextPaint.clear()
+            this.dynamicStaticLayoutText.clear()
+            this.dynamicBoringLayoutText.clear()
+            this.dynamicDrawer.clear()
+            this.dynamicIClickArea.clear()
+            this.mClickMap.clear()
+            this.dynamicDrawerSized.clear()
+
+        }
 
     }
-
-    fun clearDynamicObjects() {
-        this.isTextDirty = true
-        this.dynamicHidden.clear()
-        this.dynamicImage.clear()
-        this.dynamicText.clear()
-        this.dynamicTextPaint.clear()
-        this.dynamicStaticLayoutText.clear()
-        this.dynamicBoringLayoutText.clear()
-        this.dynamicDrawer.clear()
-        this.dynamicIClickArea.clear()
-        this.mClickMap.clear()
-        this.dynamicDrawerSized.clear()
-
-    }
-
 }
