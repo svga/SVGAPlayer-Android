@@ -256,6 +256,9 @@ open class SVGAImageView : ImageView {
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent?): Boolean {
+        if (mVideoItem == null) {
+            return super.onTouchEvent(event)
+        }
         event?.let {
             if(event.action == MotionEvent.ACTION_DOWN){
                 val drawable = drawable as? SVGADrawable ?: return false
@@ -267,9 +270,6 @@ open class SVGAImageView : ImageView {
                         }
                     }
                 }
-
-
-
             }
         }
 
