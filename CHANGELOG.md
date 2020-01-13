@@ -1,4 +1,57 @@
-# SVGAPlayer-Android CHANGELOG (2019-10-16)
+# SVGAPlayer-Android CHANGELOG (2020-01-13)
+
+# [2.5.3](https://github.com/yyued/SVGAPlayer-Android/compare/2.5.2-beta...2.5.3) (2020-01-13)
+
+
+### Bug Fixes
+* Correct touch event. ([0133a0b](https://github.com/yyued/SVGAPlayer-Android/commit/0133a0b))
+* Correct play audio. ([0133a0b](https://github.com/yyued/SVGAPlayer-Android/commit/0133a0b))
+* Issue [[#185](https://github.com/yyued/SVGAPlayer-Android/issues/185)](https://github.com/yyued/SVGAPlayer-Android/issues/185) drawTextOnBitmap 部分特殊文字会出现IndexOutOfBoundsException【必现. ([1534cd2](https://github.com/yyued/SVGAPlayer-Android/commit/1534cd2))
+
+
+### Features
+
+* Add shareParser. ([3a4d5b9](https://github.com/yyued/SVGAPlayer-Android/commit/3a4d5b9))
+* Clear audio when remove svga image view. ([35ec8ca](https://github.com/yyued/SVGAPlayer-Android/commit/35ec8ca))
+* Correct touch event when mvideoItem == null; ([e50751e](https://github.com/yyued/SVGAPlayer-Android/commit/e50751e))
+* Update threadPoolExecutor. ([3bc8915](https://github.com/yyued/SVGAPlayer-Android/commit/3bc8915))
+
+
+## [2.5.2-beta](https://github.com/yyued/SVGAPlayer-Android/compare/2.4.4...2.5.2-beta) (2019-11-26)
+
+
+### Bug Fixes
+
+* Add canvas save and restore when Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP. ([f605c5b](https://github.com/yyued/SVGAPlayer-Android/commit/f605c5b))
+* Add isRecycle check to avoid Bitmap recycled outside and draw. ([763a510](https://github.com/yyued/SVGAPlayer-Android/commit/763a510))
+* Add try catch for resetImages to avoid OOM. ([ef1f232](https://github.com/yyued/SVGAPlayer-Android/commit/ef1f232))
+* correct bitmap size. ([3ae8390](https://github.com/yyued/SVGAPlayer-Android/commit/3ae8390))
+* Delete useless file. ([1a4ff57](https://github.com/yyued/SVGAPlayer-Android/commit/1a4ff57))
+* Extra code causes antiAlias not effective. ([ac91e2a](https://github.com/yyued/SVGAPlayer-Android/commit/ac91e2a))
+* filter no matte. ([1257db4](https://github.com/yyued/SVGAPlayer-Android/commit/1257db4))
+* filter no matte. ([ae7e802](https://github.com/yyued/SVGAPlayer-Android/commit/ae7e802))
+* Ignore matte layer when Build.VERSION.SDK_INT unsupport. ([0db05f2](https://github.com/yyued/SVGAPlayer-Android/commit/0db05f2))
+* Remove clipPath support. ([f9e3827](https://github.com/yyued/SVGAPlayer-Android/commit/f9e3827))
+* reset image when bitmap matte layer. ([3f06512](https://github.com/yyued/SVGAPlayer-Android/commit/3f06512))
+* Restore audio prepare block. ([193c7d9](https://github.com/yyued/SVGAPlayer-Android/commit/193c7d9))
+* return share clear bitmap when matte bitmap is null for avoiding crash. ([9e1f0f3](https://github.com/yyued/SVGAPlayer-Android/commit/9e1f0f3))
+* support reuse bitmap paint and canvas. ([3df95bb](https://github.com/yyued/SVGAPlayer-Android/commit/3df95bb))
+* update filter when matte sprite frame alpha = 0, it is visuable. ([b25fafb](https://github.com/yyued/SVGAPlayer-Android/commit/b25fafb))
+* Use shared ThreadPoolExecutor avoid p_thread create OOM. ([e6d72ef](https://github.com/yyued/SVGAPlayer-Android/commit/e6d72ef))
+
+
+### Features
+
+* add 2.x proto support for matte. ([741eb01](https://github.com/yyued/SVGAPlayer-Android/commit/741eb01))
+* Add dynamicDrawerSized logic. ([f37722f](https://github.com/yyued/SVGAPlayer-Android/commit/f37722f))
+* Add StaticLayout maxLines support. ([fd63642](https://github.com/yyued/SVGAPlayer-Android/commit/fd63642))
+* Avoid null sprite. ([25eb9ea](https://github.com/yyued/SVGAPlayer-Android/commit/25eb9ea))
+* Catch Error OOM. ([8070ec6](https://github.com/yyued/SVGAPlayer-Android/commit/8070ec6))
+* draw matte sprite with PorterDuffXfermode(PorterDuff.Mode.DST_IN). ([3a39ff6](https://github.com/yyued/SVGAPlayer-Android/commit/3a39ff6))
+* draw matte sprite with PorterDuffXfermode(PorterDuff.Mode.DST_IN). ([bd55948](https://github.com/yyued/SVGAPlayer-Android/commit/bd55948))
+* Set ParseCompletion Nullable. ([41b2c8f](https://github.com/yyued/SVGAPlayer-Android/commit/41b2c8f))
+* Set parser class variables for demo. ([ae36dc3](https://github.com/yyued/SVGAPlayer-Android/commit/ae36dc3))
+* Update matte draw logic. ([07e7d11](https://github.com/yyued/SVGAPlayer-Android/commit/07e7d11))
 
 ## [2.5.0](https://github.com/yyued/SVGAPlayer-Android/tree/2.5.0-release)(2019-10-16)
 
