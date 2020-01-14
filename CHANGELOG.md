@@ -79,10 +79,10 @@
 * Set parser class variables for demo. ([ae36dc3](https://github.com/yyued/SVGAPlayer-Android/commit/ae36dc3))
 * Update matte draw logic. ([07e7d11](https://github.com/yyued/SVGAPlayer-Android/commit/07e7d11))
 
-## [2.4.4](https://github.com/yyued/SVGAPlayer-Android/compare/2.4.3...2.4.4) (2019-05-15)
+## [2.4.4](https://github.com/yyued/SVGAPlayer-Android/compare/2.4.3...2.4.4) (2019-05-15)
 
 
-### Bug Fixes
+### Bug Fixes
 
 * Add finalize method to release some resources. ([8506240](https://github.com/yyued/SVGAPlayer-Android/commit/8506240))
 * Add protected keyword to finalize. ([197f4f9](https://github.com/yyued/SVGAPlayer-Android/commit/197f4f9))
@@ -90,40 +90,41 @@
 
 
 
-## [2.4.2](https://github.com/yyued/SVGAPlayer-Android/compare/2.4.0...2.4.2) (2019-01-21)
+## [2.4.2](https://github.com/yyued/SVGAPlayer-Android/compare/2.4.0...2.4.2) (2019-01-21)
 
 
-### Bug Fixes
+### Bug Fixes
 
 * https://github.com/yyued/SVGAPlayer-Android/issues/110 ([38fba4f](https://github.com/yyued/SVGAPlayer-Android/commit/38fba4f))
 
 
 
-## [2.4.0](https://github.com/yyued/SVGAPlayer-Android/compare/2.3.0...2.4.0) (2019-01-16)
+## [2.4.0](https://github.com/yyued/SVGAPlayer-Android/compare/2.3.0...2.4.0) (2019-01-16)
 
 
-### Bug Fixes
+### Bug Fixes
 
 * Fix fail to play 1.0 format file. ([7fad1cd](https://github.com/yyued/SVGAPlayer-Android/commit/7fad1cd))
 * Fix memory issue, due to android.view.ImageView drawable cycle reference, let drawable sets to WeakReference if ImageView detached. ([d040e36](https://github.com/yyued/SVGAPlayer-Android/commit/d040e36))
 * Remove unnecessary code. ([cd31b1b](https://github.com/yyued/SVGAPlayer-Android/commit/cd31b1b))
 * Fix stroke color did not apply sprite alpha. ([2077be9](https://github.com/yyued/SVGAPlayer-Android/commit/2077be9))
- 
-## 2.3.0 
+
+
+## 2.3.0 
 
 *  Add audio support. 
 
-## 2.1.10 
+## 2.1.10 
 
 * Fix vector stroke width scale for old version.
 
-## 2.1.9
+## 2.1.9
 
 * Fix alpha not set while drawing shapes.
 
-## 2.1.8 
+## 2.1.8 
 
-* Handle null return for func readAsBytes
+* Handle null return for func readAsBytes
 
 
 
