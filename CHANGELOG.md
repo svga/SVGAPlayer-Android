@@ -6,7 +6,7 @@
 ### Bug Fixes
 * Correct touch event. ([0133a0b](https://github.com/yyued/SVGAPlayer-Android/commit/0133a0b))
 * Correct play audio. ([0133a0b](https://github.com/yyued/SVGAPlayer-Android/commit/0133a0b))
-* Issue [[#185](https://github.com/yyued/SVGAPlayer-Android/issues/185)](https://github.com/yyued/SVGAPlayer-Android/issues/185) drawTextOnBitmap 部分特殊文字会出现IndexOutOfBoundsException【必现. ([1534cd2](https://github.com/yyued/SVGAPlayer-Android/commit/1534cd2))
+* Issue [#185](https://github.com/yyued/SVGAPlayer-Android/issues/185) drawTextOnBitmap 部分特殊文字会出现IndexOutOfBoundsException【必现】 ([1534cd2](https://github.com/yyued/SVGAPlayer-Android/commit/1534cd2))
 
 
 ### Features
