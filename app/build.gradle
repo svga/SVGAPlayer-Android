@@ -34,3 +34,18 @@ dependencies {
     implementation 'com.squareup.okhttp3:okhttp:3.4.1'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
+
+
+task testGit() {
+    testExc("channel_id_test")
+}
+
+def testExc(String channelId) {
+    exec {
+        workingDir '.'
+//        commandLine 'git commit -m \'test\''
+//        commandLine 'git', 'status'
+//        commandLine 'git', 'commit', '-m', 'test'
+        commandLine 'git', 'commit', '-am', "${version} ${channelId} 渠道包"
+    }
+}
