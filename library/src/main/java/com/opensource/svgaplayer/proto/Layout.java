@@ -2,6 +2,8 @@
 // Source file: svga.proto
 package com.opensource.svgaplayer.proto;
 
+import android.os.Parcelable;
+
 import com.squareup.wire.AndroidMessage;
 import com.squareup.wire.Message;
 import com.squareup.wire.ProtoAdapter;
@@ -13,7 +15,7 @@ import okio.ByteString;
 public final class Layout extends AndroidMessage<Layout, Layout.Builder> {
   public static final ProtoAdapter<Layout> ADAPTER = ProtoAdapter.newMessageAdapter(Layout.class);
 
-  public static final Creator<Layout> CREATOR = AndroidMessage.newCreator(ADAPTER);
+  public static final Parcelable.Creator<Layout> CREATOR = AndroidMessage.newCreator(ADAPTER);
 
   private static final long serialVersionUID = 0L;
 

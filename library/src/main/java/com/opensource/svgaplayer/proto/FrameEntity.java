@@ -2,6 +2,8 @@
 // Source file: svga.proto
 package com.opensource.svgaplayer.proto;
 
+import android.os.Parcelable;
+
 import com.squareup.wire.AndroidMessage;
 import com.squareup.wire.Message;
 import com.squareup.wire.ProtoAdapter;
@@ -13,9 +15,10 @@ import java.util.List;
 import okio.ByteString;
 
 public final class FrameEntity extends AndroidMessage<FrameEntity, FrameEntity.Builder> {
-  public static final ProtoAdapter<FrameEntity> ADAPTER = ProtoAdapter.newMessageAdapter(FrameEntity.class);
+  public static final ProtoAdapter<FrameEntity> ADAPTER = ProtoAdapter.newMessageAdapter(
+          FrameEntity.class);
 
-  public static final Creator<FrameEntity> CREATOR = AndroidMessage.newCreator(ADAPTER);
+  public static final Parcelable.Creator<FrameEntity> CREATOR = AndroidMessage.newCreator(ADAPTER);
 
   private static final long serialVersionUID = 0L;
 
@@ -75,12 +78,12 @@ public final class FrameEntity extends AndroidMessage<FrameEntity, FrameEntity.B
   public final List<ShapeEntity> shapes;
 
   public FrameEntity(Float alpha, Layout layout, Transform transform, String clipPath,
-      List<ShapeEntity> shapes) {
+                     List<ShapeEntity> shapes) {
     this(alpha, layout, transform, clipPath, shapes, ByteString.EMPTY);
   }
 
   public FrameEntity(Float alpha, Layout layout, Transform transform, String clipPath,
-      List<ShapeEntity> shapes, ByteString unknownFields) {
+                     List<ShapeEntity> shapes, ByteString unknownFields) {
     super(ADAPTER, unknownFields);
     this.alpha = alpha;
     this.layout = layout;

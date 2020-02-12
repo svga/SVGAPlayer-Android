@@ -2,6 +2,8 @@
 // Source file: svga.proto
 package com.opensource.svgaplayer.proto;
 
+import android.os.Parcelable;
+
 import com.squareup.wire.AndroidMessage;
 import com.squareup.wire.Message;
 import com.squareup.wire.ProtoAdapter;
@@ -11,9 +13,10 @@ import com.squareup.wire.internal.Internal;
 import okio.ByteString;
 
 public final class MovieParams extends AndroidMessage<MovieParams, MovieParams.Builder> {
-  public static final ProtoAdapter<MovieParams> ADAPTER = ProtoAdapter.newMessageAdapter(MovieParams.class);
+  public static final ProtoAdapter<MovieParams> ADAPTER = ProtoAdapter.newMessageAdapter(
+          MovieParams.class);
 
-  public static final Creator<MovieParams> CREATOR = AndroidMessage.newCreator(ADAPTER);
+  public static final Parcelable.Creator<MovieParams> CREATOR = AndroidMessage.newCreator(ADAPTER);
 
   private static final long serialVersionUID = 0L;
 
@@ -70,7 +73,7 @@ public final class MovieParams extends AndroidMessage<MovieParams, MovieParams.B
   }
 
   public MovieParams(Float viewBoxWidth, Float viewBoxHeight, Integer fps, Integer frames,
-      ByteString unknownFields) {
+                     ByteString unknownFields) {
     super(ADAPTER, unknownFields);
     this.viewBoxWidth = viewBoxWidth;
     this.viewBoxHeight = viewBoxHeight;

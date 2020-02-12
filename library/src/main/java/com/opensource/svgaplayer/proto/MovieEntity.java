@@ -2,6 +2,8 @@
 // Source file: svga.proto
 package com.opensource.svgaplayer.proto;
 
+import android.os.Parcelable;
+
 import com.squareup.wire.AndroidMessage;
 import com.squareup.wire.Message;
 import com.squareup.wire.ProtoAdapter;
@@ -14,9 +16,10 @@ import java.util.Map;
 import okio.ByteString;
 
 public final class MovieEntity extends AndroidMessage<MovieEntity, MovieEntity.Builder> {
-  public static final ProtoAdapter<MovieEntity> ADAPTER = ProtoAdapter.newMessageAdapter(MovieEntity.class);
+  public static final ProtoAdapter<MovieEntity> ADAPTER = ProtoAdapter.newMessageAdapter(
+          MovieEntity.class);
 
-  public static final Creator<MovieEntity> CREATOR = AndroidMessage.newCreator(ADAPTER);
+  public static final Parcelable.Creator<MovieEntity> CREATOR = AndroidMessage.newCreator(ADAPTER);
 
   private static final long serialVersionUID = 0L;
 

@@ -2,6 +2,8 @@
 // Source file: svga.proto
 package com.opensource.svgaplayer.proto;
 
+import android.os.Parcelable;
+
 import com.squareup.wire.AndroidMessage;
 import com.squareup.wire.Message;
 import com.squareup.wire.ProtoAdapter;
@@ -12,9 +14,10 @@ import com.squareup.wire.internal.Internal;
 import okio.ByteString;
 
 public final class ShapeEntity extends AndroidMessage<ShapeEntity, ShapeEntity.Builder> {
-  public static final ProtoAdapter<ShapeEntity> ADAPTER = ProtoAdapter.newMessageAdapter(ShapeEntity.class);
+  public static final ProtoAdapter<ShapeEntity> ADAPTER = ProtoAdapter.newMessageAdapter(
+          ShapeEntity.class);
 
-  public static final Creator<ShapeEntity> CREATOR = AndroidMessage.newCreator(ADAPTER);
+  public static final Parcelable.Creator<ShapeEntity> CREATOR = AndroidMessage.newCreator(ADAPTER);
 
   private static final long serialVersionUID = 0L;
 
@@ -29,6 +32,11 @@ public final class ShapeEntity extends AndroidMessage<ShapeEntity, ShapeEntity.B
       returnDefaultValue = false
   )
   public final ShapeType type;
+
+  /**
+   * 对应 type 枚举类型的原始int，反序列化出来的值可以从这里取
+   */
+  private int _type_value = DEFAULT_TYPE.getValue();
 
   /**
    * 矢量参数
@@ -72,18 +80,19 @@ public final class ShapeEntity extends AndroidMessage<ShapeEntity, ShapeEntity.B
   )
   public final EllipseArgs ellipse;
 
-  public ShapeEntity(ShapeType type, ShapeStyle styles, Transform transform, ShapeArgs shape,
-      RectArgs rect, EllipseArgs ellipse) {
-    this(type, styles, transform, shape, rect, ellipse, ByteString.EMPTY);
+  public ShapeEntity(ShapeType type, int _type_value, ShapeStyle styles, Transform transform,
+      ShapeArgs shape, RectArgs rect, EllipseArgs ellipse) {
+    this(type, _type_value, styles, transform, shape, rect, ellipse, ByteString.EMPTY);
   }
 
-  public ShapeEntity(ShapeType type, ShapeStyle styles, Transform transform, ShapeArgs shape,
-      RectArgs rect, EllipseArgs ellipse, ByteString unknownFields) {
+  public ShapeEntity(ShapeType type, int _type_value, ShapeStyle styles, Transform transform,
+      ShapeArgs shape, RectArgs rect, EllipseArgs ellipse, ByteString unknownFields) {
     super(ADAPTER, unknownFields);
     if (Internal.countNonNull(shape, rect, ellipse) > 1) {
       throw new IllegalArgumentException("at most one of shape, rect, ellipse may be non-null");
     }
     this.type = type;
+    this._type_value = _type_value;
     this.styles = styles;
     this.transform = transform;
     this.shape = shape;
@@ -91,10 +100,18 @@ public final class ShapeEntity extends AndroidMessage<ShapeEntity, ShapeEntity.B
     this.ellipse = ellipse;
   }
 
+  /**
+   * 对应 type 枚举类型的原始int，反序列化出来的值可以从这里取
+   */
+  public final int getTypeValue() {
+    return _type_value;
+  }
+
   @Override
   public Builder newBuilder() {
     Builder builder = new Builder();
     builder.type = type;
+    builder._type_value = _type_value;
     builder.styles = styles;
     builder.transform = transform;
     builder.shape = shape;
@@ -111,6 +128,7 @@ public final class ShapeEntity extends AndroidMessage<ShapeEntity, ShapeEntity.B
     ShapeEntity o = (ShapeEntity) other;
     return unknownFields().equals(o.unknownFields())
         && Internal.equals(type, o.type)
+        && Internal.equals(_type_value, o._type_value)
         && Internal.equals(styles, o.styles)
         && Internal.equals(transform, o.transform)
         && Internal.equals(shape, o.shape)
@@ -124,6 +142,7 @@ public final class ShapeEntity extends AndroidMessage<ShapeEntity, ShapeEntity.B
     if (result == 0) {
       result = unknownFields().hashCode();
       result = result * 37 + (type != null ? type.hashCode() : 0);
+      result = result * 37 + _type_value;
       result = result * 37 + (styles != null ? styles.hashCode() : 0);
       result = result * 37 + (transform != null ? transform.hashCode() : 0);
       result = result * 37 + (shape != null ? shape.hashCode() : 0);
@@ -136,6 +155,8 @@ public final class ShapeEntity extends AndroidMessage<ShapeEntity, ShapeEntity.B
 
   public static final class Builder extends Message.Builder<ShapeEntity, Builder> {
     public ShapeType type;
+
+    private int _type_value;
 
     public ShapeStyle styles;
 
@@ -198,7 +219,7 @@ public final class ShapeEntity extends AndroidMessage<ShapeEntity, ShapeEntity.B
 
     @Override
     public ShapeEntity build() {
-      return new ShapeEntity(type, styles, transform, shape, rect, ellipse, super.buildUnknownFields());
+      return new ShapeEntity(type, _type_value, styles, transform, shape, rect, ellipse, super.buildUnknownFields());
     }
   }
 
@@ -221,7 +242,9 @@ public final class ShapeEntity extends AndroidMessage<ShapeEntity, ShapeEntity.B
     /**
      * 与前帧一致
      */
-    KEEP(3);
+    KEEP(3),
+
+    UNRECOGNIZED(-1);
 
     public static final ProtoAdapter<ShapeType> ADAPTER = ProtoAdapter.newEnumAdapter(ShapeType.class);
 
@@ -240,7 +263,7 @@ public final class ShapeEntity extends AndroidMessage<ShapeEntity, ShapeEntity.B
         case 1: return RECT;
         case 2: return ELLIPSE;
         case 3: return KEEP;
-        default: return null;
+        default: return UNRECOGNIZED;
       }
     }
 
@@ -253,7 +276,7 @@ public final class ShapeEntity extends AndroidMessage<ShapeEntity, ShapeEntity.B
   public static final class ShapeArgs extends AndroidMessage<ShapeArgs, ShapeArgs.Builder> {
     public static final ProtoAdapter<ShapeArgs> ADAPTER = ProtoAdapter.newMessageAdapter(ShapeArgs.class);
 
-    public static final Creator<ShapeArgs> CREATOR = AndroidMessage.newCreator(ADAPTER);
+    public static final Parcelable.Creator<ShapeArgs> CREATOR = AndroidMessage.newCreator(ADAPTER);
 
     private static final long serialVersionUID = 0L;
 
@@ -330,7 +353,7 @@ public final class ShapeEntity extends AndroidMessage<ShapeEntity, ShapeEntity.B
   public static final class RectArgs extends AndroidMessage<RectArgs, RectArgs.Builder> {
     public static final ProtoAdapter<RectArgs> ADAPTER = ProtoAdapter.newMessageAdapter(RectArgs.class);
 
-    public static final Creator<RectArgs> CREATOR = AndroidMessage.newCreator(ADAPTER);
+    public static final Parcelable.Creator<RectArgs> CREATOR = AndroidMessage.newCreator(ADAPTER);
 
     private static final long serialVersionUID = 0L;
 
@@ -387,7 +410,7 @@ public final class ShapeEntity extends AndroidMessage<ShapeEntity, ShapeEntity.B
     }
 
     public RectArgs(Float x, Float y, Float width, Float height, Float cornerRadius,
-        ByteString unknownFields) {
+                    ByteString unknownFields) {
       super(ADAPTER, unknownFields);
       this.x = x;
       this.y = y;
@@ -488,7 +511,7 @@ public final class ShapeEntity extends AndroidMessage<ShapeEntity, ShapeEntity.B
   public static final class EllipseArgs extends AndroidMessage<EllipseArgs, EllipseArgs.Builder> {
     public static final ProtoAdapter<EllipseArgs> ADAPTER = ProtoAdapter.newMessageAdapter(EllipseArgs.class);
 
-    public static final Creator<EllipseArgs> CREATOR = AndroidMessage.newCreator(ADAPTER);
+    public static final Parcelable.Creator<EllipseArgs> CREATOR = AndroidMessage.newCreator(ADAPTER);
 
     private static final long serialVersionUID = 0L;
 
@@ -643,7 +666,7 @@ public final class ShapeEntity extends AndroidMessage<ShapeEntity, ShapeEntity.B
   public static final class ShapeStyle extends AndroidMessage<ShapeStyle, ShapeStyle.Builder> {
     public static final ProtoAdapter<ShapeStyle> ADAPTER = ProtoAdapter.newMessageAdapter(ShapeStyle.class);
 
-    public static final Creator<ShapeStyle> CREATOR = AndroidMessage.newCreator(ADAPTER);
+    public static final Parcelable.Creator<ShapeStyle> CREATOR = AndroidMessage.newCreator(ADAPTER);
 
     private static final long serialVersionUID = 0L;
 
@@ -702,6 +725,11 @@ public final class ShapeEntity extends AndroidMessage<ShapeEntity, ShapeEntity.B
     public final LineCap lineCap;
 
     /**
+     * 对应 lineCap 枚举类型的原始int，反序列化出来的值可以从这里取
+     */
+    private int _lineCap_value = DEFAULT_LINECAP.getValue();
+
+    /**
      * 线段连接样式
      */
     @WireField(
@@ -710,6 +738,11 @@ public final class ShapeEntity extends AndroidMessage<ShapeEntity, ShapeEntity.B
         returnDefaultValue = false
     )
     public final LineJoin lineJoin;
+
+    /**
+     * 对应 lineJoin 枚举类型的原始int，反序列化出来的值可以从这里取
+     */
+    private int _lineJoin_value = DEFAULT_LINEJOIN.getValue();
 
     /**
      * 尖角限制
@@ -752,23 +785,40 @@ public final class ShapeEntity extends AndroidMessage<ShapeEntity, ShapeEntity.B
     public final Float lineDashIII;
 
     public ShapeStyle(RGBAColor fill, RGBAColor stroke, Float strokeWidth, LineCap lineCap,
-        LineJoin lineJoin, Float miterLimit, Float lineDashI, Float lineDashII, Float lineDashIII) {
-      this(fill, stroke, strokeWidth, lineCap, lineJoin, miterLimit, lineDashI, lineDashII, lineDashIII, ByteString.EMPTY);
+                      int _lineCap_value, LineJoin lineJoin, int _lineJoin_value, Float miterLimit,
+                      Float lineDashI, Float lineDashII, Float lineDashIII) {
+      this(fill, stroke, strokeWidth, lineCap, _lineCap_value, lineJoin, _lineJoin_value, miterLimit, lineDashI, lineDashII, lineDashIII, ByteString.EMPTY);
     }
 
     public ShapeStyle(RGBAColor fill, RGBAColor stroke, Float strokeWidth, LineCap lineCap,
-        LineJoin lineJoin, Float miterLimit, Float lineDashI, Float lineDashII, Float lineDashIII,
-        ByteString unknownFields) {
+                      int _lineCap_value, LineJoin lineJoin, int _lineJoin_value, Float miterLimit,
+                      Float lineDashI, Float lineDashII, Float lineDashIII, ByteString unknownFields) {
       super(ADAPTER, unknownFields);
       this.fill = fill;
       this.stroke = stroke;
       this.strokeWidth = strokeWidth;
       this.lineCap = lineCap;
+      this._lineCap_value = _lineCap_value;
       this.lineJoin = lineJoin;
+      this._lineJoin_value = _lineJoin_value;
       this.miterLimit = miterLimit;
       this.lineDashI = lineDashI;
       this.lineDashII = lineDashII;
       this.lineDashIII = lineDashIII;
+    }
+
+    /**
+     * 对应 lineCap 枚举类型的原始int，反序列化出来的值可以从这里取
+     */
+    public final int getLineCapValue() {
+      return _lineCap_value;
+    }
+
+    /**
+     * 对应 lineJoin 枚举类型的原始int，反序列化出来的值可以从这里取
+     */
+    public final int getLineJoinValue() {
+      return _lineJoin_value;
     }
 
     @Override
@@ -778,7 +828,9 @@ public final class ShapeEntity extends AndroidMessage<ShapeEntity, ShapeEntity.B
       builder.stroke = stroke;
       builder.strokeWidth = strokeWidth;
       builder.lineCap = lineCap;
+      builder._lineCap_value = _lineCap_value;
       builder.lineJoin = lineJoin;
+      builder._lineJoin_value = _lineJoin_value;
       builder.miterLimit = miterLimit;
       builder.lineDashI = lineDashI;
       builder.lineDashII = lineDashII;
@@ -797,7 +849,9 @@ public final class ShapeEntity extends AndroidMessage<ShapeEntity, ShapeEntity.B
           && Internal.equals(stroke, o.stroke)
           && Internal.equals(strokeWidth, o.strokeWidth)
           && Internal.equals(lineCap, o.lineCap)
+          && Internal.equals(_lineCap_value, o._lineCap_value)
           && Internal.equals(lineJoin, o.lineJoin)
+          && Internal.equals(_lineJoin_value, o._lineJoin_value)
           && Internal.equals(miterLimit, o.miterLimit)
           && Internal.equals(lineDashI, o.lineDashI)
           && Internal.equals(lineDashII, o.lineDashII)
@@ -813,7 +867,9 @@ public final class ShapeEntity extends AndroidMessage<ShapeEntity, ShapeEntity.B
         result = result * 37 + (stroke != null ? stroke.hashCode() : 0);
         result = result * 37 + (strokeWidth != null ? strokeWidth.hashCode() : 0);
         result = result * 37 + (lineCap != null ? lineCap.hashCode() : 0);
+        result = result * 37 + _lineCap_value;
         result = result * 37 + (lineJoin != null ? lineJoin.hashCode() : 0);
+        result = result * 37 + _lineJoin_value;
         result = result * 37 + (miterLimit != null ? miterLimit.hashCode() : 0);
         result = result * 37 + (lineDashI != null ? lineDashI.hashCode() : 0);
         result = result * 37 + (lineDashII != null ? lineDashII.hashCode() : 0);
@@ -832,7 +888,11 @@ public final class ShapeEntity extends AndroidMessage<ShapeEntity, ShapeEntity.B
 
       public LineCap lineCap;
 
+      private int _lineCap_value;
+
       public LineJoin lineJoin;
+
+      private int _lineJoin_value;
 
       public float miterLimit;
 
@@ -919,14 +979,14 @@ public final class ShapeEntity extends AndroidMessage<ShapeEntity, ShapeEntity.B
 
       @Override
       public ShapeStyle build() {
-        return new ShapeStyle(fill, stroke, strokeWidth, lineCap, lineJoin, miterLimit, lineDashI, lineDashII, lineDashIII, super.buildUnknownFields());
+        return new ShapeStyle(fill, stroke, strokeWidth, lineCap, _lineCap_value, lineJoin, _lineJoin_value, miterLimit, lineDashI, lineDashII, lineDashIII, super.buildUnknownFields());
       }
     }
 
     public static final class RGBAColor extends AndroidMessage<RGBAColor, RGBAColor.Builder> {
       public static final ProtoAdapter<RGBAColor> ADAPTER = ProtoAdapter.newMessageAdapter(RGBAColor.class);
 
-      public static final Creator<RGBAColor> CREATOR = AndroidMessage.newCreator(ADAPTER);
+      public static final Parcelable.Creator<RGBAColor> CREATOR = AndroidMessage.newCreator(ADAPTER);
 
       private static final long serialVersionUID = 0L;
 
@@ -1059,7 +1119,9 @@ public final class ShapeEntity extends AndroidMessage<ShapeEntity, ShapeEntity.B
 
       LineCap_ROUND(1),
 
-      LineCap_SQUARE(2);
+      LineCap_SQUARE(2),
+
+      UNRECOGNIZED(-1);
 
       public static final ProtoAdapter<LineCap> ADAPTER = ProtoAdapter.newEnumAdapter(LineCap.class);
 
@@ -1077,7 +1139,7 @@ public final class ShapeEntity extends AndroidMessage<ShapeEntity, ShapeEntity.B
           case 0: return LineCap_BUTT;
           case 1: return LineCap_ROUND;
           case 2: return LineCap_SQUARE;
-          default: return null;
+          default: return UNRECOGNIZED;
         }
       }
 
@@ -1092,7 +1154,9 @@ public final class ShapeEntity extends AndroidMessage<ShapeEntity, ShapeEntity.B
 
       LineJoin_ROUND(1),
 
-      LineJoin_BEVEL(2);
+      LineJoin_BEVEL(2),
+
+      UNRECOGNIZED(-1);
 
       public static final ProtoAdapter<LineJoin> ADAPTER = ProtoAdapter.newEnumAdapter(LineJoin.class);
 
@@ -1110,7 +1174,7 @@ public final class ShapeEntity extends AndroidMessage<ShapeEntity, ShapeEntity.B
           case 0: return LineJoin_MITER;
           case 1: return LineJoin_ROUND;
           case 2: return LineJoin_BEVEL;
-          default: return null;
+          default: return UNRECOGNIZED;
         }
       }
 

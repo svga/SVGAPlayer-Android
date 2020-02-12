@@ -2,6 +2,8 @@
 // Source file: svga.proto
 package com.opensource.svgaplayer.proto;
 
+import android.os.Parcelable;
+
 import com.squareup.wire.AndroidMessage;
 import com.squareup.wire.Message;
 import com.squareup.wire.ProtoAdapter;
@@ -11,9 +13,10 @@ import com.squareup.wire.internal.Internal;
 import okio.ByteString;
 
 public final class AudioEntity extends AndroidMessage<AudioEntity, AudioEntity.Builder> {
-  public static final ProtoAdapter<AudioEntity> ADAPTER = ProtoAdapter.newMessageAdapter(AudioEntity.class);
+  public static final ProtoAdapter<AudioEntity> ADAPTER = ProtoAdapter.newMessageAdapter(
+          AudioEntity.class);
 
-  public static final Creator<AudioEntity> CREATOR = AndroidMessage.newCreator(ADAPTER);
+  public static final Parcelable.Creator<AudioEntity> CREATOR = AndroidMessage.newCreator(ADAPTER);
 
   private static final long serialVersionUID = 0L;
 
@@ -78,12 +81,12 @@ public final class AudioEntity extends AndroidMessage<AudioEntity, AudioEntity.B
   public final Integer totalTime;
 
   public AudioEntity(String audioKey, Integer startFrame, Integer endFrame, Integer startTime,
-      Integer totalTime) {
+                     Integer totalTime) {
     this(audioKey, startFrame, endFrame, startTime, totalTime, ByteString.EMPTY);
   }
 
   public AudioEntity(String audioKey, Integer startFrame, Integer endFrame, Integer startTime,
-      Integer totalTime, ByteString unknownFields) {
+                     Integer totalTime, ByteString unknownFields) {
     super(ADAPTER, unknownFields);
     this.audioKey = audioKey;
     this.startFrame = startFrame;
