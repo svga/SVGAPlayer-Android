@@ -97,6 +97,7 @@ internal class SVGAVideoShapeEntity {
                 ShapeEntity.ShapeType.RECT -> Type.rect
                 ShapeEntity.ShapeType.ELLIPSE -> Type.ellipse
                 ShapeEntity.ShapeType.KEEP -> Type.keep
+                else -> Type.shape
             }
         }
     }
