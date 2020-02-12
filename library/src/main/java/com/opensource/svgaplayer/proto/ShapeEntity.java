@@ -80,6 +80,8 @@ public final class ShapeEntity extends AndroidMessage<ShapeEntity, ShapeEntity.B
   )
   public final EllipseArgs ellipse;
 
+  private boolean __isDefaultInstance;
+
   public ShapeEntity(ShapeType type, int _type_value, ShapeStyle styles, Transform transform,
       ShapeArgs shape, RectArgs rect, EllipseArgs ellipse) {
     this(type, _type_value, styles, transform, shape, rect, ellipse, ByteString.EMPTY);
@@ -105,6 +107,13 @@ public final class ShapeEntity extends AndroidMessage<ShapeEntity, ShapeEntity.B
    */
   public final int getTypeValue() {
     return _type_value;
+  }
+
+  /**
+   * true--反序列化为null，给一个默认的实例；false--反序列化出来的实例
+   */
+  public final boolean __isDefaultInstance() {
+    return __isDefaultInstance;
   }
 
   @Override
@@ -292,6 +301,8 @@ public final class ShapeEntity extends AndroidMessage<ShapeEntity, ShapeEntity.B
     )
     public final String d;
 
+    private boolean __isDefaultInstance;
+
     public ShapeArgs(String d) {
       this(d, ByteString.EMPTY);
     }
@@ -299,6 +310,13 @@ public final class ShapeEntity extends AndroidMessage<ShapeEntity, ShapeEntity.B
     public ShapeArgs(String d, ByteString unknownFields) {
       super(ADAPTER, unknownFields);
       this.d = d;
+    }
+
+    /**
+     * true--反序列化为null，给一个默认的实例；false--反序列化出来的实例
+     */
+    public final boolean __isDefaultInstance() {
+      return __isDefaultInstance;
     }
 
     @Override
@@ -405,6 +423,8 @@ public final class ShapeEntity extends AndroidMessage<ShapeEntity, ShapeEntity.B
     )
     public final Float cornerRadius;
 
+    private boolean __isDefaultInstance;
+
     public RectArgs(Float x, Float y, Float width, Float height, Float cornerRadius) {
       this(x, y, width, height, cornerRadius, ByteString.EMPTY);
     }
@@ -417,6 +437,13 @@ public final class ShapeEntity extends AndroidMessage<ShapeEntity, ShapeEntity.B
       this.width = width;
       this.height = height;
       this.cornerRadius = cornerRadius;
+    }
+
+    /**
+     * true--反序列化为null，给一个默认的实例；false--反序列化出来的实例
+     */
+    public final boolean __isDefaultInstance() {
+      return __isDefaultInstance;
     }
 
     @Override
@@ -563,6 +590,8 @@ public final class ShapeEntity extends AndroidMessage<ShapeEntity, ShapeEntity.B
     )
     public final Float radiusY;
 
+    private boolean __isDefaultInstance;
+
     public EllipseArgs(Float x, Float y, Float radiusX, Float radiusY) {
       this(x, y, radiusX, radiusY, ByteString.EMPTY);
     }
@@ -573,6 +602,13 @@ public final class ShapeEntity extends AndroidMessage<ShapeEntity, ShapeEntity.B
       this.y = y;
       this.radiusX = radiusX;
       this.radiusY = radiusY;
+    }
+
+    /**
+     * true--反序列化为null，给一个默认的实例；false--反序列化出来的实例
+     */
+    public final boolean __isDefaultInstance() {
+      return __isDefaultInstance;
     }
 
     @Override
@@ -784,6 +820,8 @@ public final class ShapeEntity extends AndroidMessage<ShapeEntity, ShapeEntity.B
     )
     public final Float lineDashIII;
 
+    private boolean __isDefaultInstance;
+
     public ShapeStyle(RGBAColor fill, RGBAColor stroke, Float strokeWidth, LineCap lineCap,
                       int _lineCap_value, LineJoin lineJoin, int _lineJoin_value, Float miterLimit,
                       Float lineDashI, Float lineDashII, Float lineDashIII) {
@@ -819,6 +857,13 @@ public final class ShapeEntity extends AndroidMessage<ShapeEntity, ShapeEntity.B
      */
     public final int getLineJoinValue() {
       return _lineJoin_value;
+    }
+
+    /**
+     * true--反序列化为null，给一个默认的实例；false--反序列化出来的实例
+     */
+    public final boolean __isDefaultInstance() {
+      return __isDefaultInstance;
     }
 
     @Override
@@ -1026,6 +1071,8 @@ public final class ShapeEntity extends AndroidMessage<ShapeEntity, ShapeEntity.B
       )
       public final Float a;
 
+      private boolean __isDefaultInstance;
+
       public RGBAColor(Float r, Float g, Float b, Float a) {
         this(r, g, b, a, ByteString.EMPTY);
       }
@@ -1036,6 +1083,13 @@ public final class ShapeEntity extends AndroidMessage<ShapeEntity, ShapeEntity.B
         this.g = g;
         this.b = b;
         this.a = a;
+      }
+
+      /**
+       * true--反序列化为null，给一个默认的实例；false--反序列化出来的实例
+       */
+      public final boolean __isDefaultInstance() {
+        return __isDefaultInstance;
       }
 
       @Override

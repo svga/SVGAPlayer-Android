@@ -80,6 +80,8 @@ public final class AudioEntity extends AndroidMessage<AudioEntity, AudioEntity.B
   )
   public final Integer totalTime;
 
+  private boolean __isDefaultInstance;
+
   public AudioEntity(String audioKey, Integer startFrame, Integer endFrame, Integer startTime,
                      Integer totalTime) {
     this(audioKey, startFrame, endFrame, startTime, totalTime, ByteString.EMPTY);
@@ -93,6 +95,13 @@ public final class AudioEntity extends AndroidMessage<AudioEntity, AudioEntity.B
     this.endFrame = endFrame;
     this.startTime = startTime;
     this.totalTime = totalTime;
+  }
+
+  /**
+   * true--反序列化为null，给一个默认的实例；false--反序列化出来的实例
+   */
+  public final boolean __isDefaultInstance() {
+    return __isDefaultInstance;
   }
 
   @Override

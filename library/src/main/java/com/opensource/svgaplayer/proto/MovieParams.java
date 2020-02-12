@@ -68,6 +68,8 @@ public final class MovieParams extends AndroidMessage<MovieParams, MovieParams.B
   )
   public final Integer frames;
 
+  private boolean __isDefaultInstance;
+
   public MovieParams(Float viewBoxWidth, Float viewBoxHeight, Integer fps, Integer frames) {
     this(viewBoxWidth, viewBoxHeight, fps, frames, ByteString.EMPTY);
   }
@@ -79,6 +81,13 @@ public final class MovieParams extends AndroidMessage<MovieParams, MovieParams.B
     this.viewBoxHeight = viewBoxHeight;
     this.fps = fps;
     this.frames = frames;
+  }
+
+  /**
+   * true--反序列化为null，给一个默认的实例；false--反序列化出来的实例
+   */
+  public final boolean __isDefaultInstance() {
+    return __isDefaultInstance;
   }
 
   @Override

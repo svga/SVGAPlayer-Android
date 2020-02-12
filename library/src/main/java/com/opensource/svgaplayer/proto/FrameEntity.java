@@ -77,6 +77,8 @@ public final class FrameEntity extends AndroidMessage<FrameEntity, FrameEntity.B
   )
   public final List<ShapeEntity> shapes;
 
+  private boolean __isDefaultInstance;
+
   public FrameEntity(Float alpha, Layout layout, Transform transform, String clipPath,
                      List<ShapeEntity> shapes) {
     this(alpha, layout, transform, clipPath, shapes, ByteString.EMPTY);
@@ -90,6 +92,13 @@ public final class FrameEntity extends AndroidMessage<FrameEntity, FrameEntity.B
     this.transform = transform;
     this.clipPath = clipPath;
     this.shapes = Internal.immutableCopyOf("shapes", shapes);
+  }
+
+  /**
+   * true--反序列化为null，给一个默认的实例；false--反序列化出来的实例
+   */
+  public final boolean __isDefaultInstance() {
+    return __isDefaultInstance;
   }
 
   @Override

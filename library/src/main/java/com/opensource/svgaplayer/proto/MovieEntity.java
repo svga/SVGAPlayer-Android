@@ -78,6 +78,8 @@ public final class MovieEntity extends AndroidMessage<MovieEntity, MovieEntity.B
   )
   public final List<AudioEntity> audios;
 
+  private boolean __isDefaultInstance;
+
   public MovieEntity(String version, MovieParams params, Map<String, ByteString> images,
                      List<SpriteEntity> sprites, List<AudioEntity> audios) {
     this(version, params, images, sprites, audios, ByteString.EMPTY);
@@ -91,6 +93,13 @@ public final class MovieEntity extends AndroidMessage<MovieEntity, MovieEntity.B
     this.images = Internal.immutableCopyOf("images", images);
     this.sprites = Internal.immutableCopyOf("sprites", sprites);
     this.audios = Internal.immutableCopyOf("audios", audios);
+  }
+
+  /**
+   * true--反序列化为null，给一个默认的实例；false--反序列化出来的实例
+   */
+  public final boolean __isDefaultInstance() {
+    return __isDefaultInstance;
   }
 
   @Override

@@ -55,6 +55,8 @@ public final class Layout extends AndroidMessage<Layout, Layout.Builder> {
   )
   public final Float height;
 
+  private boolean __isDefaultInstance;
+
   public Layout(Float x, Float y, Float width, Float height) {
     this(x, y, width, height, ByteString.EMPTY);
   }
@@ -65,6 +67,13 @@ public final class Layout extends AndroidMessage<Layout, Layout.Builder> {
     this.y = y;
     this.width = width;
     this.height = height;
+  }
+
+  /**
+   * true--反序列化为null，给一个默认的实例；false--反序列化出来的实例
+   */
+  public final boolean __isDefaultInstance() {
+    return __isDefaultInstance;
   }
 
   @Override

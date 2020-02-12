@@ -73,6 +73,8 @@ public final class Transform extends AndroidMessage<Transform, Transform.Builder
   )
   public final Float ty;
 
+  private boolean __isDefaultInstance;
+
   public Transform(Float a, Float b, Float c, Float d, Float tx, Float ty) {
     this(a, b, c, d, tx, ty, ByteString.EMPTY);
   }
@@ -86,6 +88,13 @@ public final class Transform extends AndroidMessage<Transform, Transform.Builder
     this.d = d;
     this.tx = tx;
     this.ty = ty;
+  }
+
+  /**
+   * true--反序列化为null，给一个默认的实例；false--反序列化出来的实例
+   */
+  public final boolean __isDefaultInstance() {
+    return __isDefaultInstance;
   }
 
   @Override

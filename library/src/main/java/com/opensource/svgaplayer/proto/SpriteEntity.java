@@ -57,6 +57,8 @@ public final class SpriteEntity extends AndroidMessage<SpriteEntity, SpriteEntit
   )
   public final String matteKey;
 
+  private boolean __isDefaultInstance;
+
   public SpriteEntity(String imageKey, List<FrameEntity> frames, String matteKey) {
     this(imageKey, frames, matteKey, ByteString.EMPTY);
   }
@@ -67,6 +69,13 @@ public final class SpriteEntity extends AndroidMessage<SpriteEntity, SpriteEntit
     this.imageKey = imageKey;
     this.frames = Internal.immutableCopyOf("frames", frames);
     this.matteKey = matteKey;
+  }
+
+  /**
+   * true--反序列化为null，给一个默认的实例；false--反序列化出来的实例
+   */
+  public final boolean __isDefaultInstance() {
+    return __isDefaultInstance;
   }
 
   @Override
