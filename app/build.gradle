@@ -37,7 +37,7 @@ dependencies {
 
 
 task testGit() {
-    testExc("channel_id_test")
+//    testExc("channel_id_test")
 }
 
 def testExc(String channelId) {
