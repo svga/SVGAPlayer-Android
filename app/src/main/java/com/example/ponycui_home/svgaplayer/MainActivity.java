@@ -18,7 +18,6 @@ import android.widget.TextView;
 
 import com.opensource.svgaplayer.proto.AudioEntity;
 
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 
 import ikxd.cproxy.InnerV2;
