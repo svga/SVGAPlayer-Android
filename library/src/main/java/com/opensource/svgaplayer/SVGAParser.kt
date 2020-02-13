@@ -6,13 +6,17 @@ import android.os.Handler
 import android.util.Log
 import com.opensource.svgaplayer.proto.MovieEntity
 import org.json.JSONObject
-import java.io.*
+import java.io.BufferedInputStream
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.io.InputStream
+import java.lang.IllegalStateException
 import java.net.HttpURLConnection
 import java.net.URL
 import java.security.MessageDigest
-import java.util.concurrent.LinkedBlockingQueue
-import java.util.concurrent.ThreadPoolExecutor
-import java.util.concurrent.TimeUnit
 import java.util.zip.Inflater
 import java.util.zip.ZipInputStream
 
@@ -218,17 +222,20 @@ class SVGAParser(private val context: Context) {
     private fun decodeFromCacheKey(cacheKey: String, callback: ParseCompletion?) {
         try {
             val cacheDir = File(context.cacheDir.absolutePath + "/" + cacheKey + "/")
-            File(cacheDir, "movie.binary").takeIf { it.isFile }?.let { binaryFile ->
+            val movieFile = File(cacheDir, "movie.binary")
+            if (movieFile.exists() && movieFile.isFile) {
                 try {
-                    FileInputStream(binaryFile).use {
+                    FileInputStream(movieFile).use {
                         this.invokeCompleteCallback(
                             SVGAVideoEntity(MovieEntity.ADAPTER.decode(it), cacheDir), callback)
                     }
                 } catch (e: Exception) {
                     cacheDir.delete()
-                    binaryFile.delete()
+                    movieFile.delete()
                     decodeFromSpec(cacheDir, callback)
                 }
+            } else {
+                decodeFromSpec(cacheDir, callback)
             }
         } catch (e: Exception) {
             this.invokeErrorCallback(e, callback)
@@ -236,9 +243,10 @@ class SVGAParser(private val context: Context) {
     }
 
     private fun decodeFromSpec(cacheDir: File, callback: ParseCompletion?) {
-        File(cacheDir, "movie.spec").takeIf { it.isFile }?.let { jsonFile ->
+        val movieFile = File(cacheDir, "movie.spec")
+        if (movieFile.exists() && movieFile.isFile) {
             try {
-                FileInputStream(jsonFile).use { fileInputStream ->
+                FileInputStream(movieFile).use { fileInputStream ->
                     ByteArrayOutputStream().use { byteArrayOutputStream ->
                         val buffer = ByteArray(2048)
                         while (true) {
@@ -258,9 +266,11 @@ class SVGAParser(private val context: Context) {
                 }
             } catch (e: Exception) {
                 cacheDir.delete()
-                jsonFile.delete()
+                movieFile.delete()
                 throw e
             }
+        } else {
+            throw IllegalStateException("movie.spec and movie.spec is all empty")
         }
     }
 

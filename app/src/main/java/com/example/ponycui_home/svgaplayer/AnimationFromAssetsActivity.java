@@ -36,7 +36,8 @@ public class AnimationFromAssetsActivity extends Activity {
     }
 
     private void loadAnimation() {
-        parser.decodeFromAssets("red_pocket_miss.svga", new SVGAParser.ParseCompletion() {
+        parser.decodeFromAssets("roomlist_ranking-2_0.svga", new SVGAParser.ParseCompletion() {
+        // parser.decodeFromAssets("roomlist_ranking.svga", new SVGAParser.ParseCompletion() {
             @Override
             public void onComplete(@NotNull SVGAVideoEntity videoItem) {
                 animationView.setVideoItem(videoItem);
