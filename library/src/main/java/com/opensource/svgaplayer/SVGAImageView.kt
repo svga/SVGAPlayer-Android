@@ -248,7 +248,7 @@ open class SVGAImageView : ImageView {
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         event?.let {
             if(event.action == MotionEvent.ACTION_DOWN){
-                val drawable = drawable as? SVGADrawable ?: return false
+                val drawable = drawable as? SVGADrawable ?: return super.onTouchEvent(event)
                 for((key,value) in drawable.dynamicItem.mClickMap){
                     if (event.x >= value[0] && event.x <= value[2] && event.y >= value[1] && event.y <= value[3]) {
                         mItemClickAreaListener?.let {
