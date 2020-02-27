@@ -31,12 +31,13 @@ public class AnimationFromAssetsActivity extends Activity {
                 animationView.stepToFrame(currentIndex++, false);
             }
         });
+        // animationView.setImageDrawable(getResources().getDrawable(R.drawable.icon_lock_screen_arrow));
         loadAnimation();
         setContentView(animationView);
     }
 
     private void loadAnimation() {
-        parser.decodeFromAssets("roomlist_ranking-2_0.svga", new SVGAParser.ParseCompletion() {
+        parser.decodeFromAssets("mic_up_count_down.svga", new SVGAParser.ParseCompletion() {
         // parser.decodeFromAssets("roomlist_ranking.svga", new SVGAParser.ParseCompletion() {
             @Override
             public void onComplete(@NotNull SVGAVideoEntity videoItem) {

@@ -209,6 +209,9 @@ class SVGAVideoEntity {
                     fos.close()
                     audiosFile[it.key] = tmpFile
                 }
+            } else {
+                completionBlock()
+                return@let
             }
             this.audios = audios.map { audio ->
                 val item = SVGAAudioEntity(audio)
