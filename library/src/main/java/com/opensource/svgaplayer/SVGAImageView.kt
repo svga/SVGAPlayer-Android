@@ -11,6 +11,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.animation.LinearInterpolator
 import android.widget.ImageView
+import com.opensource.svgaplayer.utils.LogUtils
 import com.opensource.svgaplayer.utils.SVGARange
 import java.net.URL
 
@@ -130,6 +131,7 @@ open class SVGAImageView : ImageView {
     }
 
     fun startAnimation(range: SVGARange?, reverse: Boolean = false) {
+        LogUtils.i("------------------ start animation ------------------")
         stopAnimation(false)
         val drawable = drawable as? SVGADrawable ?: return
         drawable.cleared = false
@@ -154,7 +156,10 @@ open class SVGAImageView : ImageView {
                         }
                     }
                 }
-            } catch (e: Exception) {}
+            } catch (e: Exception) {
+                LogUtils.i("start animation fail")
+                e.printStackTrace()
+            }
             animator.interpolator = LinearInterpolator()
             animator.duration = ((endFrame - startFrame + 1) * (1000 / it.FPS) / durationScale).toLong()
             animator.repeatCount = if (loops <= 0) 99999 else loops - 1
