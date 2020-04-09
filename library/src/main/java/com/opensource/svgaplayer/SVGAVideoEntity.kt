@@ -202,7 +202,7 @@ class SVGAVideoEntity {
             }
             if (audiosData.count() > 0) {
                 audiosData.forEach {
-                    val tmpFile = File.createTempFile(it.key, ".mp3")
+                    val tmpFile = File.createTempFile(it.key + "_tmp", ".mp3")
                     val fos = FileOutputStream(tmpFile)
                     fos.write(it.value)
                     fos.flush()
