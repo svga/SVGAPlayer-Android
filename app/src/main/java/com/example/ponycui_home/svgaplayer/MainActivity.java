@@ -1,20 +1,11 @@
 package com.example.ponycui_home.svgaplayer;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.database.DataSetObserver;
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.text.Layout;
-import android.text.Spannable;
-import android.text.SpannableStringBuilder;
-import android.text.StaticLayout;
-import android.text.TextPaint;
-import android.text.style.ForegroundColorSpan;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,27 +14,10 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.opensource.svgaplayer.SVGADrawable;
-import com.opensource.svgaplayer.SVGADynamicEntity;
-import com.opensource.svgaplayer.SVGAImageView;
+import com.example.ponycui_home.svgaplayer.parseTest.ParseTestActivity;
 import com.opensource.svgaplayer.SVGAParser;
-import com.opensource.svgaplayer.SVGAPlayer;
-import com.opensource.svgaplayer.SVGAVideoEntity;
 
-import org.jetbrains.annotations.NotNull;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.List;
-
-import kotlin.Unit;
-import kotlin.jvm.functions.Function1;
-import kotlin.jvm.functions.Function2;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 
 class SampleItem {
 
@@ -69,14 +43,23 @@ public class MainActivity extends AppCompatActivity {
         this.setupListView();
         this.setupSVGAParser();
         setContentView(listView);
+
     }
 
     void setupData() {
-        this.items.add(new SampleItem("Animation From Assets", new Intent(this, AnimationFromAssetsActivity.class)));
-        this.items.add(new SampleItem("Animation From Network", new Intent(this, AnimationFromNetworkActivity.class)));
-        this.items.add(new SampleItem("Animation From Layout XML", new Intent(this, AnimationFromLayoutActivity.class)));
-        this.items.add(new SampleItem("Animation With Dynamic Image", new Intent(this, AnimationWithDynamicImageActivity.class)));
-        this.items.add(new SampleItem("Animation With Dynamic Click", new Intent(this, AnimationFromClickActivity.class)));
+        this.items.add(new SampleItem("Animation From Assets",
+                new Intent(this, AnimationFromAssetsActivity.class)));
+        this.items.add(new SampleItem("Animation From Network",
+                new Intent(this, AnimationFromNetworkActivity.class)));
+        this.items.add(new SampleItem("Animation From Layout XML",
+                new Intent(this, AnimationFromLayoutActivity.class)));
+        this.items.add(new SampleItem("Animation With Dynamic Image",
+                new Intent(this, AnimationWithDynamicImageActivity.class)));
+        this.items.add(new SampleItem("Animation With Dynamic Click",
+                new Intent(this, AnimationFromClickActivity.class)));
+
+        this.items.add(new SampleItem("parse 并发测试",
+                new Intent(this, ParseTestActivity.class)));
     }
 
     void setupListView() {
@@ -135,7 +118,9 @@ public class MainActivity extends AppCompatActivity {
                 textView.setText(MainActivity.this.items.get(i).title);
                 textView.setTextSize(24);
                 textView.setGravity(Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL);
-                linearLayout.addView(textView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (int) (55 * getResources().getDisplayMetrics().density)));
+                linearLayout.addView(textView,
+                        new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                                (int) (55 * getResources().getDisplayMetrics().density)));
                 return linearLayout;
             }
 
@@ -156,6 +141,7 @@ public class MainActivity extends AppCompatActivity {
         });
         this.listView.setBackgroundColor(Color.WHITE);
     }
+
     void setupSVGAParser() {
         SVGAParser.Companion.shareParser().init(this);
     }

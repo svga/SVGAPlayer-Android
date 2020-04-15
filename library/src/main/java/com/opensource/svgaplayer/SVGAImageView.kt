@@ -6,13 +6,12 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
 import android.util.AttributeSet
-import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.animation.LinearInterpolator
 import android.widget.ImageView
-import com.opensource.svgaplayer.utils.LogUtils
 import com.opensource.svgaplayer.utils.SVGARange
+import com.opensource.svgaplayer.utils.log.LogUtils
 import java.net.URL
 
 /**
@@ -20,6 +19,8 @@ import java.net.URL
  */
 
 open class SVGAImageView : ImageView {
+
+    val TAG = "SVGAImageView"
 
     enum class FillMode {
         Backward,
@@ -41,7 +42,7 @@ open class SVGAImageView : ImageView {
 
     private var animator: ValueAnimator? = null
 
-    private var mItemClickAreaListener : SVGAClickAreaListener? = null
+    private var mItemClickAreaListener: SVGAClickAreaListener? = null
 
     constructor(context: Context?) : super(context) {
         setSoftwareLayerType()
@@ -52,19 +53,21 @@ open class SVGAImageView : ImageView {
         attrs?.let { loadAttrs(it) }
     }
 
-    constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
+    constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs,
+        defStyleAttr) {
         setSoftwareLayerType()
         attrs?.let { loadAttrs(it) }
     }
 
-    constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes) {
+    constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) :
+        super(context, attrs, defStyleAttr, defStyleRes) {
         setSoftwareLayerType()
         attrs?.let { loadAttrs(it) }
     }
 
     private fun setSoftwareLayerType() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR2) {
-            this.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+            this.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
         }
     }
 
@@ -86,7 +89,8 @@ open class SVGAImageView : ImageView {
     }
 
     private fun loadAttrs(attrs: AttributeSet) {
-        val typedArray = context.theme.obtainStyledAttributes(attrs, R.styleable.SVGAImageView, 0, 0)
+        val typedArray =
+            context.theme.obtainStyledAttributes(attrs, R.styleable.SVGAImageView, 0, 0)
         loops = typedArray.getInt(R.styleable.SVGAImageView_loopCount, 0)
         clearsAfterStop = typedArray.getBoolean(R.styleable.SVGAImageView_clearsAfterStop, true)
         val antiAlias = typedArray.getBoolean(R.styleable.SVGAImageView_antiAlias, true)
@@ -94,8 +98,7 @@ open class SVGAImageView : ImageView {
         typedArray.getString(R.styleable.SVGAImageView_fillMode)?.let {
             if (it == "0") {
                 fillMode = FillMode.Backward
-            }
-            else if (it == "1") {
+            } else if (it == "1") {
                 fillMode = FillMode.Forward
             }
         }
@@ -116,7 +119,7 @@ open class SVGAImageView : ImageView {
 
                     override fun onError() {}
                 }
-                if(it.startsWith("http://") || it.startsWith("https://")) {
+                if (it.startsWith("http://") || it.startsWith("https://")) {
                     parser.parse(URL(it), callback)
                 } else {
                     parser.parse(it, callback)
@@ -131,7 +134,7 @@ open class SVGAImageView : ImageView {
     }
 
     fun startAnimation(range: SVGARange?, reverse: Boolean = false) {
-        LogUtils.i("------------------ start animation ------------------")
+        LogUtils.info(TAG, "------------------ start animation ------------------")
         stopAnimation(false)
         val drawable = drawable as? SVGADrawable ?: return
         drawable.cleared = false
@@ -139,7 +142,8 @@ open class SVGAImageView : ImageView {
         drawable.videoItem.let {
             var durationScale = 1.0
             val startFrame = Math.max(0, range?.location ?: 0)
-            val endFrame = Math.min(it.frames - 1, ((range?.location ?: 0) + (range?.length ?: Int.MAX_VALUE) - 1))
+            val endFrame = Math.min(it.frames - 1,
+                ((range?.location ?: 0) + (range?.length ?: Int.MAX_VALUE) - 1))
             val animator = ValueAnimator.ofInt(startFrame, endFrame)
             try {
                 val animatorClass = Class.forName("android.animation.ValueAnimator")
@@ -152,49 +156,54 @@ open class SVGAImageView : ImageView {
                         if (durationScale == 0.0) {
                             it.setFloat(animatorClass, 1.0f)
                             durationScale = 1.0
-                            Log.e("SVGAPlayer", "The animation duration scale has been reset to 1.0x, because you closed it on developer options.")
+                            LogUtils.info(TAG,
+                                "The animation duration scale has been reset to" +
+                                    " 1.0x, because you closed it on developer options.")
                         }
                     }
                 }
             } catch (e: Exception) {
-                LogUtils.i("start animation fail")
+                LogUtils.error(TAG, "start animation fail", e)
                 e.printStackTrace()
             }
             animator.interpolator = LinearInterpolator()
-            animator.duration = ((endFrame - startFrame + 1) * (1000 / it.FPS) / durationScale).toLong()
+            animator.duration =
+                ((endFrame - startFrame + 1) * (1000 / it.FPS) / durationScale).toLong()
             animator.repeatCount = if (loops <= 0) 99999 else loops - 1
             animator.addUpdateListener {
                 drawable.currentFrame = animator.animatedValue as Int
-                callback?.onStep(drawable.currentFrame, ((drawable.currentFrame + 1).toDouble() / drawable.videoItem.frames.toDouble()))
+                callback?.onStep(drawable.currentFrame,
+                    ((drawable.currentFrame + 1).toDouble() / drawable.videoItem.frames.toDouble()))
             }
             animator.addListener(object : Animator.AnimatorListener {
                 override fun onAnimationRepeat(animation: Animator?) {
                     callback?.onRepeat()
                 }
+
                 override fun onAnimationEnd(animation: Animator?) {
                     isAnimating = false
                     stopAnimation()
                     if (!clearsAfterStop) {
                         if (fillMode == FillMode.Backward) {
                             drawable.currentFrame = startFrame
-                        }
-                        else if (fillMode == FillMode.Forward) {
+                        } else if (fillMode == FillMode.Forward) {
                             drawable.currentFrame = endFrame
                         }
                     }
                     callback?.onFinished()
                 }
+
                 override fun onAnimationCancel(animation: Animator?) {
                     isAnimating = false
                 }
+
                 override fun onAnimationStart(animation: Animator?) {
                     isAnimating = true
                 }
             })
             if (reverse) {
                 animator.reverse()
-            }
-            else {
+            } else {
                 animator.start()
             }
             this.animator = animator
@@ -241,7 +250,8 @@ open class SVGAImageView : ImageView {
         if (andPlay) {
             startAnimation()
             animator?.let {
-                it.currentPlayTime = (Math.max(0.0f, Math.min(1.0f, (frame.toFloat() / drawable.videoItem.frames.toFloat()))) * it.duration).toLong()
+                it.currentPlayTime = (Math.max(0.0f, Math.min(1.0f,
+                    (frame.toFloat() / drawable.videoItem.frames.toFloat()))) * it.duration).toLong()
             }
         }
     }
@@ -255,7 +265,7 @@ open class SVGAImageView : ImageView {
         stepToFrame(frame, andPlay)
     }
 
-    fun setOnAnimKeyClickListener(clickListener : SVGAClickAreaListener){
+    fun setOnAnimKeyClickListener(clickListener: SVGAClickAreaListener) {
         mItemClickAreaListener = clickListener
     }
 
@@ -265,9 +275,9 @@ open class SVGAImageView : ImageView {
             return super.onTouchEvent(event)
         }
         event?.let {
-            if(event.action == MotionEvent.ACTION_DOWN){
+            if (event.action == MotionEvent.ACTION_DOWN) {
                 val drawable = drawable as? SVGADrawable ?: return false
-                for((key,value) in drawable.dynamicItem.mClickMap){
+                for ((key, value) in drawable.dynamicItem.mClickMap) {
                     if (event.x >= value[0] && event.x <= value[2] && event.y >= value[1] && event.y <= value[3]) {
                         mItemClickAreaListener?.let {
                             it.onClick(key)
@@ -280,5 +290,4 @@ open class SVGAImageView : ImageView {
 
         return super.onTouchEvent(event)
     }
-
 }
