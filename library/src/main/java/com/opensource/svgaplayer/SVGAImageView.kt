@@ -34,6 +34,9 @@ open class SVGAImageView : ImageView {
 
     var fillMode: FillMode = FillMode.Forward
 
+    // =0 means default speed，>1 speed up，<1 Slow down
+    var durationScaleRatio: Float = 0f
+
     var callback: SVGACallback? = null
 
     private var mVideoItem: SVGAVideoEntity? = null
@@ -87,6 +90,7 @@ open class SVGAImageView : ImageView {
     private fun loadAttrs(attrs: AttributeSet) {
         val typedArray = context.theme.obtainStyledAttributes(attrs, R.styleable.SVGAImageView, 0, 0)
         loops = typedArray.getInt(R.styleable.SVGAImageView_loopCount, 0)
+        durationScaleRatio = typedArray.getFloat(R.styleable.SVGAImageView_durationScaleRatio, 0f)  //new attr to adjust speed of animation
         clearsAfterStop = typedArray.getBoolean(R.styleable.SVGAImageView_clearsAfterStop, true)
         val antiAlias = typedArray.getBoolean(R.styleable.SVGAImageView_antiAlias, true)
         val autoPlay = typedArray.getBoolean(R.styleable.SVGAImageView_autoPlay, true)
@@ -157,6 +161,12 @@ open class SVGAImageView : ImageView {
             } catch (e: Exception) {}
             animator.interpolator = LinearInterpolator()
             animator.duration = ((endFrame - startFrame + 1) * (1000 / it.FPS) / durationScale).toLong()
+
+            //Adjust the duration,and no need to modify the .svga file.
+            if (durationScaleRatio > 0) {
+                animator.duration = (animator.duration / durationScaleRatio).toLong()
+            }
+
             animator.repeatCount = if (loops <= 0) 99999 else loops - 1
             animator.addUpdateListener {
                 drawable.currentFrame = animator.animatedValue as Int

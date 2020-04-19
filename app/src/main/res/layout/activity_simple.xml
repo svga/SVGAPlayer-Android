@@ -6,11 +6,13 @@
     android:layout_height="match_parent"
     android:background="#000000">
 
+    <!--slow down half,if set durationScaleRatio = 5,means to accelerate 5 times-->
     <com.opensource.svgaplayer.SVGAImageView
         android:layout_height="match_parent"
         android:layout_width="match_parent"
         android:scaleType="fitCenter"
         app:source="angel.svga"
+        app:durationScaleRatio="0.5"
         app:antiAlias="true"/>
 
 </RelativeLayout>
