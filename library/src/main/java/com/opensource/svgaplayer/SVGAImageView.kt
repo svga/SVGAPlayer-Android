@@ -223,7 +223,7 @@ open class SVGAImageView : ImageView {
             setImageDrawable(null)
             return
         }
-        val drawable = SVGADrawable(videoItem, dynamicItem ?: SVGADynamicEntity())
+        val drawable = SVGADrawable(videoItem, dynamicItem ?: SVGADynamicEntity(), scaleType)
         drawable.cleared = clearsAfterStop
         setImageDrawable(drawable)
         this.mVideoItem = videoItem
