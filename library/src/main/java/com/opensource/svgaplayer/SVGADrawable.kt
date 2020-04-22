@@ -7,7 +7,7 @@ import android.graphics.drawable.Drawable
 import android.widget.ImageView
 import com.opensource.svgaplayer.drawer.SVGACanvasDrawer
 
-class SVGADrawable(val videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicEntity, private val scaleType:ImageView.ScaleType = ImageView.ScaleType.MATRIX): Drawable() {
+class SVGADrawable(val videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicEntity, internal var scaleType:ImageView.ScaleType = ImageView.ScaleType.MATRIX): Drawable() {
 
     constructor(videoItem: SVGAVideoEntity): this(videoItem, SVGADynamicEntity())
 
