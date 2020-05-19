@@ -12,6 +12,7 @@ import android.view.View
 import android.view.animation.LinearInterpolator
 import android.widget.ImageView
 import com.opensource.svgaplayer.utils.SVGARange
+import java.lang.ref.WeakReference
 import java.net.URL
 
 /**
@@ -41,6 +42,10 @@ open class SVGAImageView : ImageView {
     private var animator: ValueAnimator? = null
 
     private var mItemClickAreaListener : SVGAClickAreaListener? = null
+
+    private var mAntiAlias = true
+
+    private var mAutoPlay = true
 
     constructor(context: Context?) : super(context) {
         setSoftwareLayerType()
@@ -88,8 +93,8 @@ open class SVGAImageView : ImageView {
         val typedArray = context.theme.obtainStyledAttributes(attrs, R.styleable.SVGAImageView, 0, 0)
         loops = typedArray.getInt(R.styleable.SVGAImageView_loopCount, 0)
         clearsAfterStop = typedArray.getBoolean(R.styleable.SVGAImageView_clearsAfterStop, true)
-        val antiAlias = typedArray.getBoolean(R.styleable.SVGAImageView_antiAlias, true)
-        val autoPlay = typedArray.getBoolean(R.styleable.SVGAImageView_autoPlay, true)
+        mAntiAlias = typedArray.getBoolean(R.styleable.SVGAImageView_antiAlias, true)
+        mAutoPlay = typedArray.getBoolean(R.styleable.SVGAImageView_autoPlay, true)
         typedArray.getString(R.styleable.SVGAImageView_fillMode)?.let {
             if (it == "0") {
                 fillMode = FillMode.Backward
@@ -99,30 +104,20 @@ open class SVGAImageView : ImageView {
             }
         }
         typedArray.getString(R.styleable.SVGAImageView_source)?.let {
-            val parser = SVGAParser(context)
-            Thread {
-                val callback: SVGAParser.ParseCompletion = object : SVGAParser.ParseCompletion {
-                    override fun onComplete(videoItem: SVGAVideoEntity) {
-                        this@SVGAImageView.post {
-                            videoItem.antiAlias = antiAlias
-                            setVideoItem(videoItem)
-                            (drawable as? SVGADrawable)?.scaleType = scaleType
-                            if (autoPlay) {
-                                startAnimation()
-                            }
-                        }
-                    }
-
-                    override fun onError() {}
-                }
-                if(it.startsWith("http://") || it.startsWith("https://")) {
-                    parser.parse(URL(it), callback)
-                } else {
-                    parser.parse(it, callback)
-                }
-            }.start()
+            ParserSourceThread(this, it).start()
         }
         typedArray.recycle()
+    }
+
+    private fun startAnimation(videoItem: SVGAVideoEntity) {
+        this@SVGAImageView.post {
+            videoItem.antiAlias = mAntiAlias
+            setVideoItem(videoItem)
+            (drawable as? SVGADrawable)?.scaleType = scaleType
+            if (mAutoPlay) {
+                startAnimation()
+            }
+        }
     }
 
     fun startAnimation() {
@@ -276,4 +271,32 @@ open class SVGAImageView : ImageView {
         return super.onTouchEvent(event)
     }
 
+    /**
+     * 解析资源线程，不持有外部引用
+     */
+    class ParserSourceThread(view: SVGAImageView, val source: String) : Thread() {
+        /**
+         * 使用弱引用解决内存泄漏
+         */
+        private val weakReference = WeakReference<SVGAImageView>(view)
+        private val parser = SVGAParser(view.context)
+
+        override fun run() {
+            if (source.startsWith("http://") || source.startsWith("https://")) {
+                parser.parse(URL(source), createCallback())
+            } else {
+                parser.parse(source, createCallback())
+            }
+        }
+
+        private fun createCallback(): SVGAParser.ParseCompletion {
+            return object : SVGAParser.ParseCompletion {
+                override fun onComplete(videoItem: SVGAVideoEntity) {
+                    weakReference.get()!!.startAnimation(videoItem)
+                }
+
+                override fun onError() {}
+            }
+        }
+    }
 }
