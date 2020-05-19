@@ -44,8 +44,11 @@ open class SVGAImageView : ImageView {
     private var mItemClickAreaListener : SVGAClickAreaListener? = null
 
     private var mAntiAlias = true
-
     private var mAutoPlay = true
+    private var mDrawable: SVGADrawable? = null
+    private val mAnimatorListener = AnimatorListener(this);
+    private var mStartFrame = 0
+    private var mEndFrame = 0
 
     constructor(context: Context?) : super(context) {
         setSoftwareLayerType()
@@ -129,66 +132,68 @@ open class SVGAImageView : ImageView {
         val drawable = drawable as? SVGADrawable ?: return
         drawable.cleared = false
         drawable.scaleType = scaleType
-        drawable.videoItem.let {
-            var durationScale = 1.0
-            val startFrame = Math.max(0, range?.location ?: 0)
-            val endFrame = Math.min(it.frames - 1, ((range?.location ?: 0) + (range?.length ?: Int.MAX_VALUE) - 1))
-            val animator = ValueAnimator.ofInt(startFrame, endFrame)
-            try {
-                val animatorClass = Class.forName("android.animation.ValueAnimator")
-                animatorClass?.let {
-                    it.getDeclaredField("sDurationScale")?.let {
-                        it.isAccessible = true
-                        it.getFloat(animatorClass).let {
-                            durationScale = it.toDouble()
-                        }
-                        if (durationScale == 0.0) {
-                            it.setFloat(animatorClass, 1.0f)
-                            durationScale = 1.0
-                            Log.e("SVGAPlayer", "The animation duration scale has been reset to 1.0x, because you closed it on developer options.")
-                        }
-                    }
-                }
-            } catch (e: Exception) {}
-            animator.interpolator = LinearInterpolator()
-            animator.duration = ((endFrame - startFrame + 1) * (1000 / it.FPS) / durationScale).toLong()
-            animator.repeatCount = if (loops <= 0) 99999 else loops - 1
-            animator.addUpdateListener {
-                drawable.currentFrame = animator.animatedValue as Int
-                callback?.onStep(drawable.currentFrame, ((drawable.currentFrame + 1).toDouble() / drawable.videoItem.frames.toDouble()))
-            }
-            animator.addListener(object : Animator.AnimatorListener {
-                override fun onAnimationRepeat(animation: Animator?) {
-                    callback?.onRepeat()
-                }
-                override fun onAnimationEnd(animation: Animator?) {
-                    isAnimating = false
-                    stopAnimation()
-                    if (!clearsAfterStop) {
-                        if (fillMode == FillMode.Backward) {
-                            drawable.currentFrame = startFrame
-                        }
-                        else if (fillMode == FillMode.Forward) {
-                            drawable.currentFrame = endFrame
-                        }
-                    }
-                    callback?.onFinished()
-                }
-                override fun onAnimationCancel(animation: Animator?) {
-                    isAnimating = false
-                }
-                override fun onAnimationStart(animation: Animator?) {
-                    isAnimating = true
-                }
-            })
-            if (reverse) {
-                animator.reverse()
-            }
-            else {
-                animator.start()
-            }
-            this.animator = animator
+        play(range, drawable.videoItem, drawable, reverse)
+    }
+
+    private fun play(range: SVGARange?, it: SVGAVideoEntity, drawable: SVGADrawable, reverse: Boolean) {
+        val durationScale = generateScale()
+        mDrawable = drawable;
+        mStartFrame = Math.max(0, range?.location ?: 0)
+        mEndFrame = Math.min(it.frames - 1, ((range?.location ?: 0) + (range?.length
+                ?: Int.MAX_VALUE) - 1))
+        val animator = ValueAnimator.ofInt(mStartFrame, mEndFrame)
+        animator.interpolator = LinearInterpolator()
+        animator.duration = ((mEndFrame - mStartFrame + 1) * (1000 / it.FPS) / durationScale).toLong()
+        animator.repeatCount = if (loops <= 0) 99999 else loops - 1
+        animator.addUpdateListener {
+            drawable.currentFrame = animator.animatedValue as Int
+            val percentage = (drawable.currentFrame + 1).toDouble() / drawable.videoItem.frames.toDouble()
+            callback?.onStep(drawable.currentFrame, percentage)
         }
+        animator.addListener(mAnimatorListener);
+        if (reverse) {
+            animator.reverse()
+        } else {
+            animator.start()
+        }
+        this.animator = animator
+    }
+
+    private fun generateScale(): Double {
+        var scale = 1.0
+        try {
+            val animatorClass = Class.forName("android.animation.ValueAnimator")
+            animatorClass?.let { clazz ->
+                clazz.getDeclaredField("sDurationScale")?.let { field ->
+                    field.isAccessible = true
+                    field.getFloat(animatorClass).let { value ->
+                        scale = value.toDouble()
+                    }
+                    if (scale == 0.0) {
+                        field.setFloat(animatorClass, 1.0f)
+                        scale = 1.0
+                        Log.e("SVGAPlayer", "The animation duration scale has been reset to 1.0x," +
+                                " because you closed it on developer options.")
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return scale
+    }
+
+    private fun onAnimationEnd(animation: Animator?) {
+        isAnimating = false
+        stopAnimation()
+        if (!clearsAfterStop) {
+            if (fillMode == FillMode.Backward) {
+                mDrawable!!.currentFrame = mStartFrame
+            } else if (fillMode == FillMode.Forward) {
+                mDrawable!!.currentFrame = mEndFrame
+            }
+        }
+        callback?.onFinished()
     }
 
     fun pauseAnimation() {
@@ -274,7 +279,7 @@ open class SVGAImageView : ImageView {
     /**
      * 解析资源线程，不持有外部引用
      */
-    class ParserSourceThread(view: SVGAImageView, val source: String) : Thread() {
+    private class ParserSourceThread(view: SVGAImageView, val source: String) : Thread() {
         /**
          * 使用弱引用解决内存泄漏
          */
@@ -297,6 +302,26 @@ open class SVGAImageView : ImageView {
 
                 override fun onError() {}
             }
+        }
+    }
+
+    private class AnimatorListener(view: SVGAImageView) : Animator.AnimatorListener {
+        private val weakReference = WeakReference<SVGAImageView>(view)
+
+        override fun onAnimationRepeat(animation: Animator?) {
+            weakReference.get()!!.callback?.onRepeat()
+        }
+
+        override fun onAnimationEnd(animation: Animator?) {
+            weakReference.get()!!.onAnimationEnd(animation)
+        }
+
+        override fun onAnimationCancel(animation: Animator?) {
+            weakReference.get()!!.isAnimating = false
+        }
+
+        override fun onAnimationStart(animation: Animator?) {
+            weakReference.get()!!.isAnimating = true
         }
     }
 }
