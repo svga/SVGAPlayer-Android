@@ -18,7 +18,6 @@ import java.net.URL
 /**
  * Created by PonyCui on 2017/3/29.
  */
-
 open class SVGAImageView : ImageView {
 
     enum class FillMode {
@@ -30,23 +29,18 @@ open class SVGAImageView : ImageView {
         private set
 
     var loops = 0
-
     var clearsAfterStop = true
-
     var fillMode: FillMode = FillMode.Forward
-
     var callback: SVGACallback? = null
 
     private var mVideoItem: SVGAVideoEntity? = null
-
-    private var animator: ValueAnimator? = null
-
+    private var mAnimator: ValueAnimator? = null
     private var mItemClickAreaListener : SVGAClickAreaListener? = null
-
     private var mAntiAlias = true
     private var mAutoPlay = true
     private var mDrawable: SVGADrawable? = null
-    private val mAnimatorListener = AnimatorListener(this);
+    private val mAnimatorListener = AnimatorListener(this)
+    private val mAnimatorUpdateListener = AnimatorUpdateListener(this)
     private var mStartFrame = 0
     private var mEndFrame = 0
 
@@ -72,23 +66,6 @@ open class SVGAImageView : ImageView {
     private fun setSoftwareLayerType() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR2) {
             this.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
-        }
-    }
-
-    override fun onDetachedFromWindow() {
-        super.onDetachedFromWindow()
-        clearAudio()
-        animator?.cancel()
-        animator?.removeAllListeners()
-        animator?.removeAllUpdateListeners()
-    }
-
-    private fun clearAudio() {
-        this.mVideoItem?.audios?.forEach { audio ->
-            audio.playID?.let {
-                this.mVideoItem?.soundPool?.stop(it)
-            }
-            audio.playID = null
         }
     }
 
@@ -136,29 +113,34 @@ open class SVGAImageView : ImageView {
     }
 
     private fun play(range: SVGARange?, it: SVGAVideoEntity, drawable: SVGADrawable, reverse: Boolean) {
-        val durationScale = generateScale()
         mDrawable = drawable;
         mStartFrame = Math.max(0, range?.location ?: 0)
         mEndFrame = Math.min(it.frames - 1, ((range?.location ?: 0) + (range?.length
                 ?: Int.MAX_VALUE) - 1))
         val animator = ValueAnimator.ofInt(mStartFrame, mEndFrame)
         animator.interpolator = LinearInterpolator()
-        animator.duration = ((mEndFrame - mStartFrame + 1) * (1000 / it.FPS) / durationScale).toLong()
+        animator.duration = ((mEndFrame - mStartFrame + 1) * (1000 / it.FPS) / generateScale()).toLong()
         animator.repeatCount = if (loops <= 0) 99999 else loops - 1
-        animator.addUpdateListener {
-            drawable.currentFrame = animator.animatedValue as Int
-            val percentage = (drawable.currentFrame + 1).toDouble() / drawable.videoItem.frames.toDouble()
-            callback?.onStep(drawable.currentFrame, percentage)
-        }
+        animator.addUpdateListener(mAnimatorUpdateListener)
         animator.addListener(mAnimatorListener);
         if (reverse) {
             animator.reverse()
         } else {
             animator.start()
         }
-        this.animator = animator
+        mAnimator = animator
     }
 
+    private fun onAnimatorUpdate(animator: ValueAnimator?) {
+        if (mDrawable == null) {
+            return
+        }
+        mDrawable!!.currentFrame = animator?.animatedValue as Int
+        val percentage = (mDrawable!!.currentFrame + 1).toDouble() / mDrawable!!.videoItem?.frames?.toDouble()
+        callback?.onStep(mDrawable!!.currentFrame, percentage)
+    }
+
+    @Suppress("UNNECESSARY_SAFE_CALL")
     private fun generateScale(): Double {
         var scale = 1.0
         try {
@@ -177,8 +159,7 @@ open class SVGAImageView : ImageView {
                     }
                 }
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
+        } catch (ignore: Exception) {
         }
         return scale
     }
@@ -206,9 +187,9 @@ open class SVGAImageView : ImageView {
     }
 
     fun stopAnimation(clear: Boolean) {
-        animator?.cancel()
-        animator?.removeAllListeners()
-        animator?.removeAllUpdateListeners()
+        mAnimator?.cancel()
+        mAnimator?.removeAllListeners()
+        mAnimator?.removeAllUpdateListeners()
         (drawable as? SVGADrawable)?.let {
             it.cleared = clear
         }
@@ -235,7 +216,7 @@ open class SVGAImageView : ImageView {
         drawable.currentFrame = frame
         if (andPlay) {
             startAnimation()
-            animator?.let {
+            mAnimator?.let {
                 it.currentPlayTime = (Math.max(0.0f, Math.min(1.0f, (frame.toFloat() / drawable.videoItem.frames.toFloat()))) * it.duration).toLong()
             }
         }
@@ -276,6 +257,23 @@ open class SVGAImageView : ImageView {
         return super.onTouchEvent(event)
     }
 
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        clearAudio()
+        mAnimator?.cancel()
+        mAnimator?.removeAllListeners()
+        mAnimator?.removeAllUpdateListeners()
+    }
+
+    private fun clearAudio() {
+        this.mVideoItem?.audios?.forEach { audio ->
+            audio.playID?.let {
+                this.mVideoItem?.soundPool?.stop(it)
+            }
+            audio.playID = null
+        }
+    }
+
     /**
      * 解析资源线程，不持有外部引用
      */
@@ -297,31 +295,40 @@ open class SVGAImageView : ImageView {
         private fun createCallback(): SVGAParser.ParseCompletion {
             return object : SVGAParser.ParseCompletion {
                 override fun onComplete(videoItem: SVGAVideoEntity) {
-                    weakReference.get()!!.startAnimation(videoItem)
+                    weakReference.get()?.startAnimation(videoItem)
                 }
 
                 override fun onError() {}
             }
         }
-    }
+    } // end of ParserSourceThread
 
     private class AnimatorListener(view: SVGAImageView) : Animator.AnimatorListener {
         private val weakReference = WeakReference<SVGAImageView>(view)
 
         override fun onAnimationRepeat(animation: Animator?) {
-            weakReference.get()!!.callback?.onRepeat()
+            weakReference.get()?.callback?.onRepeat()
         }
 
         override fun onAnimationEnd(animation: Animator?) {
-            weakReference.get()!!.onAnimationEnd(animation)
+            weakReference.get()?.onAnimationEnd(animation)
         }
 
         override fun onAnimationCancel(animation: Animator?) {
-            weakReference.get()!!.isAnimating = false
+            weakReference.get()?.isAnimating = false
         }
 
         override fun onAnimationStart(animation: Animator?) {
-            weakReference.get()!!.isAnimating = true
+            weakReference.get()?.isAnimating = true
         }
-    }
+    } // end of AnimatorListener
+
+
+    private class AnimatorUpdateListener(view: SVGAImageView) : ValueAnimator.AnimatorUpdateListener {
+        private val weakReference = WeakReference<SVGAImageView>(view)
+
+        override fun onAnimationUpdate(animation: ValueAnimator?) {
+            weakReference.get()?.onAnimatorUpdate(animation)
+        }
+    } // end of AnimatorUpdateListener
 }
