@@ -22,7 +22,7 @@ import java.util.zip.ZipInputStream
 
 private var fileLock: Int = 0
 
-class SVGAParser(private var context: Context?) {
+class SVGAParser(context: Context?) {
     private var mContextRef = WeakReference<Context?>(context)
 
     interface ParseCompletion {
