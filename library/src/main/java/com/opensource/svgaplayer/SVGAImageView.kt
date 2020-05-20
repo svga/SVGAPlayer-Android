@@ -131,15 +131,6 @@ open class SVGAImageView : ImageView {
         mAnimator = animator
     }
 
-    private fun onAnimatorUpdate(animator: ValueAnimator?) {
-        if (mDrawable == null) {
-            return
-        }
-        mDrawable!!.currentFrame = animator?.animatedValue as Int
-        val percentage = (mDrawable!!.currentFrame + 1).toDouble() / mDrawable!!.videoItem?.frames?.toDouble()
-        callback?.onStep(mDrawable!!.currentFrame, percentage)
-    }
-
     @Suppress("UNNECESSARY_SAFE_CALL")
     private fun generateScale(): Double {
         var scale = 1.0
@@ -162,6 +153,15 @@ open class SVGAImageView : ImageView {
         } catch (ignore: Exception) {
         }
         return scale
+    }
+
+    private fun onAnimatorUpdate(animator: ValueAnimator?) {
+        if (mDrawable == null) {
+            return
+        }
+        mDrawable!!.currentFrame = animator?.animatedValue as Int
+        val percentage = (mDrawable!!.currentFrame + 1).toDouble() / mDrawable!!.videoItem.frames.toDouble()
+        callback?.onStep(mDrawable!!.currentFrame, percentage)
     }
 
     private fun onAnimationEnd(animation: Animator?) {
