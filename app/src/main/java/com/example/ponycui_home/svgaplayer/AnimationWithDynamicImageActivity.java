@@ -19,7 +19,7 @@ import java.net.URL;
 public class AnimationWithDynamicImageActivity extends Activity {
 
     SVGAImageView animationView = null;
-    SVGAParser parser = new SVGAParser(this);
+    SVGAParser parser = new SVGAParser();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {

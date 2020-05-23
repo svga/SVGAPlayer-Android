@@ -128,7 +128,7 @@ SVGAParser.shareParser().init(this);
 #### 创建一个 `SVGAParser` 实例，加载 assets 中的动画。
 
 ```kotlin
-parser = new SVGAParser(this);
+parser = new SVGAParser();
 parser.decodeFromAssets("posche.svga", new SVGAParser.ParseCompletion() {
     
 });
@@ -137,7 +137,7 @@ parser.decodeFromAssets("posche.svga", new SVGAParser.ParseCompletion() {
 #### 创建一个 `SVGAParser` 实例，加载远端服务器中的动画。
 
 ```kotlin
-parser = new SVGAParser(this);
+parser = new SVGAParser();
 parser.decodeFromURL(new URL("https://github.com/yyued/SVGA-Samples/blob/master/posche.svga?raw=true"), new SVGAParser.ParseCompletion() {
     
 });
@@ -146,7 +146,7 @@ parser.decodeFromURL(new URL("https://github.com/yyued/SVGA-Samples/blob/master/
 #### 创建一个 `SVGADrawable` 实例，并赋值给 `SVGAImageView`，然后播放动画。
 
 ```kotlin
-parser = new SVGAParser(this);
+parser = new SVGAParser();
 parser.decodeFromURL(..., new SVGAParser.ParseCompletion() {
     @Override
     public void onComplete(@NotNull SVGAVideoEntity videoItem) {

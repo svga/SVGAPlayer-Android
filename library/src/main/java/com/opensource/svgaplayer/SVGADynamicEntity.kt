@@ -8,7 +8,6 @@ import android.text.StaticLayout
 import android.text.TextPaint
 import java.net.HttpURLConnection
 import java.net.URL
-import kotlin.concurrent.thread
 
 /**
  * Created by cuiminghui on 2017/3/30.
@@ -50,7 +49,7 @@ class SVGADynamicEntity {
 
     fun setDynamicImage(url: String, forKey: String) {
         val handler = android.os.Handler()
-        SVGAParser.threadPoolExecutor.execute {
+        SVGAParser.getThreadPoolExecutor().execute {
             (URL(url).openConnection() as? HttpURLConnection)?.let {
                 try {
                     it.connectTimeout = 20 * 1000

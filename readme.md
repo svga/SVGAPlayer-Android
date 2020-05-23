@@ -143,7 +143,7 @@ You can also create `SVGAParser` instance by yourself.
 #### Create a `SVGAParser` instance, parse from assets like this.
 
 ```kotlin
-parser = new SVGAParser(this);
+parser = new SVGAParser();
 parser.decodeFromAssets("posche.svga", new SVGAParser.ParseCompletion() {
     // ...
 });
@@ -152,7 +152,7 @@ parser.decodeFromAssets("posche.svga", new SVGAParser.ParseCompletion() {
 #### Create a `SVGAParser` instance, parse from remote server like this.
 
 ```kotlin
-parser = new SVGAParser(this);
+parser = new SVGAParser();
 parser.decodeFromURL(new URL("https://github.com/yyued/SVGA-Samples/blob/master/posche.svga?raw=true"), new SVGAParser.ParseCompletion() {
     
 });
@@ -161,7 +161,7 @@ parser.decodeFromURL(new URL("https://github.com/yyued/SVGA-Samples/blob/master/
 #### Create a `SVGADrawable` instance then set to `SVGAImageView`, play it as you want.
 
 ```kotlin
-parser = new SVGAParser(this);
+parser = new SVGAParser();
 parser.decodeFromURL(..., new SVGAParser.ParseCompletion() {
     @Override
     public void onComplete(@NotNull SVGAVideoEntity videoItem) {

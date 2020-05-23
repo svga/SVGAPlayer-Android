@@ -11,6 +11,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.animation.LinearInterpolator
 import android.widget.ImageView
+import com.opensource.svgaplayer.task.DecodeParseCenter
 import com.opensource.svgaplayer.utils.SVGARange
 import java.lang.ref.WeakReference
 import java.net.URL
@@ -61,6 +62,10 @@ open class SVGAImageView : ImageView {
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes) {
         setSoftwareLayerType()
         attrs?.let { loadAttrs(it) }
+    }
+
+    init {
+        DecodeParseCenter.initCenter(context)
     }
 
     private fun setSoftwareLayerType() {
@@ -282,7 +287,7 @@ open class SVGAImageView : ImageView {
          * 使用弱引用解决内存泄漏
          */
         private val weakReference = WeakReference<SVGAImageView>(view)
-        private val parser = SVGAParser(view.context)
+        private val parser = SVGAParser()
 
         override fun run() {
             if (source.startsWith("http://") || source.startsWith("https://")) {

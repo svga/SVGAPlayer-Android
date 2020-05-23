@@ -157,7 +157,6 @@ public class MainActivity extends AppCompatActivity {
         this.listView.setBackgroundColor(Color.WHITE);
     }
     void setupSVGAParser() {
-        SVGAParser.Companion.shareParser().init(this);
     }
 
 
