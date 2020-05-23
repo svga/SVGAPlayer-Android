@@ -3,6 +3,7 @@ package com.opensource.svgaplayer
 import android.content.Context
 import android.net.http.HttpResponseCache
 import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import com.opensource.svgaplayer.proto.MovieEntity
 import org.json.JSONObject
@@ -91,6 +92,7 @@ class SVGAParser(context: Context?) {
             threadPoolExecutor = executor
         }
         private var mShareParser = SVGAParser(null)
+        private val mMainHandler = Handler(Looper.getMainLooper())
         fun shareParser(): SVGAParser {
             return mShareParser
         }
@@ -189,7 +191,8 @@ class SVGAParser(context: Context?) {
         if (mContextRef.get() == null) {
             Log.e("SVGAParser", "在配置 SVGAParser context 前, 无法解析 SVGA 文件。")
         }
-        Handler(mContextRef.get()?.mainLooper).post {
+
+        mMainHandler.post {
             callback?.onComplete(videoItem)
         }
     }
@@ -199,7 +202,8 @@ class SVGAParser(context: Context?) {
         if (mContextRef.get() == null) {
             Log.e("SVGAParser", "在配置 SVGAParser context 前, 无法解析 SVGA 文件。")
         }
-        Handler(mContextRef.get()?.mainLooper).post {
+
+        mMainHandler.post {
             callback?.onError()
         }
     }

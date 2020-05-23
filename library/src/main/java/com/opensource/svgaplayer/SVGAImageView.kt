@@ -84,7 +84,7 @@ open class SVGAImageView : ImageView {
             }
         }
         typedArray.getString(R.styleable.SVGAImageView_source)?.let {
-            ParserSourceThread(this, it).start()
+            SVGAParser.threadPoolExecutor.execute(SyncSourceParser(this, it))
         }
         typedArray.recycle()
     }
@@ -277,11 +277,11 @@ open class SVGAImageView : ImageView {
     /**
      * 解析资源线程，不持有外部引用
      */
-    private class ParserSourceThread(view: SVGAImageView, val source: String) : Thread() {
+    private class SyncSourceParser(view: SVGAImageView, val source: String) : Runnable {
         /**
          * 使用弱引用解决内存泄漏
          */
-        private val weakReference = WeakReference<SVGAImageView>(view)
+        private val weakReference = WeakReference(view)
         private val parser = SVGAParser(view.context)
 
         override fun run() {
@@ -301,7 +301,7 @@ open class SVGAImageView : ImageView {
                 override fun onError() {}
             }
         }
-    } // end of ParserSourceThread
+    } // end of SyncSourceParser
 
     private class AnimatorListener(view: SVGAImageView) : Animator.AnimatorListener {
         private val weakReference = WeakReference<SVGAImageView>(view)
