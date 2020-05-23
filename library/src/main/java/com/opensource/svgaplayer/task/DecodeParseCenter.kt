@@ -10,14 +10,23 @@ import com.opensource.svgaplayer.SVGAVideoEntity
 import com.opensource.svgaplayer.proto.MovieEntity
 import com.opensource.svgaplayer.utils.ResUtil
 import org.json.JSONObject
-import java.io.*
+import java.io.BufferedInputStream
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.io.InputStream
 import java.net.URL
 import java.security.MessageDigest
-import java.util.*
+import java.util.LinkedList
 import java.util.concurrent.TimeUnit
 import java.util.zip.Inflater
 import java.util.zip.ZipInputStream
 
+/**
+ * parse 中心
+ */
 object DecodeParseCenter {
 
     private val TAG = DecodeParseCenter::class.java.simpleName
@@ -25,14 +34,12 @@ object DecodeParseCenter {
     private var fileLock: Int = 0
 
     private const val MSG_TASK_RUN_IF_NEED = 1
-    private const val MSG_TASK_CANCEL = 2
-    private const val MSG_TASK_CLEAR = 3
 
-    private const val MSG_TASK_SUCCESS = 4
-    private const val MSG_TASK_FAIL = 5
+    private const val MSG_TASK_SUCCESS = 2
+    private const val MSG_TASK_FAIL = 3
 
-    private const val MSG_TASK_ADD_BY_URL = 6
-    private const val MSG_TASK_ADD_BY_ASSETS = 7
+    private const val MSG_TASK_ADD_BY_URL = 4
+    private const val MSG_TASK_ADD_BY_ASSETS = 5
 
     /**
      * 可同时运行的最大任务数量
@@ -62,7 +69,6 @@ object DecodeParseCenter {
 
     private var mContext: Context? = null
 
-
     init {
         mEntityCache = object : LruCache<String, SVGAVideoEntity>(mMaxCache) {
         }
@@ -72,6 +78,9 @@ object DecodeParseCenter {
         mContext = context.applicationContext
     }
 
+    /**
+     * 创建 url 任务
+     */
     fun addTask(url: URL, callback: SVGAParser.ParseCompletion?): String {
         val key = buildCacheKey(url.toString())
 
@@ -88,6 +97,9 @@ object DecodeParseCenter {
         return key
     }
 
+    /**
+     * 创建 assets 任务
+     */
     fun addTask(assets: String, callback: SVGAParser.ParseCompletion?): String {
 
         val task = DecodeAssetsTask(assets, callback)
@@ -103,42 +115,6 @@ object DecodeParseCenter {
         mHandler.sendMsg(MSG_TASK_ADD_BY_ASSETS, task)
 
         return key
-    }
-
-    private fun dealTaskUrl(task: DecodeUrlTask) {
-        mWaitTasks.add(task)
-        mHandler.sendMsg(MSG_TASK_RUN_IF_NEED)
-    }
-
-    private fun dealTaskAssets(task: DecodeAssetsTask) {
-        mWaitTasks.add(task)
-        mHandler.sendMsg(MSG_TASK_RUN_IF_NEED)
-    }
-
-    /**
-     * 从缓存中查找
-     */
-    fun getCache(taskCacheKey: String): SVGAVideoEntity? {
-        return mEntityCache?.get(taskCacheKey)
-    }
-
-    /**
-     * 加载任务
-     */
-    fun runTasks() {
-        while (mRunningTasks.size < mMaxTasks) {
-            val task = mWaitTasks.poll()
-            task ?: break
-            val entity = getCache(task.taskCacheKey)
-            if (entity == null) {
-                if (mRunningTasks[task.taskCacheKey] == null) {
-                    mRunningTasks[task.taskCacheKey] = task
-                    SVGAParser.getThreadPoolExecutor().execute(task)
-                }
-            } else {
-                task.callback?.onComplete(entity)
-            }
-        }
     }
 
     fun getFromAssets(path: String): InputStream {
@@ -160,8 +136,10 @@ object DecodeParseCenter {
                     decodeFromCacheKey(task.taskCacheKey)
                 } else {
                     inflate(bytes)?.let {
-                        val videoItem =
-                                SVGAVideoEntity(MovieEntity.ADAPTER.decode(it), File(task.taskCacheKey))
+                        val videoItem = SVGAVideoEntity(
+                                MovieEntity.ADAPTER.decode(it),
+                                File(task.taskCacheKey)
+                        )
                         videoItem.prepare {
                             invokeCompleteCallback(task.taskCacheKey, videoItem)
                         }
@@ -230,8 +208,52 @@ object DecodeParseCenter {
         }
     }
 
+    /**
+     * 从内存缓存中查找
+     */
+    fun getCache(taskCacheKey: String): SVGAVideoEntity? {
+        return mEntityCache?.get(taskCacheKey)
+    }
+
+    /**
+     * 是否拥有本地缓存
+     */
     fun hasDiskCached(cacheKey: String): Boolean {
         return buildCacheDir(cacheKey).exists()
+    }
+
+    /**
+     * 移除某个任务
+     */
+    fun removeTask(taskCacheKey: String) {
+        var targetTask: DecodeTask? = null
+        for (task in mWaitTasks) {
+            if (taskCacheKey == task.taskCacheKey) {
+                targetTask = task
+            }
+        }
+        targetTask?.let {
+            mWaitTasks.remove(it)
+            return
+        }
+        mRunningTasks.remove(taskCacheKey)
+    }
+
+    /**
+     * 清空所有任务
+     */
+    fun clearAllTask() {
+        mWaitTasks.clear()
+        mRunningTasks.clear()
+        val pool = SVGAParser.getThreadPoolExecutor()
+        try {
+            pool.shutdown()
+            if (!pool.awaitTermination(1, TimeUnit.SECONDS)) {
+                pool.shutdownNow()
+            }
+        } catch (e: Exception) {
+            pool.shutdownNow()
+        }
     }
 
     private fun readAsBytes(inputStream: InputStream): ByteArray? {
@@ -304,34 +326,6 @@ object DecodeParseCenter {
     private fun buildCacheDir(cacheKey: String): File =
             File(mContext?.cacheDir?.absolutePath + "/" + cacheKey + "/")
 
-    fun removeTask(taskCacheKey: String) {
-        var targetTask: DecodeTask? = null
-        for (task in mWaitTasks) {
-            if (taskCacheKey == task.taskCacheKey) {
-                targetTask = task
-            }
-        }
-        targetTask?.let {
-            mWaitTasks.remove(it)
-            return
-        }
-        mRunningTasks.remove(taskCacheKey)
-    }
-
-    fun clearAllTask() {
-        mWaitTasks.clear()
-        mRunningTasks.clear()
-        val pool = SVGAParser.getThreadPoolExecutor()
-        try {
-            pool.shutdown()
-            if (!pool.awaitTermination(1, TimeUnit.SECONDS)) {
-                pool.shutdownNow()
-            }
-        } catch (e: Exception) {
-            pool.shutdownNow()
-        }
-    }
-
     private fun buildCacheKey(str: String): String {
         val messageDigest = MessageDigest.getInstance("MD5")
         messageDigest.update(str.toByteArray(charset("UTF-8")))
@@ -358,6 +352,35 @@ object DecodeParseCenter {
         mHandler.sendMsg(MSG_TASK_FAIL, DecodeResult(taskCacheKey, error = e))
     }
 
+    private fun dealTaskUrl(task: DecodeUrlTask) {
+        mWaitTasks.add(task)
+        mHandler.sendMsg(MSG_TASK_RUN_IF_NEED)
+    }
+
+    private fun dealTaskAssets(task: DecodeAssetsTask) {
+        mWaitTasks.add(task)
+        mHandler.sendMsg(MSG_TASK_RUN_IF_NEED)
+    }
+
+    /**
+     * 加载任务
+     */
+    private fun runTasks() {
+        while (mRunningTasks.size < mMaxTasks) {
+            val task = mWaitTasks.poll()
+            task ?: break
+            val entity = getCache(task.taskCacheKey)
+            if (entity == null) {
+                if (mRunningTasks[task.taskCacheKey] == null) {
+                    mRunningTasks[task.taskCacheKey] = task
+                    SVGAParser.getThreadPoolExecutor().execute(task)
+                }
+            } else {
+                task.callback?.onComplete(entity)
+            }
+        }
+    }
+
     private fun dealSuccess(result: DecodeResult) {
         val task = mRunningTasks.remove(result.taskKey)
         task?.callback?.let { callback ->
@@ -366,11 +389,13 @@ object DecodeParseCenter {
                 mEntityCache?.put(result.taskKey, it)
             }
         }
+        mHandler.sendMsg(MSG_TASK_RUN_IF_NEED)
     }
 
     private fun dealFail(result: DecodeResult) {
         val task = mRunningTasks.remove(result.taskKey)
         task?.callback?.onError()
+        mHandler.sendMsg(MSG_TASK_RUN_IF_NEED)
     }
 
     private class DecodeParseHandler : Handler() {
@@ -397,12 +422,6 @@ object DecodeParseCenter {
                     }
                     MSG_TASK_RUN_IF_NEED -> {
                         runTasks()
-                    }
-                    MSG_TASK_CANCEL -> {
-                        removeTask(m.obj as String)
-                    }
-                    MSG_TASK_CLEAR -> {
-                        clearAllTask()
                     }
                     MSG_TASK_SUCCESS -> {
                         dealSuccess(msg.obj as DecodeResult)

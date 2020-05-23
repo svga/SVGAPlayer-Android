@@ -4,7 +4,11 @@ import com.opensource.svgaplayer.SVGAParser
 import com.opensource.svgaplayer.utils.FileDownloader
 import java.net.URL
 
-class DecodeUrlTask(url: String, callback: SVGAParser.ParseCompletion?) : DecodeTask(url, callback) {
+/**
+ * 解析 url 任务
+ */
+class DecodeUrlTask(url: String, callback: SVGAParser.ParseCompletion?) :
+        DecodeTask(url, callback) {
 
     override fun run() {
         try {
@@ -17,7 +21,6 @@ class DecodeUrlTask(url: String, callback: SVGAParser.ParseCompletion?) : Decode
                     DecodeParseCenter.invokeErrorCallback(taskCacheKey, e)
                 })
             }
-
         } catch (e: Exception) {
             DecodeParseCenter.invokeErrorCallback(taskCacheKey, e)
         }

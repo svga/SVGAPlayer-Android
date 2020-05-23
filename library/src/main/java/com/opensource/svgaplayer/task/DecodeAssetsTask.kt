@@ -2,6 +2,9 @@ package com.opensource.svgaplayer.task
 
 import com.opensource.svgaplayer.SVGAParser
 
+/**
+ * 解析 assets 任务
+ */
 class DecodeAssetsTask(path: String, callback: SVGAParser.ParseCompletion?) :
         DecodeTask(path, callback) {
 
