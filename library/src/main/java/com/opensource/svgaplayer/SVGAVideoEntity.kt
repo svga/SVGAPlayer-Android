@@ -14,6 +14,7 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.util.*
+import kotlin.concurrent.timerTask
 
 private val options = BitmapFactory.Options()
 
@@ -173,6 +174,8 @@ class SVGAVideoEntity {
 
     private fun resetAudios(obj: MovieEntity, completionBlock: () -> Unit) {
         obj.audios?.takeIf { it.isNotEmpty() }?.let { audios ->
+            //是否已经回调
+            var calledCompletion: Boolean = false;
             var soundLoaded = 0
             val soundPool = if (android.os.Build.VERSION.SDK_INT >= 21) {
                 SoundPool.Builder().setAudioAttributes(AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).build())
@@ -185,7 +188,10 @@ class SVGAVideoEntity {
             soundPool.setOnLoadCompleteListener { _, _, _ ->
                 soundLoaded++
                 if (soundLoaded >= audios.count()) {
-                    completionBlock()
+                    if (!calledCompletion) {
+                        completionBlock()
+                    }
+                    calledCompletion = true
                 }
             }
             val audiosData = HashMap<String, ByteArray>()
@@ -222,6 +228,16 @@ class SVGAVideoEntity {
                 return@map item
             }
             this.soundPool = soundPool
+            val timer = Timer()
+            timer.schedule(timerTask {
+                if (!calledCompletion) {
+                    completionBlock()
+                }
+                calledCompletion = true
+                timer.cancel()
+
+            }, 2000)
+
         } ?: kotlin.run(completionBlock)
     }
 
