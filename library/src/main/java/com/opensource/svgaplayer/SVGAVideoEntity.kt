@@ -24,6 +24,7 @@ private val options = BitmapFactory.Options()
 class SVGAVideoEntity {
 
     protected fun finalize() {
+        this.soundPool?.setOnLoadCompleteListener(null)
         this.soundPool?.release()
         this.soundPool = null
         this.images.clear()
@@ -177,6 +178,14 @@ class SVGAVideoEntity {
             //是否已经回调
             var calledCompletion = false;
             val timer = Timer()
+            val timerTask = timerTask {
+                if (!calledCompletion) {
+                    completionBlock()
+                }
+                calledCompletion = true
+                cancel();
+                timer.cancel()
+            }
             var soundLoaded = 0
             val soundPool = if (android.os.Build.VERSION.SDK_INT >= 21) {
                 SoundPool.Builder().setAudioAttributes(AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).build())
@@ -189,11 +198,12 @@ class SVGAVideoEntity {
             soundPool.setOnLoadCompleteListener { _, _, _ ->
                 soundLoaded++
                 if (soundLoaded >= audios.count()) {
+                    timerTask.cancel()
+                    timer.cancel()
                     if (!calledCompletion) {
                         completionBlock()
                     }
                     calledCompletion = true
-                    timer.cancel()
                 }
             }
             val audiosData = HashMap<String, ByteArray>()
@@ -231,14 +241,7 @@ class SVGAVideoEntity {
             }
 
             this.soundPool = soundPool
-            timer.schedule(timerTask {
-                if (!calledCompletion) {
-                    completionBlock()
-                }
-                calledCompletion = true
-                timer.cancel()
-
-            }, 2000)
+            timer.schedule(timerTask, 2000)
 
         } ?: kotlin.run(completionBlock)
     }
