@@ -12,13 +12,17 @@ import android.view.View
 import android.view.animation.LinearInterpolator
 import android.widget.ImageView
 import com.opensource.svgaplayer.utils.SVGARange
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.lang.ref.WeakReference
 import java.net.URL
 
 /**
  * Created by PonyCui on 2017/3/29.
  */
-open class SVGAImageView : ImageView {
+@Suppress("NewApi")
+open class SVGAImageView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0, defStyleRes: Int = 0)
+    : ImageView(context, attrs, defStyleAttr, defStyleRes) {
 
     enum class FillMode {
         Backward,
@@ -35,7 +39,7 @@ open class SVGAImageView : ImageView {
 
     private var mVideoItem: SVGAVideoEntity? = null
     private var mAnimator: ValueAnimator? = null
-    private var mItemClickAreaListener : SVGAClickAreaListener? = null
+    private var mItemClickAreaListener: SVGAClickAreaListener? = null
     private var mAntiAlias = true
     private var mAutoPlay = true
     private var mDrawable: SVGADrawable? = null
@@ -44,29 +48,11 @@ open class SVGAImageView : ImageView {
     private var mStartFrame = 0
     private var mEndFrame = 0
 
-    constructor(context: Context?) : super(context) {
-        setSoftwareLayerType()
-    }
-
-    constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs) {
-        setSoftwareLayerType()
-        attrs?.let { loadAttrs(it) }
-    }
-
-    constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
-        setSoftwareLayerType()
-        attrs?.let { loadAttrs(it) }
-    }
-
-    constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes) {
-        setSoftwareLayerType()
-        attrs?.let { loadAttrs(it) }
-    }
-
-    private fun setSoftwareLayerType() {
+    init {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR2) {
-            this.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+            this.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
         }
+        attrs?.let { loadAttrs(it) }
     }
 
     private fun loadAttrs(attrs: AttributeSet) {
@@ -78,15 +64,39 @@ open class SVGAImageView : ImageView {
         typedArray.getString(R.styleable.SVGAImageView_fillMode)?.let {
             if (it == "0") {
                 fillMode = FillMode.Backward
-            }
-            else if (it == "1") {
+            } else if (it == "1") {
                 fillMode = FillMode.Forward
             }
         }
         typedArray.getString(R.styleable.SVGAImageView_source)?.let {
-            ParserSourceThread(this, it).start()
+            parserSource(it)
         }
         typedArray.recycle()
+    }
+
+    private fun parserSource(source: String) {
+        // 使用弱引用解决内存泄漏
+        val ref = WeakReference<SVGAImageView>(this)
+
+        // 在后台启动一个新的协程并继续
+        GlobalScope.launch {
+            val parser = SVGAParser(context)
+            if (source.startsWith("http://") || source.startsWith("https://")) {
+                parser.decodeFromURL(URL(source), createParseCompletion(ref))
+            } else {
+                parser.decodeFromAssets(source, createParseCompletion(ref))
+            }
+        }
+    }
+
+    private fun createParseCompletion(ref: WeakReference<SVGAImageView>): SVGAParser.ParseCompletion {
+        return object : SVGAParser.ParseCompletion {
+            override fun onComplete(videoItem: SVGAVideoEntity) {
+                ref.get()?.startAnimation(videoItem)
+            }
+
+            override fun onError() {}
+        }
     }
 
     private fun startAnimation(videoItem: SVGAVideoEntity) {
@@ -113,10 +123,9 @@ open class SVGAImageView : ImageView {
     }
 
     private fun play(range: SVGARange?, it: SVGAVideoEntity, drawable: SVGADrawable, reverse: Boolean) {
-        mDrawable = drawable;
+        mDrawable = drawable
         mStartFrame = Math.max(0, range?.location ?: 0)
-        mEndFrame = Math.min(it.frames - 1, ((range?.location ?: 0) + (range?.length
-                ?: Int.MAX_VALUE) - 1))
+        mEndFrame = Math.min(it.frames - 1, ((range?.location ?: 0) + (range?.length ?: Int.MAX_VALUE) - 1))
         val animator = ValueAnimator.ofInt(mStartFrame, mEndFrame)
         animator.interpolator = LinearInterpolator()
         animator.duration = ((mEndFrame - mStartFrame + 1) * (1000 / it.FPS) / generateScale()).toLong()
@@ -135,20 +144,17 @@ open class SVGAImageView : ImageView {
     private fun generateScale(): Double {
         var scale = 1.0
         try {
-            val animatorClass = Class.forName("android.animation.ValueAnimator")
-            animatorClass?.let { clazz ->
-                clazz.getDeclaredField("sDurationScale")?.let { field ->
-                    field.isAccessible = true
-                    field.getFloat(animatorClass).let { value ->
-                        scale = value.toDouble()
-                    }
-                    if (scale == 0.0) {
-                        field.setFloat(animatorClass, 1.0f)
-                        scale = 1.0
-                        Log.e("SVGAPlayer", "The animation duration scale has been reset to 1.0x," +
-                                " because you closed it on developer options.")
-                    }
-                }
+            val animatorClass = Class.forName("android.animation.ValueAnimator") ?: return scale
+            val field = animatorClass.getDeclaredField("sDurationScale") ?: return scale
+            field.isAccessible = true
+            field.getFloat(animatorClass).let { value ->
+                scale = value.toDouble()
+            }
+            if (scale == 0.0) {
+                field.setFloat(animatorClass, 1.0f)
+                scale = 1.0
+                Log.e("SVGAPlayer", "The animation duration scale has been reset to 1.0x," +
+                        " because you closed it on developer options.")
             }
         } catch (ignore: Exception) {
         }
@@ -169,9 +175,9 @@ open class SVGAImageView : ImageView {
         stopAnimation()
         if (!clearsAfterStop) {
             if (fillMode == FillMode.Backward) {
-                mDrawable!!.currentFrame = mStartFrame
+                mDrawable?.currentFrame = mStartFrame
             } else if (fillMode == FillMode.Forward) {
-                mDrawable!!.currentFrame = mEndFrame
+                mDrawable?.currentFrame = mEndFrame
             }
         }
         callback?.onFinished()
@@ -241,14 +247,15 @@ open class SVGAImageView : ImageView {
             return super.onTouchEvent(event)
         }
         event?.let {
-            if(event.action == MotionEvent.ACTION_DOWN){
-                val drawable = drawable as? SVGADrawable ?: return false
-                for((key,value) in drawable.dynamicItem.mClickMap){
-                    if (event.x >= value[0] && event.x <= value[2] && event.y >= value[1] && event.y <= value[3]) {
-                        mItemClickAreaListener?.let {
-                            it.onClick(key)
-                            return true
-                        }
+            if(event.action != MotionEvent.ACTION_DOWN) {
+                return super.onTouchEvent(event)
+            }
+            val drawable = drawable as? SVGADrawable ?: return false
+            for ((key, value) in drawable.dynamicItem.mClickMap) {
+                if (event.x >= value[0] && event.x <= value[2] && event.y >= value[1] && event.y <= value[3]) {
+                    mItemClickAreaListener?.let {
+                        it.onClick(key)
+                        return true
                     }
                 }
             }
@@ -273,35 +280,6 @@ open class SVGAImageView : ImageView {
             audio.playID = null
         }
     }
-
-    /**
-     * 解析资源线程，不持有外部引用
-     */
-    private class ParserSourceThread(view: SVGAImageView, val source: String) : Thread() {
-        /**
-         * 使用弱引用解决内存泄漏
-         */
-        private val weakReference = WeakReference<SVGAImageView>(view)
-        private val parser = SVGAParser(view.context)
-
-        override fun run() {
-            if (source.startsWith("http://") || source.startsWith("https://")) {
-                parser.parse(URL(source), createCallback())
-            } else {
-                parser.parse(source, createCallback())
-            }
-        }
-
-        private fun createCallback(): SVGAParser.ParseCompletion {
-            return object : SVGAParser.ParseCompletion {
-                override fun onComplete(videoItem: SVGAVideoEntity) {
-                    weakReference.get()?.startAnimation(videoItem)
-                }
-
-                override fun onError() {}
-            }
-        }
-    } // end of ParserSourceThread
 
     private class AnimatorListener(view: SVGAImageView) : Animator.AnimatorListener {
         private val weakReference = WeakReference<SVGAImageView>(view)
