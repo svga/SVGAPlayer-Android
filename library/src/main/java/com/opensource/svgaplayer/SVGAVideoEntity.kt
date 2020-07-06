@@ -5,12 +5,13 @@ import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.SoundPool
 import android.os.Build
+import android.util.Log
 import com.opensource.svgaplayer.entities.SVGAAudioEntity
 import com.opensource.svgaplayer.entities.SVGAVideoSpriteEntity
 import com.opensource.svgaplayer.proto.AudioEntity
 import com.opensource.svgaplayer.proto.MovieEntity
 import com.opensource.svgaplayer.proto.MovieParams
-import com.opensource.svgaplayer.utils.BitmapUtils
+import com.opensource.svgaplayer.bitmap.SVGABitmapCreator
 import com.opensource.svgaplayer.utils.SVGARect
 import org.json.JSONObject
 import java.io.File
@@ -77,6 +78,7 @@ class SVGAVideoEntity {
     internal fun init(reqWidth:Int, reqHeight:Int) {
         this.reqWidth = reqWidth
         this.reqHeight = reqHeight
+        Log.d("SVGAVideoEntity", "init reqHeight$reqHeight reqWidth$reqWidth" )
         if (mJsonMovie != null) {
             parsResourceByJson()
         } else if (movieItem != null) {
@@ -142,10 +144,8 @@ class SVGAVideoEntity {
     }
 
     private fun createBitmap(filePath: String): Bitmap? {
-        if (filePath.isEmpty()) {
-            return null
-        }
-        return BitmapUtils.decodeSampledBitmapFromFile(filePath, reqWidth, reqHeight)
+        Log.d("SVGAVideoEntity", "createBitmap reqHeight$reqHeight reqWidth$reqWidth" )
+        return SVGABitmapCreator.createBitmap(filePath, reqWidth, reqHeight)
     }
 
     private fun parserImages(obj: MovieEntity) {
@@ -166,7 +166,8 @@ class SVGAVideoEntity {
     }
 
     private fun createBitmap(byteArray: ByteArray, filePath: String): Bitmap? {
-        return BitmapUtils.decodeSampledBitmapFromByteArray(byteArray, reqWidth, reqHeight) ?: createBitmap(filePath)
+        val bitmap = SVGABitmapCreator.createBitmap(byteArray, reqWidth, reqHeight)
+        return bitmap?:createBitmap(filePath)
     }
 
     private fun resetSprites(json: JSONObject) {
@@ -250,7 +251,7 @@ class SVGAVideoEntity {
 
     private fun setupSoundPool(entity: MovieEntity, completionBlock: () -> Unit) {
         var soundLoaded = 0
-        soundPool = generateSoundPool(entity);
+        soundPool = generateSoundPool(entity)
         soundPool?.setOnLoadCompleteListener { _, _, _ ->
             soundLoaded++
             if (soundLoaded >= entity.audios.count()) {
