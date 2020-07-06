@@ -1,21 +1,19 @@
 package com.opensource.svgaplayer
 
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.SoundPool
 import com.opensource.svgaplayer.entities.SVGAAudioEntity
 import com.opensource.svgaplayer.entities.SVGAVideoSpriteEntity
 import com.opensource.svgaplayer.proto.MovieEntity
+import com.opensource.svgaplayer.utils.BitmapUtils
 import com.opensource.svgaplayer.utils.SVGARect
 import org.json.JSONObject
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.util.*
-
-private val options = BitmapFactory.Options()
 
 /**
  * Created by PonyCui on 16/6/18.
@@ -39,6 +37,9 @@ class SVGAVideoEntity {
     var frames: Int = 0
         private set
 
+
+    internal var reqHeight = 0
+    internal var reqWidth = 0
     internal var sprites: List<SVGAVideoSpriteEntity> = listOf()
     internal var audios: List<SVGAAudioEntity> = listOf()
     internal var soundPool: SoundPool? = null
@@ -96,21 +97,20 @@ class SVGAVideoEntity {
     private fun resetImages(obj: JSONObject) {
         obj.optJSONObject("images")?.let { imgObjects ->
             imgObjects.keys().forEach { imageKey ->
-                options.inPreferredConfig = Bitmap.Config.RGB_565
                 var filePath = cacheDir.absolutePath + "/" + imgObjects[imageKey]
-                var bitmap = if (File(filePath).exists()) BitmapFactory.decodeFile(filePath, options) else null
+                var bitmap = if (File(filePath).exists()) createBitmap(filePath) else null
                 val bitmapKey = imageKey.replace(".matte", "")
                 if (bitmap != null) {
                     images.put(bitmapKey, bitmap)
                 } else {
                     // bitmap.matte : bitmap
                     var filePath = cacheDir.absolutePath + "/" + imgObjects[imageKey] + ".png"
-                    var bitmap = if (File(filePath).exists()) BitmapFactory.decodeFile(filePath, options) else null
+                    var bitmap = if (File(filePath).exists()) createBitmap(filePath) else null
                     if (bitmap != null) {
                         images.put(bitmapKey, bitmap)
                     } else {
                         (cacheDir.absolutePath + "/" + imageKey + ".png").takeIf { File(it).exists() }?.let {
-                            BitmapFactory.decodeFile(it, options)?.let {
+                            createBitmap(filePath)?.let {
                                 images.put(bitmapKey, it)
                             }
                         }
@@ -123,7 +123,6 @@ class SVGAVideoEntity {
     private fun resetImages(obj: MovieEntity) {
         obj.images?.entries?.forEach {
             val imageKey = it.key
-            options.inPreferredConfig = Bitmap.Config.RGB_565
             val byteArray = it.value.toByteArray()
             if (byteArray.count() < 4) {
                 return@forEach
@@ -131,18 +130,18 @@ class SVGAVideoEntity {
             val fileTag = byteArray.slice(IntRange(0, 3))
             if (fileTag[0].toInt() == 73 && fileTag[1].toInt() == 68 && fileTag[2].toInt() == 51) {
             } else {
-                val bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.count(), options)
+                val bitmap = BitmapUtils.decodeSampledBitmapFromByteArray(byteArray,reqWidth, reqHeight)
                 if (bitmap != null) {
                     images[imageKey] = bitmap
                 } else {
                     it.value.utf8()?.let {
                         var filePath = cacheDir.absolutePath + "/" + it
-                        var bitmap = if (File(filePath).exists()) BitmapFactory.decodeFile(filePath, options) else null
+                        var bitmap = if (File(filePath).exists()) createBitmap(filePath) else null
                         if (bitmap != null) {
                             images.put(imageKey, bitmap)
                         } else {
                             (cacheDir.absolutePath + "/" + imageKey + ".png").takeIf { File(it).exists() }?.let {
-                                BitmapFactory.decodeFile(it, options)?.let {
+                                createBitmap(it)?.let {
                                     images.put(imageKey, it)
                                 }
                             }
@@ -151,6 +150,10 @@ class SVGAVideoEntity {
                 }
             }
         }
+    }
+
+    private fun createBitmap(filePath: String): Bitmap? {
+        return BitmapUtils.decodeSampledBitmapFromFile(filePath, reqWidth, reqHeight)
     }
 
     private fun resetSprites(obj: JSONObject) {

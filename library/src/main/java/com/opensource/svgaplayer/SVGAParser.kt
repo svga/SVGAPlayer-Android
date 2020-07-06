@@ -23,10 +23,9 @@ import java.util.zip.ZipInputStream
 private var fileLock: Int = 0
 
 class SVGAParser(context: Context?) {
-    private var mContextRef = WeakReference<Context?>(context)
+    private var mContextRef = WeakReference(context)
 
     interface ParseCompletion {
-
         fun onComplete(videoItem: SVGAVideoEntity)
         fun onError()
     }
@@ -87,9 +86,11 @@ class SVGAParser(context: Context?) {
 
     companion object {
         internal var threadPoolExecutor = Executors.newCachedThreadPool()
+
         fun setThreadPoolExecutor(executor: ThreadPoolExecutor) {
             threadPoolExecutor = executor
         }
+
         private var mShareParser = SVGAParser(null)
         fun shareParser(): SVGAParser {
             return mShareParser
