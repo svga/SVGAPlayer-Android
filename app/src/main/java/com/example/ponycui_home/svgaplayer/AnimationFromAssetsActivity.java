@@ -70,7 +70,7 @@ public class AnimationFromAssetsActivity extends Activity {
             samples.add("MerryChristmas.svga");
         }
         return samples.get((int) Math.floor(Math.random() * samples.size()));
-//        return "Rocket.svga";
+//        return "gradientBorder.svga";
     }
 
 }

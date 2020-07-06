@@ -188,9 +188,9 @@ open class SVGAImageView @JvmOverloads constructor(context: Context, attrs: Attr
         }
 
         callback?.onFinished()
-        Log.d("## onAnimationEnd", "onFinished")
         // 不是循环播放时，手动停止一下
         if ((animation as ValueAnimator).repeatCount <= 0) {
+            Log.d("## onAnimationEnd", "onFinished")
             // 要根据用户设置的 clearsAfterStop 状态判断，不可手动置 true
             stopAnimation()
         }

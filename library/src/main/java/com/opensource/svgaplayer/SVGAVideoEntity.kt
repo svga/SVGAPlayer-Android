@@ -125,7 +125,7 @@ class SVGAVideoEntity {
     }
 
     private fun createBitmap(filePath: String): Bitmap? {
-        if (filePath.isNotEmpty()) {
+        if (filePath.isEmpty()) {
             return null
         }
         return BitmapUtils.decodeSampledBitmapFromFile(filePath, reqWidth, reqHeight)
