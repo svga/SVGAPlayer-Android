@@ -178,7 +178,6 @@ open class SVGAImageView @JvmOverloads constructor(context: Context, attrs: Attr
 
     private fun onAnimationEnd(animation: Animator?) {
         isAnimating = false
-        stopAnimation()
         val drawable = getSVGADrawable()
         if (!clearsAfterStop && drawable != null) {
             if (fillMode == FillMode.Backward) {
@@ -187,7 +186,9 @@ open class SVGAImageView @JvmOverloads constructor(context: Context, attrs: Attr
                 drawable.currentFrame = mEndFrame
             }
         }
+
         callback?.onFinished()
+        Log.d("## onAnimationEnd", "onFinished")
         // 不是循环播放时，手动停止一下
         if ((animation as ValueAnimator).repeatCount <= 0) {
             // 要根据用户设置的 clearsAfterStop 状态判断，不可手动置 true
@@ -196,6 +197,7 @@ open class SVGAImageView @JvmOverloads constructor(context: Context, attrs: Attr
     }
 
     fun pauseAnimation() {
+        Log.d("## pauseAnimation", "")
         stopAnimation(false)
         callback?.onPause()
     }
@@ -205,6 +207,8 @@ open class SVGAImageView @JvmOverloads constructor(context: Context, attrs: Attr
     }
 
     fun stopAnimation(clear: Boolean) {
+        Log.d("## stopAnimation", "cancel")
+
         mAnimator?.cancel()
         mAnimator?.removeAllListeners()
         mAnimator?.removeAllUpdateListeners()
@@ -282,17 +286,21 @@ open class SVGAImageView @JvmOverloads constructor(context: Context, attrs: Attr
 
         override fun onAnimationRepeat(animation: Animator?) {
             weakReference.get()?.callback?.onRepeat()
+            Log.d("## onAnimationRepeat", (animation as ValueAnimator).repeatCount.toString())
         }
 
         override fun onAnimationEnd(animation: Animator?) {
+            Log.d("## onAnimationEnd", (animation as ValueAnimator).repeatCount.toString())
             weakReference.get()?.onAnimationEnd(animation)
         }
 
         override fun onAnimationCancel(animation: Animator?) {
+            Log.d("## onAnimationCancel", (animation as ValueAnimator).duration.toString())
             weakReference.get()?.isAnimating = false
         }
 
         override fun onAnimationStart(animation: Animator?) {
+            Log.d("## onAnimationStart", (animation as ValueAnimator).duration.toString())
             weakReference.get()?.isAnimating = true
         }
     } // end of AnimatorListener
@@ -302,6 +310,8 @@ open class SVGAImageView @JvmOverloads constructor(context: Context, attrs: Attr
         private val weakReference = WeakReference<SVGAImageView>(view)
 
         override fun onAnimationUpdate(animation: ValueAnimator?) {
+            Log.d("## onAnimationUpdate", (animation as ValueAnimator).repeatCount.toString())
+
             weakReference.get()?.onAnimatorUpdate(animation)
         }
     } // end of AnimatorUpdateListener
