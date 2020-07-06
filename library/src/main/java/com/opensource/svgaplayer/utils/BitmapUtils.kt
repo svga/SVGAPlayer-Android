@@ -14,7 +14,7 @@ object BitmapUtils {
             fileName: String,
             reqWidth: Int,
             reqHeight: Int
-    ): Bitmap {
+    ): Bitmap? {
         // First decode with inJustDecodeBounds=true to check dimensions
         return BitmapFactory.Options().run {
             inJustDecodeBounds = true
@@ -34,7 +34,7 @@ object BitmapUtils {
             byteArray: ByteArray,
             reqWidth: Int,
             reqHeight: Int
-    ): Bitmap {
+    ): Bitmap? {
         // First decode with inJustDecodeBounds=true to check dimensions
         return BitmapFactory.Options().run {
             inJustDecodeBounds = true

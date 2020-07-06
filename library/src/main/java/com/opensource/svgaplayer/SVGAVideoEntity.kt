@@ -129,42 +129,33 @@ class SVGAVideoEntity {
         }
     }
 
+    private fun createBitmap(filePath: String): Bitmap? {
+        if (filePath.isNotEmpty()) {
+            return null
+        }
+        return BitmapUtils.decodeSampledBitmapFromFile(filePath, reqWidth, reqHeight)
+    }
+
     private fun parserImages(obj: MovieEntity) {
-        obj.images?.entries?.forEach {
-            val imageKey = it.key
-            val byteArray = it.value.toByteArray()
+        obj.images?.entries?.forEach { entry ->
+            val byteArray = entry.value.toByteArray()
             if (byteArray.count() < 4) {
                 return@forEach
             }
             val fileTag = byteArray.slice(IntRange(0, 3))
             if (fileTag[0].toInt() == 73 && fileTag[1].toInt() == 68 && fileTag[2].toInt() == 51) {
-            } else {
-                val bitmap = BitmapUtils.decodeSampledBitmapFromByteArray(byteArray,reqWidth, reqHeight)
-                if (bitmap != null) {
-                    images[imageKey] = bitmap
-                } else {
-                    it.value.utf8()?.let {
-                        var filePath = mCacheDir.absolutePath + "/" + it
-                        var bitmap = if (File(filePath).exists()) createBitmap(filePath) else null
-                        if (bitmap != null) {
-                            images.put(imageKey, bitmap)
-                        } else {
-                            (mCacheDir.absolutePath + "/" + imageKey + ".png").takeIf { File(it).exists() }?.let {
-                                createBitmap(it)?.let {
-                                    images.put(imageKey, it)
-                                }
-                            }
-                        }
-                    }
-                }
+                return@forEach
+            }
+            val filePath = generateBitmapFilePath(entry.value.utf8(), entry.key)
+            createBitmap(byteArray, filePath)?.let { bitmap ->
+                images[entry.key] = bitmap
             }
         }
     }
 
-    private fun createBitmap(filePath: String): Bitmap? {
-        return BitmapUtils.decodeSampledBitmapFromFile(filePath, reqWidth, reqHeight)
+    private fun createBitmap(byteArray: ByteArray, filePath: String): Bitmap? {
+        return BitmapUtils.decodeSampledBitmapFromByteArray(byteArray, reqWidth, reqHeight) ?: createBitmap(filePath)
     }
-
 
     private fun resetSprites(obj: JSONObject) {
         val mutableList: MutableList<SVGAVideoSpriteEntity> = mutableListOf()
