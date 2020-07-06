@@ -61,4 +61,8 @@ class SVGADrawable(val videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
         }
     }
 
+    internal fun release() {
+        clearAudio()
+        videoItem.clear()
+    }
 }

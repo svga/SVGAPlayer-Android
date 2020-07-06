@@ -206,6 +206,9 @@ open class SVGAImageView @JvmOverloads constructor(context: Context, attrs: Attr
         mAnimator?.removeAllUpdateListeners()
         if (clear) {
             getSVGADrawable()?.cleared = true
+            // 回收内存
+            getSVGADrawable()?.release()
+            // 清除对 drawable 的引用
             setImageDrawable(null)
         }
         getSVGADrawable()?.clearAudio()
