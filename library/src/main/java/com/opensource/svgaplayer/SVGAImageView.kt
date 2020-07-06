@@ -176,6 +176,7 @@ open class SVGAImageView @JvmOverloads constructor(context: Context, attrs: Attr
 
     private fun onAnimationEnd(animation: Animator?) {
         isAnimating = false
+        stopAnimation()
         val drawable = getSVGADrawable()
         if (!clearsAfterStop && drawable != null) {
             if (fillMode == FillMode.Backward) {
@@ -184,13 +185,10 @@ open class SVGAImageView @JvmOverloads constructor(context: Context, attrs: Attr
                 drawable.currentFrame = mEndFrame
             }
         }
-
-        callback?.onFinished()
-        // 不是循环播放时，手动停止一下
-        if ((animation as ValueAnimator).repeatCount <= 0) {
-            // 要根据用户设置的 clearsAfterStop 状态判断，不可手动置 true
+        if (clearsAfterStop && (animation as ValueAnimator).repeatCount <= 0) {
             release()
         }
+        callback?.onFinished()
     }
 
     fun pauseAnimation() {
@@ -206,11 +204,7 @@ open class SVGAImageView @JvmOverloads constructor(context: Context, attrs: Attr
         mAnimator?.cancel()
         mAnimator?.removeAllListeners()
         mAnimator?.removeAllUpdateListeners()
-        if (clear) {
-            release()
-        } else {
-            getSVGADrawable()?.clearAudio()
-        }
+        getSVGADrawable()?.cleared = clear
     }
 
     private fun release() {
@@ -281,6 +275,7 @@ open class SVGAImageView @JvmOverloads constructor(context: Context, attrs: Attr
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
         stopAnimation(true)
+        release()
     }
 
     private class AnimatorListener(view: SVGAImageView) : Animator.AnimatorListener {
