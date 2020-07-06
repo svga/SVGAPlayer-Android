@@ -7,6 +7,7 @@ import android.media.SoundPool
 import com.opensource.svgaplayer.entities.SVGAAudioEntity
 import com.opensource.svgaplayer.entities.SVGAVideoSpriteEntity
 import com.opensource.svgaplayer.proto.MovieEntity
+import com.opensource.svgaplayer.proto.MovieParams
 import com.opensource.svgaplayer.utils.BitmapUtils
 import com.opensource.svgaplayer.utils.SVGARect
 import org.json.JSONObject
@@ -20,6 +21,7 @@ import java.util.*
  */
 class SVGAVideoEntity {
 
+    // FIXME: 2020/7/6 必须移除
     protected fun finalize() {
         this.soundPool?.release()
         this.soundPool = null
@@ -27,6 +29,7 @@ class SVGAVideoEntity {
     }
 
     var antiAlias = true
+    var movieItem: MovieEntity? = null
 
     var videoSize = SVGARect(0.0, 0.0, 0.0, 0.0)
         private set
@@ -37,7 +40,6 @@ class SVGAVideoEntity {
     var frames: Int = 0
         private set
 
-
     internal var reqHeight = 0
     internal var reqWidth = 0
     internal var sprites: List<SVGAVideoSpriteEntity> = listOf()
@@ -46,73 +48,80 @@ class SVGAVideoEntity {
     internal var images = HashMap<String, Bitmap>()
     private var cacheDir: File
 
-    constructor(obj: JSONObject, cacheDir: File) {
+    constructor(json: JSONObject, cacheDir: File) {
         this.cacheDir = cacheDir
-        obj.optJSONObject("movie")?.let {
-            it.optJSONObject("viewBox")?.let {
-                videoSize = SVGARect(0.0, 0.0, it.optDouble("width", 0.0), it.optDouble("height", 0.0))
-            }
-            FPS = it.optInt("fps", 20)
-            frames = it.optInt("frames", 0)
-        }
+        json.optJSONObject("movie")?.let(this::setup)
         try {
-            resetImages(obj)
+            parserImages(json)
         } catch (e: Exception) {
             e.printStackTrace()
         } catch (e: OutOfMemoryError) {
             e.printStackTrace()
         }
-        resetSprites(obj)
+        resetSprites(json)
     }
 
-    var movieItem: MovieEntity? = null
-
-    internal constructor(obj: MovieEntity, cacheDir: File) {
-        this.movieItem = obj
+    internal constructor(entity: MovieEntity, cacheDir: File) {
+        this.movieItem = entity
         this.cacheDir = cacheDir
-        obj.params?.let { movieParams ->
-            videoSize = SVGARect(0.0, 0.0, (movieParams.viewBoxWidth
-                    ?: 0.0f).toDouble(), (movieParams.viewBoxHeight ?: 0.0f).toDouble())
-            FPS = movieParams.fps ?: 20
-            frames = movieParams.frames ?: 0
-        }
+        entity.params?.let (this::setup)
+
         try {
-            resetImages(obj)
+            parserImages(entity)
         } catch (e: Exception) {
             e.printStackTrace()
         } catch (e: OutOfMemoryError) {
             e.printStackTrace()
         }
-        resetSprites(obj)
+        resetSprites(entity)
+    }
+
+    private fun setup(movieObject: JSONObject) {
+        movieObject.optJSONObject("viewBox")?.let { viewBoxObject ->
+            val width = viewBoxObject.optDouble("width", 0.0)
+            val height = viewBoxObject.optDouble("height", 0.0)
+            videoSize = SVGARect(0.0, 0.0, width, height)
+        }
+        FPS = movieObject.optInt("fps", 20)
+        frames = movieObject.optInt("frames", 0)
+    }
+
+    private fun setup(movieParams: MovieParams) {
+        val width = (movieParams.viewBoxWidth ?: 0.0f).toDouble()
+        val height = (movieParams.viewBoxHeight ?: 0.0f).toDouble()
+        videoSize = SVGARect(0.0, 0.0, width, height)
+        FPS = movieParams.fps ?: 20
+        frames = movieParams.frames ?: 0
     }
 
     internal fun prepare(callback: () -> Unit) {
-        this.movieItem?.let {
-            resetAudios(it) {
+        if (movieItem == null) {
+            callback()
+        } else {
+            resetAudios(movieItem!!) {
                 callback()
             }
-        } ?: callback()
+        }
     }
 
-    private fun resetImages(obj: JSONObject) {
-        obj.optJSONObject("images")?.let { imgObjects ->
-            imgObjects.keys().forEach { imageKey ->
-                var filePath = cacheDir.absolutePath + "/" + imgObjects[imageKey]
+    private fun parserImages(json: JSONObject) {
+        val imageJson = json.optJSONObject("images") ?: return
+        imageJson.keys().forEach { key ->
+            val filePath = cacheDir.absolutePath + "/" + imageJson[key]
+            val bitmap = if (File(filePath).exists()) createBitmap(filePath) else null
+            val bitmapKey = key.replace(".matte", "")
+            if (bitmap != null) {
+                images[bitmapKey] = bitmap
+            } else {
+                // bitmap.matte : bitmap
+                var filePath = cacheDir.absolutePath + "/" + imageJson[key] + ".png"
                 var bitmap = if (File(filePath).exists()) createBitmap(filePath) else null
-                val bitmapKey = imageKey.replace(".matte", "")
                 if (bitmap != null) {
-                    images.put(bitmapKey, bitmap)
+                    images[bitmapKey] = bitmap
                 } else {
-                    // bitmap.matte : bitmap
-                    var filePath = cacheDir.absolutePath + "/" + imgObjects[imageKey] + ".png"
-                    var bitmap = if (File(filePath).exists()) createBitmap(filePath) else null
-                    if (bitmap != null) {
-                        images.put(bitmapKey, bitmap)
-                    } else {
-                        (cacheDir.absolutePath + "/" + imageKey + ".png").takeIf { File(it).exists() }?.let {
-                            createBitmap(filePath)?.let {
-                                images.put(bitmapKey, it)
-                            }
+                    (cacheDir.absolutePath + "/" + key + ".png").takeIf { File(it).exists() }?.let {
+                        createBitmap(filePath)?.let {
+                            images.put(bitmapKey, it)
                         }
                     }
                 }
@@ -120,7 +129,7 @@ class SVGAVideoEntity {
         }
     }
 
-    private fun resetImages(obj: MovieEntity) {
+    private fun parserImages(obj: MovieEntity) {
         obj.images?.entries?.forEach {
             val imageKey = it.key
             val byteArray = it.value.toByteArray()
