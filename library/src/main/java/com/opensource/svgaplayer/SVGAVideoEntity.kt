@@ -46,10 +46,10 @@ class SVGAVideoEntity {
     internal var audios: List<SVGAAudioEntity> = listOf()
     internal var soundPool: SoundPool? = null
     internal var images = HashMap<String, Bitmap>()
-    private var cacheDir: File
+    private var mCacheDir: File
 
     constructor(json: JSONObject, cacheDir: File) {
-        this.cacheDir = cacheDir
+        this.mCacheDir = cacheDir
         json.optJSONObject("movie")?.let(this::setup)
         try {
             parserImages(json)
@@ -63,7 +63,7 @@ class SVGAVideoEntity {
 
     internal constructor(entity: MovieEntity, cacheDir: File) {
         this.movieItem = entity
-        this.cacheDir = cacheDir
+        this.mCacheDir = cacheDir
         entity.params?.let (this::setup)
 
         try {
@@ -105,27 +105,27 @@ class SVGAVideoEntity {
     }
 
     private fun parserImages(json: JSONObject) {
-        val imageJson = json.optJSONObject("images") ?: return
-        imageJson.keys().forEach { key ->
-            val filePath = cacheDir.absolutePath + "/" + imageJson[key]
-            val bitmap = if (File(filePath).exists()) createBitmap(filePath) else null
-            val bitmapKey = key.replace(".matte", "")
-            if (bitmap != null) {
+        val imgJson = json.optJSONObject("images") ?: return
+        imgJson.keys().forEach { imgKey ->
+            val filePath = generateBitmapFilePath(imgJson[imgKey].toString(), imgKey)
+            if (filePath.isNotEmpty()) {
+                val bitmapKey = imgKey.replace(".matte", "")
+                val bitmap = createBitmap(filePath) ?: return@forEach
                 images[bitmapKey] = bitmap
-            } else {
-                // bitmap.matte : bitmap
-                var filePath = cacheDir.absolutePath + "/" + imageJson[key] + ".png"
-                var bitmap = if (File(filePath).exists()) createBitmap(filePath) else null
-                if (bitmap != null) {
-                    images[bitmapKey] = bitmap
-                } else {
-                    (cacheDir.absolutePath + "/" + key + ".png").takeIf { File(it).exists() }?.let {
-                        createBitmap(filePath)?.let {
-                            images.put(bitmapKey, it)
-                        }
-                    }
-                }
             }
+        }
+    }
+
+    private fun generateBitmapFilePath(imgName: String, imgKey: String): String {
+        val path = mCacheDir.absolutePath + "/" + imgName
+        val path1 = "$path.png"
+        val path2 = mCacheDir.absolutePath + "/" + imgKey + ".png"
+
+        return when {
+            File(path).exists() -> path
+            File(path1).exists() -> path1
+            File(path2).exists() -> path2
+            else -> ""
         }
     }
 
@@ -144,12 +144,12 @@ class SVGAVideoEntity {
                     images[imageKey] = bitmap
                 } else {
                     it.value.utf8()?.let {
-                        var filePath = cacheDir.absolutePath + "/" + it
+                        var filePath = mCacheDir.absolutePath + "/" + it
                         var bitmap = if (File(filePath).exists()) createBitmap(filePath) else null
                         if (bitmap != null) {
                             images.put(imageKey, bitmap)
                         } else {
-                            (cacheDir.absolutePath + "/" + imageKey + ".png").takeIf { File(it).exists() }?.let {
+                            (mCacheDir.absolutePath + "/" + imageKey + ".png").takeIf { File(it).exists() }?.let {
                                 createBitmap(it)?.let {
                                     images.put(imageKey, it)
                                 }
@@ -164,6 +164,7 @@ class SVGAVideoEntity {
     private fun createBitmap(filePath: String): Bitmap? {
         return BitmapUtils.decodeSampledBitmapFromFile(filePath, reqWidth, reqHeight)
     }
+
 
     private fun resetSprites(obj: JSONObject) {
         val mutableList: MutableList<SVGAVideoSpriteEntity> = mutableListOf()
