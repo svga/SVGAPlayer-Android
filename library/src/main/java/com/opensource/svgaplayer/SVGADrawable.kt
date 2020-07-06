@@ -42,7 +42,7 @@ class SVGADrawable(val videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
         }
     }
 
-    override fun setAlpha(alpha: Int) { }
+    override fun setAlpha(alpha: Int) {}
 
     override fun getOpacity(): Int {
         return PixelFormat.TRANSPARENT
@@ -50,6 +50,15 @@ class SVGADrawable(val videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
 
     override fun setColorFilter(colorFilter: ColorFilter?) {
 
+    }
+
+    internal fun clearAudio() {
+        videoItem.audios.forEach { audio ->
+            audio.playID?.let {
+                videoItem.soundPool?.stop(it)
+            }
+            audio.playID = null
+        }
     }
 
 }
