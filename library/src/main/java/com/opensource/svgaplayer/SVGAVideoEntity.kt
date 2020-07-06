@@ -6,17 +6,19 @@ import android.media.AudioManager
 import android.media.SoundPool
 import android.os.Build
 import android.util.Log
+import com.opensource.svgaplayer.bitmap.BitmapCreatorCallBack
+import com.opensource.svgaplayer.bitmap.SVGABitmapCreator
 import com.opensource.svgaplayer.entities.SVGAAudioEntity
 import com.opensource.svgaplayer.entities.SVGAVideoSpriteEntity
 import com.opensource.svgaplayer.proto.AudioEntity
 import com.opensource.svgaplayer.proto.MovieEntity
 import com.opensource.svgaplayer.proto.MovieParams
-import com.opensource.svgaplayer.bitmap.SVGABitmapCreator
 import com.opensource.svgaplayer.utils.SVGARect
 import org.json.JSONObject
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
+import java.lang.ref.WeakReference
 import java.util.*
 
 /**
@@ -44,6 +46,7 @@ class SVGAVideoEntity {
     internal var imageMap = HashMap<String, Bitmap>()
     private var mCacheDir: File
     private var mJsonMovie: JSONObject? = null
+    private val mRef = WeakReference<SVGAVideoEntity>(this)
 
     constructor(json: JSONObject, cacheDir: File) {
         mJsonMovie = json
@@ -122,11 +125,18 @@ class SVGAVideoEntity {
         val imgJson = json.optJSONObject("images") ?: return
         imgJson.keys().forEach { imgKey ->
             val filePath = generateBitmapFilePath(imgJson[imgKey].toString(), imgKey)
-            if (filePath.isNotEmpty()) {
-                val bitmapKey = imgKey.replace(".matte", "")
-                val bitmap = createBitmap(filePath) ?: return@forEach
-                imageMap[bitmapKey] = bitmap
+            if (filePath.isEmpty()) {
+                return
             }
+            val bitmapKey = imgKey.replace(".matte", "")
+            createBitmap(filePath, object : BitmapCreatorCallBack {
+                override fun onCreateComplete(bitmap: Bitmap?) {
+                    if (bitmap == null) {
+                        return
+                    }
+                    mRef.get()?.imageMap?.put(bitmapKey, bitmap)
+                }
+            })
         }
     }
 
@@ -143,9 +153,9 @@ class SVGAVideoEntity {
         }
     }
 
-    private fun createBitmap(filePath: String): Bitmap? {
-        Log.d("SVGAVideoEntity", "createBitmap reqHeight$reqHeight reqWidth$reqWidth" )
-        return SVGABitmapCreator.createBitmap(filePath, reqWidth, reqHeight)
+    private fun createBitmap(filePath: String, callback: BitmapCreatorCallBack) {
+        Log.d("SVGAVideoEntity", "createBitmap reqHeight$reqHeight reqWidth$reqWidth")
+        SVGABitmapCreator.createBitmap(filePath, reqWidth, reqHeight, callback)
     }
 
     private fun parserImages(obj: MovieEntity) {
@@ -159,15 +169,27 @@ class SVGAVideoEntity {
                 return@forEach
             }
             val filePath = generateBitmapFilePath(entry.value.utf8(), entry.key)
-            createBitmap(byteArray, filePath)?.let { bitmap ->
-                imageMap[entry.key] = bitmap
-            }
+            createBitmap(byteArray, filePath, object : BitmapCreatorCallBack {
+                override fun onCreateComplete(bitmap: Bitmap?) {
+                    if (bitmap == null) {
+                        return
+                    }
+                    mRef.get()?.imageMap?.put(entry.key, bitmap)
+                }
+            })
         }
     }
 
-    private fun createBitmap(byteArray: ByteArray, filePath: String): Bitmap? {
-        val bitmap = SVGABitmapCreator.createBitmap(byteArray, reqWidth, reqHeight)
-        return bitmap?:createBitmap(filePath)
+    private fun createBitmap(byteArray: ByteArray, filePath: String, callback: BitmapCreatorCallBack) {
+        SVGABitmapCreator.createBitmap(byteArray, reqWidth, reqHeight, object : BitmapCreatorCallBack {
+            override fun onCreateComplete(bitmap: Bitmap?) {
+                if (bitmap != null) {
+                    callback.onCreateComplete(bitmap)
+                } else {
+                    createBitmap(filePath, callback)
+                }
+            }
+        })
     }
 
     private fun resetSprites(json: JSONObject) {

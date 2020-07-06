@@ -14,7 +14,7 @@ interface BitmapCreator {
      * @param reqWidth 期望的宽
      * @param reqHeight 期望的高
      */
-    fun createBitmap(filePath: String, reqWidth: Int, reqHeight: Int): Bitmap?
+    fun createBitmap(filePath: String, reqWidth: Int, reqHeight: Int, callback: BitmapCreatorCallBack): Bitmap?
 
     /**
      * 创建 bitmap
@@ -23,5 +23,5 @@ interface BitmapCreator {
      * @param reqWidth 期望的宽
      * @param reqHeight 期望的高
      */
-    fun createBitmap(byteArray: ByteArray, reqWidth: Int, reqHeight: Int): Bitmap?
+    fun createBitmap(byteArray: ByteArray, reqWidth: Int, reqHeight: Int, callback: BitmapCreatorCallBack): Bitmap?
 }

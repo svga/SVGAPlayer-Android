@@ -1,6 +1,5 @@
 package com.opensource.svgaplayer.bitmap
 
-import android.graphics.Bitmap
 import com.opensource.svgaplayer.utils.BitmapUtils
 
 /**
@@ -11,21 +10,28 @@ import com.opensource.svgaplayer.utils.BitmapUtils
 object SVGABitmapCreator {
     private var mCreator: BitmapCreator? = null;
 
-    fun createBitmap(filePath: String, reqWidth: Int, reqHeight: Int): Bitmap? {
+    fun createBitmap(filePath: String, reqWidth: Int, reqHeight: Int, callback: BitmapCreatorCallBack) {
         if (filePath.isEmpty()) {
-            return null
+            callback.onCreateComplete(null)
         }
         if (mCreator != null) {
-            return mCreator?.createBitmap(filePath, reqWidth, reqHeight)
+            mCreator?.createBitmap(filePath, reqWidth, reqHeight, callback)
+        } else {
+            val bitmap = BitmapUtils.decodeSampledBitmapFromFile(filePath, reqWidth, reqHeight)
+            callback.onCreateComplete(bitmap)
         }
-        return BitmapUtils.decodeSampledBitmapFromFile(filePath, reqWidth, reqHeight)
     }
 
-    fun createBitmap(byteArray: ByteArray, reqWidth: Int, reqHeight: Int): Bitmap? {
-        if (mCreator != null) {
-            return mCreator?.createBitmap(byteArray, reqWidth, reqHeight)
+    fun createBitmap(byteArray: ByteArray, reqWidth: Int, reqHeight: Int, callback: BitmapCreatorCallBack) {
+        if (byteArray.isEmpty()) {
+            return
         }
-        return BitmapUtils.decodeSampledBitmapFromByteArray(byteArray, reqWidth, reqHeight)
+        if (mCreator != null) {
+            mCreator?.createBitmap(byteArray, reqWidth, reqHeight, callback)
+        } else {
+            val bitmap = BitmapUtils.decodeSampledBitmapFromByteArray(byteArray, reqWidth, reqHeight)
+            callback.onCreateComplete(bitmap)
+        }
     }
 
     /**
