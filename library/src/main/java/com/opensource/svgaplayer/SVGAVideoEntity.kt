@@ -6,7 +6,7 @@ import android.media.AudioManager
 import android.media.SoundPool
 import android.os.Build
 import android.util.Log
-import com.opensource.svgaplayer.bitmap.BitmapCreatorCallBack
+import com.opensource.svgaplayer.bitmap.BitmapCreatorCallback
 import com.opensource.svgaplayer.bitmap.SVGABitmapCreator
 import com.opensource.svgaplayer.entities.SVGAAudioEntity
 import com.opensource.svgaplayer.entities.SVGAVideoSpriteEntity
@@ -129,7 +129,7 @@ class SVGAVideoEntity {
                 return
             }
             val bitmapKey = imgKey.replace(".matte", "")
-            createBitmap(filePath, object : BitmapCreatorCallBack {
+            createBitmap(filePath, object : BitmapCreatorCallback {
                 override fun onCreateComplete(bitmap: Bitmap?) {
                     if (bitmap == null) {
                         return
@@ -153,7 +153,7 @@ class SVGAVideoEntity {
         }
     }
 
-    private fun createBitmap(filePath: String, callback: BitmapCreatorCallBack) {
+    private fun createBitmap(filePath: String, callback: BitmapCreatorCallback) {
         Log.d("SVGAVideoEntity", "createBitmap reqHeight$reqHeight reqWidth$reqWidth")
         SVGABitmapCreator.createBitmap(filePath, reqWidth, reqHeight, callback)
     }
@@ -169,7 +169,7 @@ class SVGAVideoEntity {
                 return@forEach
             }
             val filePath = generateBitmapFilePath(entry.value.utf8(), entry.key)
-            createBitmap(byteArray, filePath, object : BitmapCreatorCallBack {
+            createBitmap(byteArray, filePath, object : BitmapCreatorCallback {
                 override fun onCreateComplete(bitmap: Bitmap?) {
                     if (bitmap == null) {
                         return
@@ -180,8 +180,8 @@ class SVGAVideoEntity {
         }
     }
 
-    private fun createBitmap(byteArray: ByteArray, filePath: String, callback: BitmapCreatorCallBack) {
-        SVGABitmapCreator.createBitmap(byteArray, reqWidth, reqHeight, object : BitmapCreatorCallBack {
+    private fun createBitmap(byteArray: ByteArray, filePath: String, callback: BitmapCreatorCallback) {
+        SVGABitmapCreator.createBitmap(byteArray, reqWidth, reqHeight, object : BitmapCreatorCallback {
             override fun onCreateComplete(bitmap: Bitmap?) {
                 if (bitmap != null) {
                     callback.onCreateComplete(bitmap)

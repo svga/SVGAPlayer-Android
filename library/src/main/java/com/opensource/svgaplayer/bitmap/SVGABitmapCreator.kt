@@ -10,7 +10,7 @@ import com.opensource.svgaplayer.utils.BitmapUtils
 object SVGABitmapCreator {
     private var mCreator: BitmapCreator? = null;
 
-    fun createBitmap(filePath: String, reqWidth: Int, reqHeight: Int, callback: BitmapCreatorCallBack) {
+    fun createBitmap(filePath: String, reqWidth: Int, reqHeight: Int, callback: BitmapCreatorCallback) {
         if (filePath.isEmpty()) {
             callback.onCreateComplete(null)
         }
@@ -22,7 +22,7 @@ object SVGABitmapCreator {
         }
     }
 
-    fun createBitmap(byteArray: ByteArray, reqWidth: Int, reqHeight: Int, callback: BitmapCreatorCallBack) {
+    fun createBitmap(byteArray: ByteArray, reqWidth: Int, reqHeight: Int, callback: BitmapCreatorCallback) {
         if (byteArray.isEmpty()) {
             return
         }
