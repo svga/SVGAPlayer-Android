@@ -14,7 +14,6 @@ import com.opensource.svgaplayer.SVGAVideoEntity;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.logging.Logger;
 
 public class AnimationFromAssetsActivity extends Activity {
 
@@ -70,7 +69,6 @@ public class AnimationFromAssetsActivity extends Activity {
             samples.add("MerryChristmas.svga");
         }
         return samples.get((int) Math.floor(Math.random() * samples.size()));
-//        return "gradientBorder.svga";
     }
 
 }

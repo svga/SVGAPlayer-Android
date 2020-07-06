@@ -35,43 +35,22 @@ class SVGAVideoEntity {
     var frames: Int = 0
         private set
 
-    internal var reqHeight = 0
-    internal var reqWidth = 0
+    private var reqHeight = 0
+    private var reqWidth = 0
     internal var spriteList: List<SVGAVideoSpriteEntity> = emptyList()
     internal var audioList: List<SVGAAudioEntity> = emptyList()
     internal var soundPool: SoundPool? = null
     internal var imageMap = HashMap<String, Bitmap>()
     private var mCacheDir: File
+    private var mJsonMovie: JSONObject? = null
 
     constructor(json: JSONObject, cacheDir: File) {
-        this.mCacheDir = cacheDir
-        json.optJSONObject("movie")?.let(this::setup)
-        try {
-            parserImages(json)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        } catch (e: OutOfMemoryError) {
-            e.printStackTrace()
-        }
-        resetSprites(json)
+        mJsonMovie = json
+        mCacheDir = cacheDir
+        json.optJSONObject("movie")?.let(this::setupByJson)
     }
 
-    internal constructor(entity: MovieEntity, cacheDir: File) {
-        this.movieItem = entity
-        this.mCacheDir = cacheDir
-        entity.params?.let (this::setup)
-
-        try {
-            parserImages(entity)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        } catch (e: OutOfMemoryError) {
-            e.printStackTrace()
-        }
-        resetSprites(entity)
-    }
-
-    private fun setup(movieObject: JSONObject) {
+    private fun setupByJson(movieObject: JSONObject) {
         movieObject.optJSONObject("viewBox")?.let { viewBoxObject ->
             val width = viewBoxObject.optDouble("width", 0.0)
             val height = viewBoxObject.optDouble("height", 0.0)
@@ -81,12 +60,50 @@ class SVGAVideoEntity {
         frames = movieObject.optInt("frames", 0)
     }
 
-    private fun setup(movieParams: MovieParams) {
+    internal constructor(entity: MovieEntity, cacheDir: File) {
+        this.movieItem = entity
+        this.mCacheDir = cacheDir
+        entity.params?.let (this::setupByMovie)
+    }
+
+    private fun setupByMovie(movieParams: MovieParams) {
         val width = (movieParams.viewBoxWidth ?: 0.0f).toDouble()
         val height = (movieParams.viewBoxHeight ?: 0.0f).toDouble()
         videoSize = SVGARect(0.0, 0.0, width, height)
         FPS = movieParams.fps ?: 20
         frames = movieParams.frames ?: 0
+    }
+
+    internal fun init(reqWidth:Int, reqHeight:Int) {
+        this.reqWidth = reqWidth
+        this.reqHeight = reqHeight
+        if (mJsonMovie != null) {
+            parsResourceByJson()
+        } else if (movieItem != null) {
+            parsResourceByMovie()
+        }
+    }
+
+    private fun parsResourceByJson() {
+        try {
+            parserImages(mJsonMovie!!)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } catch (e: OutOfMemoryError) {
+            e.printStackTrace()
+        }
+        resetSprites(mJsonMovie!!)
+    }
+
+    private fun parsResourceByMovie() {
+        try {
+            parserImages(movieItem!!)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } catch (e: OutOfMemoryError) {
+            e.printStackTrace()
+        }
+        resetSprites(movieItem!!)
     }
 
     internal fun prepare(callback: () -> Unit) {

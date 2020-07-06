@@ -141,8 +141,7 @@ open class SVGAImageView @JvmOverloads constructor(context: Context, attrs: Attr
         val drawable = getSVGADrawable() ?: return
         drawable.cleared = false
         drawable.scaleType = scaleType
-        drawable.videoItem.reqHeight = height
-        drawable.videoItem.reqWidth = width
+        drawable.videoItem.init(width, height)
         Log.d("SVGAImageView", "height:$height width:$width")
     }
 
