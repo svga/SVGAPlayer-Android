@@ -53,7 +53,7 @@ class SVGADrawable(val videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
     }
 
     internal fun clearAudio() {
-        videoItem.audios.forEach { audio ->
+        videoItem.audioList.forEach { audio ->
             audio.playID?.let {
                 videoItem.soundPool?.stop(it)
             }

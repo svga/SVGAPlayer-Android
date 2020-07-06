@@ -1,17 +1,13 @@
 package com.opensource.svgaplayer.drawer
 
-import android.annotation.TargetApi
 import android.graphics.*
 import android.os.Build
 import android.text.*
-import android.text.style.StyleSpan
-import android.widget.FrameLayout
 import android.widget.ImageView
 import com.opensource.svgaplayer.SVGADynamicEntity
 import com.opensource.svgaplayer.SVGAVideoEntity
 import com.opensource.svgaplayer.entities.SVGAVideoShapeEntity
 import java.lang.Exception
-import java.lang.reflect.Field
 
 /**
  * Created by cuiminghui on 2017/3/29.
@@ -157,7 +153,7 @@ internal class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVG
     }
 
     private fun playAudio(frameIndex: Int) {
-        this.videoItem.audios.forEach { audio ->
+        this.videoItem.audioList.forEach { audio ->
             if (audio.startFrame == frameIndex) {
                 this.videoItem.soundPool?.let { soundPool ->
                     audio.soundID?.let {soundID ->
@@ -193,7 +189,7 @@ internal class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVG
         val isHidden = dynamicItem.dynamicHidden[imageKey] == true
         if (isHidden) { return }
         val bitmapKey = imageKey.replace(".matte", "")
-        val drawingBitmap = (dynamicItem.dynamicImage[bitmapKey] ?: videoItem.images[bitmapKey]) ?: return
+        val drawingBitmap = (dynamicItem.dynamicImage[bitmapKey] ?: videoItem.imageMap[bitmapKey]) ?: return
         val frameMatrix = shareFrameMatrix(sprite.frameEntity.transform)
         val paint = this.sharedValues.sharedPaint()
         paint.isAntiAlias = videoItem.antiAlias
