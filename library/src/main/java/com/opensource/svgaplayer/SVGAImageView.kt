@@ -189,7 +189,7 @@ open class SVGAImageView @JvmOverloads constructor(context: Context, attrs: Attr
         // 不是循环播放时，手动停止一下
         if ((animation as ValueAnimator).repeatCount <= 0) {
             // 要根据用户设置的 clearsAfterStop 状态判断，不可手动置 true
-            stopAnimation()
+            release()
         }
     }
 
@@ -207,13 +207,18 @@ open class SVGAImageView @JvmOverloads constructor(context: Context, attrs: Attr
         mAnimator?.removeAllListeners()
         mAnimator?.removeAllUpdateListeners()
         if (clear) {
-            getSVGADrawable()?.cleared = true
-            // 回收内存
-            getSVGADrawable()?.release()
-            // 清除对 drawable 的引用
-            setImageDrawable(null)
+            release()
+        } else {
+            getSVGADrawable()?.clearAudio()
         }
-        getSVGADrawable()?.clearAudio()
+    }
+
+    private fun release() {
+        getSVGADrawable()?.cleared = true
+        // 回收内存
+        getSVGADrawable()?.release()
+        // 清除对 drawable 的引用
+        setImageDrawable(null)
     }
 
     fun setVideoItem(videoItem: SVGAVideoEntity?) {
