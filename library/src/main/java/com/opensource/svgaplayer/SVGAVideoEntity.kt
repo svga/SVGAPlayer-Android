@@ -5,9 +5,6 @@ import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.SoundPool
 import android.os.Build
-import android.util.Log
-import com.opensource.svgaplayer.bitmap.BitmapCreatorCallback
-import com.opensource.svgaplayer.bitmap.SVGABitmapCreator
 import com.opensource.svgaplayer.entities.SVGAAudioEntity
 import com.opensource.svgaplayer.entities.SVGAVideoSpriteEntity
 import com.opensource.svgaplayer.proto.AudioEntity
@@ -18,7 +15,6 @@ import org.json.JSONObject
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
-import java.lang.ref.WeakReference
 import java.util.*
 
 /**
@@ -46,7 +42,6 @@ class SVGAVideoEntity {
     internal var imageMap = HashMap<String, Bitmap>()
     private var mCacheDir: File
     private var mJsonMovie: JSONObject? = null
-    private val mRef = WeakReference<SVGAVideoEntity>(this)
 
     constructor(json: JSONObject, cacheDir: File) {
         mJsonMovie = json
@@ -81,7 +76,6 @@ class SVGAVideoEntity {
     internal fun init(reqWidth:Int, reqHeight:Int) {
         this.reqWidth = reqWidth
         this.reqHeight = reqHeight
-        Log.d("SVGAVideoEntity", "init reqHeight$reqHeight reqWidth$reqWidth" )
         if (mJsonMovie != null) {
             parsResourceByJson()
         } else if (movieItem != null) {
@@ -129,14 +123,10 @@ class SVGAVideoEntity {
                 return
             }
             val bitmapKey = imgKey.replace(".matte", "")
-            createBitmap(filePath, object : BitmapCreatorCallback {
-                override fun onCreateComplete(bitmap: Bitmap?) {
-                    if (bitmap == null) {
-                        return
-                    }
-                    mRef.get()?.imageMap?.put(bitmapKey, bitmap)
-                }
-            })
+            val bitmap = createBitmap(filePath)
+            if (bitmap != null) {
+                imageMap[bitmapKey] = bitmap
+            }
         }
     }
 
@@ -153,9 +143,8 @@ class SVGAVideoEntity {
         }
     }
 
-    private fun createBitmap(filePath: String, callback: BitmapCreatorCallback) {
-        Log.d("SVGAVideoEntity", "createBitmap reqHeight$reqHeight reqWidth$reqWidth")
-        SVGABitmapCreator.createBitmap(filePath, reqWidth, reqHeight, callback)
+    private fun createBitmap(filePath: String): Bitmap? {
+        return SVGABitmapDecoder.decodeBitmapFromFile(filePath, reqWidth, reqHeight)
     }
 
     private fun parserImages(obj: MovieEntity) {
@@ -169,27 +158,15 @@ class SVGAVideoEntity {
                 return@forEach
             }
             val filePath = generateBitmapFilePath(entry.value.utf8(), entry.key)
-            createBitmap(byteArray, filePath, object : BitmapCreatorCallback {
-                override fun onCreateComplete(bitmap: Bitmap?) {
-                    if (bitmap == null) {
-                        return
-                    }
-                    mRef.get()?.imageMap?.put(entry.key, bitmap)
-                }
-            })
+            createBitmap(byteArray, filePath)?.let { bitmap ->
+                imageMap[entry.key] = bitmap
+            }
         }
     }
 
-    private fun createBitmap(byteArray: ByteArray, filePath: String, callback: BitmapCreatorCallback) {
-        SVGABitmapCreator.createBitmap(byteArray, reqWidth, reqHeight, object : BitmapCreatorCallback {
-            override fun onCreateComplete(bitmap: Bitmap?) {
-                if (bitmap != null) {
-                    callback.onCreateComplete(bitmap)
-                } else {
-                    createBitmap(filePath, callback)
-                }
-            }
-        })
+    private fun createBitmap(byteArray: ByteArray, filePath: String): Bitmap? {
+        val bitmap = SVGABitmapDecoder.decodeBitmapFromByteArray(byteArray, reqWidth, reqHeight)
+        return bitmap ?: createBitmap(filePath)
     }
 
     private fun resetSprites(json: JSONObject) {

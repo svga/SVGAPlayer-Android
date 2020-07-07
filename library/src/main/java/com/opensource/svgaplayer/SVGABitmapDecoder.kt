@@ -1,16 +1,16 @@
-package com.opensource.svgaplayer.utils
+package com.opensource.svgaplayer
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.util.Log
 
 /**
+ * bitmap 解码器
  *
  * Create by im_dsd 2020/7/4 21:10
  */
-object BitmapUtils {
+internal object SVGABitmapDecoder {
 
-    fun decodeSampledBitmapFromFile(
+    fun decodeBitmapFromFile(
             fileName: String,
             reqWidth: Int,
             reqHeight: Int
@@ -30,7 +30,7 @@ object BitmapUtils {
         }
     }
 
-    fun decodeSampledBitmapFromByteArray(
+    fun decodeBitmapFromByteArray(
             byteArray: ByteArray,
             reqWidth: Int,
             reqHeight: Int
@@ -72,5 +72,4 @@ object BitmapUtils {
 
         return inSampleSize
     }
-
 }
