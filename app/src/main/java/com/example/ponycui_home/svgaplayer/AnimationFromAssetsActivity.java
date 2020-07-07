@@ -41,6 +41,7 @@ public class AnimationFromAssetsActivity extends Activity {
                 animationView.setVideoItem(videoItem);
                 animationView.stepToFrame(0, true);
             }
+
             @Override
             public void onError() {
 
