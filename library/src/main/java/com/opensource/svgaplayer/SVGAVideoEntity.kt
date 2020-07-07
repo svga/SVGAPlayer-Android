@@ -189,7 +189,6 @@ class SVGAVideoEntity {
 
     private fun setupAudios(entity: MovieEntity, completionBlock: () -> Unit) {
         if (entity.audios == null || entity.audios.isEmpty()) {
-            // 为啥会有音轨？
             run(completionBlock)
             return
         }
@@ -266,7 +265,6 @@ class SVGAVideoEntity {
                 .setUsage(AudioAttributes.USAGE_MEDIA)
                 .build()
         SoundPool.Builder().setAudioAttributes(attributes)
-                // 报错的点，看看音频数量
                 .setMaxStreams(12.coerceAtMost(entity.audios.count()))
                 .build()
     } else {

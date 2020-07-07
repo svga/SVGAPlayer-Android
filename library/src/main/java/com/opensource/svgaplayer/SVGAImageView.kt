@@ -202,7 +202,6 @@ open class SVGAImageView @JvmOverloads constructor(context: Context, attrs: Attr
 
     private fun clear() {
         getSVGADrawable()?.cleared = true
-        // 回收内存
         getSVGADrawable()?.clear()
         // 清除对 drawable 的引用
         setImageDrawable(null)
@@ -212,11 +211,11 @@ open class SVGAImageView @JvmOverloads constructor(context: Context, attrs: Attr
         setVideoItem(videoItem, SVGADynamicEntity())
     }
 
-    fun setVideoItem(videoItem: SVGAVideoEntity?, dynamicItem: SVGADynamicEntity = SVGADynamicEntity()) {
+    fun setVideoItem(videoItem: SVGAVideoEntity?, dynamicItem: SVGADynamicEntity?) {
         if (videoItem == null) {
             setImageDrawable(null)
         } else {
-            val drawable = SVGADrawable(videoItem, dynamicItem)
+            val drawable = SVGADrawable(videoItem, dynamicItem ?: SVGADynamicEntity())
             drawable.cleared = clearsAfterStop
             setImageDrawable(drawable)
         }
