@@ -12,7 +12,9 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.security.MessageDigest
 import java.util.concurrent.Executors
+import java.util.concurrent.ThreadFactory
 import java.util.concurrent.ThreadPoolExecutor
+import java.util.concurrent.atomic.AtomicInteger
 import java.util.zip.Inflater
 import java.util.zip.ZipInputStream
 
@@ -79,13 +81,15 @@ class SVGAParser(context: Context?) {
             }
             return cancelBlock
         }
-
     }
 
     var fileDownloader = FileDownloader()
 
     companion object {
-        internal var threadPoolExecutor = Executors.newCachedThreadPool()
+        private val threadNum = AtomicInteger(0)
+        internal var threadPoolExecutor = Executors.newCachedThreadPool { runable ->
+             Thread("SVGAParser-Thread-${threadNum.getAndIncrement()}")
+        }
 
         fun setThreadPoolExecutor(executor: ThreadPoolExecutor) {
             threadPoolExecutor = executor

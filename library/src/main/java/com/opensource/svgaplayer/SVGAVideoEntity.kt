@@ -5,6 +5,8 @@ import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.SoundPool
 import android.os.Build
+import com.opensource.svgaplayer.bitmap.SVGABitmapByteArrayDecoder
+import com.opensource.svgaplayer.bitmap.SVGABitmapFileDecoder
 import com.opensource.svgaplayer.entities.SVGAAudioEntity
 import com.opensource.svgaplayer.entities.SVGAVideoSpriteEntity
 import com.opensource.svgaplayer.proto.AudioEntity
@@ -73,38 +75,6 @@ class SVGAVideoEntity {
         frames = movieParams.frames ?: 0
     }
 
-    internal fun init(reqWidth:Int, reqHeight:Int) {
-        this.reqWidth = reqWidth
-        this.reqHeight = reqHeight
-        if (mJsonMovie != null) {
-            parsResourceByJson()
-        } else if (movieItem != null) {
-            parsResourceByMovie()
-        }
-    }
-
-    private fun parsResourceByJson() {
-        try {
-            parserImages(mJsonMovie!!)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        } catch (e: OutOfMemoryError) {
-            e.printStackTrace()
-        }
-        resetSprites(mJsonMovie!!)
-    }
-
-    private fun parsResourceByMovie() {
-        try {
-            parserImages(movieItem!!)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        } catch (e: OutOfMemoryError) {
-            e.printStackTrace()
-        }
-        resetSprites(movieItem!!)
-    }
-
     internal fun prepare(callback: () -> Unit) {
         if (movieItem == null) {
             callback()
@@ -112,6 +82,25 @@ class SVGAVideoEntity {
             setupAudios(movieItem!!) {
                 callback()
             }
+        }
+    }
+
+    internal fun parserResourceWithViewSize(reqWidth: Int, reqHeight: Int) {
+        this.reqWidth = reqWidth
+        this.reqHeight = reqHeight
+
+        try {
+            if (mJsonMovie != null) {
+                parserImages(mJsonMovie!!)
+                resetSprites(mJsonMovie!!)
+            } else if (movieItem != null) {
+                parserImages(movieItem!!)
+                resetSprites(movieItem!!)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } catch (e: OutOfMemoryError) {
+            e.printStackTrace()
         }
     }
 
@@ -144,7 +133,7 @@ class SVGAVideoEntity {
     }
 
     private fun createBitmap(filePath: String): Bitmap? {
-        return SVGABitmapDecoder.decodeBitmapFromFile(filePath, reqWidth, reqHeight)
+        return SVGABitmapFileDecoder.decodeBitmapFrom(filePath, reqWidth, reqHeight)
     }
 
     private fun parserImages(obj: MovieEntity) {
@@ -165,7 +154,7 @@ class SVGAVideoEntity {
     }
 
     private fun createBitmap(byteArray: ByteArray, filePath: String): Bitmap? {
-        val bitmap = SVGABitmapDecoder.decodeBitmapFromByteArray(byteArray, reqWidth, reqHeight)
+        val bitmap = SVGABitmapByteArrayDecoder.decodeBitmapFrom(byteArray, reqWidth, reqHeight)
         return bitmap ?: createBitmap(filePath)
     }
 
