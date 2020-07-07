@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.util.Log;
 import android.view.View;
 
 import com.opensource.svgaplayer.SVGAImageView;
@@ -36,16 +35,13 @@ public class AnimationFromAssetsActivity extends Activity {
     }
 
     private void loadAnimation() {
-        String fileName = this.randomSample();
-        Log.d("AssetsActivity", fileName);
-
-        SVGAParser.Companion.shareParser().decodeFromAssets(fileName, new SVGAParser.ParseCompletion() {
-                @Override
-                public void onComplete(@NotNull SVGAVideoEntity videoItem) {
-                    animationView.setVideoItem(videoItem);
-                    animationView.stepToFrame(0, true);
-                }
-                @Override
+        SVGAParser.Companion.shareParser().decodeFromAssets(this.randomSample(), new SVGAParser.ParseCompletion() {
+            @Override
+            public void onComplete(@NotNull SVGAVideoEntity videoItem) {
+                animationView.setVideoItem(videoItem);
+                animationView.stepToFrame(0, true);
+            }
+            @Override
             public void onError() {
 
             }
