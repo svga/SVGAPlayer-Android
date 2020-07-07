@@ -56,7 +56,6 @@ object BitmapUtils {
         val (height: Int, width: Int) = options.run { outHeight to outWidth }
         var inSampleSize = 1
         if (reqHeight <= 0 || reqWidth <= 0) {
-            Log.d("BitmapUtils", "inSampleSize:$inSampleSize height:$height width$width  reqHeight$reqHeight reqWidth$reqWidth" )
             return inSampleSize
         }
         if (height > reqHeight || width > reqWidth) {
@@ -71,7 +70,6 @@ object BitmapUtils {
             }
         }
 
-        Log.d("BitmapUtils", "inSampleSize:$inSampleSize height:$height width$width  reqHeight$reqHeight reqWidth$reqWidth" )
         return inSampleSize
     }
 

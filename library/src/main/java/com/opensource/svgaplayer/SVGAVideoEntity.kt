@@ -214,6 +214,7 @@ class SVGAVideoEntity {
         if (entity.audios == null || entity.audios.isEmpty()) {
             // 为啥会有音轨？
             run(completionBlock)
+            return
         }
         setupSoundPool(entity, completionBlock)
         val audiosFileMap = generateAudioFileMap(entity)

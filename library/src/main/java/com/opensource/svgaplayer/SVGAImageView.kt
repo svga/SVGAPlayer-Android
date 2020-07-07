@@ -186,7 +186,7 @@ open class SVGAImageView @JvmOverloads constructor(context: Context, attrs: Attr
             }
         }
         if (clearsAfterStop && (animation as ValueAnimator).repeatCount <= 0) {
-            release()
+            clear()
         }
         callback?.onFinished()
     }
@@ -207,10 +207,10 @@ open class SVGAImageView @JvmOverloads constructor(context: Context, attrs: Attr
         getSVGADrawable()?.cleared = clear
     }
 
-    private fun release() {
+    private fun clear() {
         getSVGADrawable()?.cleared = true
         // 回收内存
-        getSVGADrawable()?.release()
+        getSVGADrawable()?.clear()
         // 清除对 drawable 的引用
         setImageDrawable(null)
     }
@@ -275,7 +275,7 @@ open class SVGAImageView @JvmOverloads constructor(context: Context, attrs: Attr
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
         stopAnimation(true)
-        release()
+        clear()
     }
 
     private class AnimatorListener(view: SVGAImageView) : Animator.AnimatorListener {
