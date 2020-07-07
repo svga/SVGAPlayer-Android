@@ -86,8 +86,8 @@ class SVGAParser(context: Context?) {
 
     companion object {
         private val threadNum = AtomicInteger(0)
-        internal var threadPoolExecutor = Executors.newCachedThreadPool { runable ->
-             Thread("SVGAParser-Thread-${threadNum.getAndIncrement()}")
+        internal var threadPoolExecutor = Executors.newCachedThreadPool { r ->
+            Thread(r, "SVGAParser-Thread-${threadNum.getAndIncrement()}")
         }
 
         fun setThreadPoolExecutor(executor: ThreadPoolExecutor) {
