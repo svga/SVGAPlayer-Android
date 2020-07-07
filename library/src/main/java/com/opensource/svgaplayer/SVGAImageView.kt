@@ -190,7 +190,7 @@ open class SVGAImageView @JvmOverloads constructor(context: Context, attrs: Attr
         // 清除对 drawable 的引用
         setImageDrawable(null)
     }
-    
+
     fun pauseAnimation() {
         stopAnimation(false)
         callback?.onPause()

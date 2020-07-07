@@ -12,7 +12,6 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.security.MessageDigest
 import java.util.concurrent.Executors
-import java.util.concurrent.ThreadFactory
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.zip.Inflater
@@ -110,11 +109,12 @@ class SVGAParser(context: Context?) {
             Log.e("SVGAParser", "在配置 SVGAParser context 前, 无法解析 SVGA 文件。")
         }
         try {
-            mContextRef.get()?.assets?.open(name)?.let {
-                this.decodeFromInputStream(it, buildCacheKey("file:///assets/$name"), callback, true)
+            threadPoolExecutor.execute {
+                mContextRef.get()?.assets?.open(name)?.let {
+                    this.decodeFromInputStream(it, buildCacheKey("file:///assets/$name"), callback, true)
+                }
             }
-        }
-        catch (e: java.lang.Exception) {
+        } catch (e: java.lang.Exception) {
             this.invokeErrorCallback(e, callback)
         }
     }
