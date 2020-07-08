@@ -2,8 +2,6 @@ package com.opensource.svgaplayer.bitmap
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.util.Log
-import com.opensource.svgaplayer.utils.BitmapUtils
 
 /**
  * Bitmap 解码器
@@ -26,8 +24,7 @@ internal abstract class SVGABitmapDecoder<T> {
             }
 
             // Calculate inSampleSize
-            inSampleSize = BitmapUtils.calculateInSampleSize(this, reqWidth, reqHeight)
-            Log.d("##SVGA","## SVGABitmapDecoder inSampleSize $inSampleSize")
+            inSampleSize = BitmapSampleSizeCalculator.calculate(this, reqWidth, reqHeight)
             // Decode bitmap with inSampleSize set
             inJustDecodeBounds = false
             onDecode(data, this)

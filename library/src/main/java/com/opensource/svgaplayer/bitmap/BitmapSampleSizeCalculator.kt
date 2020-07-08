@@ -1,19 +1,17 @@
-package com.opensource.svgaplayer.utils
+package com.opensource.svgaplayer.bitmap
 
 import android.graphics.BitmapFactory
-import android.util.Log
 
 /**
  *
  * Create by im_dsd 2020/7/7 17:59
  */
-internal object BitmapUtils {
+internal object BitmapSampleSizeCalculator {
 
-    fun calculateInSampleSize(options: BitmapFactory.Options, reqWidth: Int, reqHeight: Int): Int {
+    fun calculate(options: BitmapFactory.Options, reqWidth: Int, reqHeight: Int): Int {
         // Raw height and width of image
         val (height: Int, width: Int) = options.run { outHeight to outWidth }
         var inSampleSize = 1
-        Log.d("##SVGA","## calculateInSampleSize  $reqWidth $reqHeight $width $height")
 
         if (reqHeight <= 0 || reqWidth <= 0) {
             return inSampleSize
