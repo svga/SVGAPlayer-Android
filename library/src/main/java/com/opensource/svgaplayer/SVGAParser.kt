@@ -26,6 +26,12 @@ private var fileLock: Int = 0
 class SVGAParser(context: Context?) {
     private var mContextRef = WeakReference(context)
 
+    @Volatile
+    private var mFrameWidth: Int = 0
+
+    @Volatile
+    private var mFrameHeight: Int = 0
+
     interface ParseCompletion {
         fun onComplete(videoItem: SVGAVideoEntity)
         fun onError()
@@ -86,15 +92,16 @@ class SVGAParser(context: Context?) {
 
     companion object {
         private val threadNum = AtomicInteger(0)
-        internal var threadPoolExecutor = Executors.newCachedThreadPool { runable ->
-             Thread("SVGAParser-Thread-${threadNum.getAndIncrement()}")
+        private var mShareParser = SVGAParser(null)
+
+        internal var threadPoolExecutor = Executors.newCachedThreadPool { r ->
+             Thread(r, "SVGAParser-Thread-${threadNum.getAndIncrement()}")
         }
 
         fun setThreadPoolExecutor(executor: ThreadPoolExecutor) {
             threadPoolExecutor = executor
         }
 
-        private var mShareParser = SVGAParser(null)
         fun shareParser(): SVGAParser {
             return mShareParser
         }
@@ -102,6 +109,11 @@ class SVGAParser(context: Context?) {
 
     fun init(context: Context) {
         mContextRef = WeakReference<Context?>(context)
+    }
+
+    fun setFrameSize(frameWidth: Int, frameHeight: Int) {
+        mFrameWidth = frameWidth
+        mFrameHeight = frameHeight
     }
 
     fun decodeFromAssets(name: String, callback: ParseCompletion?) {
@@ -149,7 +161,7 @@ class SVGAParser(context: Context?) {
                     }
                     else {
                         inflate(bytes)?.let {
-                            val videoItem = SVGAVideoEntity(MovieEntity.ADAPTER.decode(it), File(cacheKey))
+                            val videoItem = SVGAVideoEntity(MovieEntity.ADAPTER.decode(it), File(cacheKey), mFrameWidth, mFrameHeight)
                             videoItem.prepare {
                                 this.invokeCompleteCallback(videoItem, callback)
                             }
@@ -222,7 +234,7 @@ class SVGAParser(context: Context?) {
             File(cacheDir, "movie.binary").takeIf { it.isFile }?.let { binaryFile ->
                 try {
                     FileInputStream(binaryFile).use {
-                        this.invokeCompleteCallback(SVGAVideoEntity(MovieEntity.ADAPTER.decode(it), cacheDir), callback)
+                        this.invokeCompleteCallback(SVGAVideoEntity(MovieEntity.ADAPTER.decode(it), cacheDir, mFrameWidth, mFrameHeight), callback)
                     }
                 } catch (e: Exception) {
                     cacheDir.delete()
@@ -244,7 +256,7 @@ class SVGAParser(context: Context?) {
                             }
                             byteArrayOutputStream.toString().let {
                                 JSONObject(it).let {
-                                    this.invokeCompleteCallback(SVGAVideoEntity(it, cacheDir), callback)
+                                    this.invokeCompleteCallback(SVGAVideoEntity(it, cacheDir, mFrameWidth, mFrameHeight), callback)
                                 }
                             }
                         }

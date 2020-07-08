@@ -134,7 +134,6 @@ open class SVGAImageView @JvmOverloads constructor(context: Context, attrs: Attr
         val drawable = getSVGADrawable() ?: return
         drawable.cleared = false
         drawable.scaleType = scaleType
-        drawable.videoItem.parserResourceWithViewSize(width, height)
     }
 
     private fun getSVGADrawable(): SVGADrawable? {
