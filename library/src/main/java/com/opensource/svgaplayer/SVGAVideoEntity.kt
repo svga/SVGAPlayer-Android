@@ -108,11 +108,6 @@ class SVGAVideoEntity {
         }
     }
 
-    internal fun parserResourceWithViewSize(reqWidth: Int, reqHeight: Int) {
-        this.mFrameWidth = reqWidth
-        this.mFrameHeight = reqHeight
-    }
-
     private fun parserImages(json: JSONObject) {
         val imgJson = json.optJSONObject("images") ?: return
         imgJson.keys().forEach { imgKey ->
