@@ -50,16 +50,16 @@ class SVGAVideoEntity {
         mFrameWidth = frameWidth
         mFrameHeight = frameHeight
         mCacheDir = cacheDir
-        val movieObject = json.optJSONObject("movie") ?: return
-        setupByJson(movieObject)
+        val movieJsonObject = json.optJSONObject("movie") ?: return
+        setupByJson(movieJsonObject)
         try {
-            parserImages(movieObject)
+            parserImages(json)
         } catch (e: Exception) {
             e.printStackTrace()
         } catch (e: OutOfMemoryError) {
             e.printStackTrace()
         }
-        resetSprites(movieObject)
+        resetSprites(json)
     }
 
     private fun setupByJson(movieObject: JSONObject) {
