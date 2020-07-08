@@ -78,6 +78,7 @@ class SVGAVideoEntity {
         this.mFrameWidth = frameWidth
         this.mFrameHeight = frameHeight
         this.mCacheDir = cacheDir
+        this.movieItem = entity
         entity.params?.let(this::setupByMovie)
         try {
             parserImages(entity)
