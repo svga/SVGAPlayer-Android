@@ -8,7 +8,6 @@ import android.text.StaticLayout
 import android.text.TextPaint
 import java.net.HttpURLConnection
 import java.net.URL
-import kotlin.concurrent.thread
 
 /**
  * Created by cuiminghui on 2017/3/30.
@@ -28,8 +27,6 @@ class SVGADynamicEntity {
     internal var dynamicBoringLayoutText: HashMap<String, BoringLayout> = hashMapOf()
 
     internal var dynamicDrawer: HashMap<String, (canvas: Canvas, frameIndex: Int) -> Boolean> = hashMapOf()
-
-
 
     //点击事件回调map
     internal var mClickMap : HashMap<String, IntArray> = hashMapOf()
@@ -98,7 +95,7 @@ class SVGADynamicEntity {
 
     fun setClickArea(clickKey: List<String>) {
         for(itemKey in clickKey){
-            dynamicIClickArea.put(itemKey,object : IClickAreaListener{
+            dynamicIClickArea.put(itemKey,object : IClickAreaListener {
                 override fun onResponseArea(key: String, x0: Int, y0: Int, x1: Int, y1: Int) {
                     mClickMap.let {
                         if(it.get(key) == null){
