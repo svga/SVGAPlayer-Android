@@ -22,6 +22,7 @@ import java.util.zip.ZipInputStream
  */
 
 private var fileLock: Int = 0
+private var isUnzipping = false
 
 class SVGAParser(context: Context?) {
     private var mContextRef = WeakReference(context)
@@ -152,14 +153,19 @@ class SVGAParser(context: Context?) {
             try {
                 readAsBytes(inputStream)?.let { bytes ->
                     if (bytes.size > 4 && bytes[0].toInt() == 80 && bytes[1].toInt() == 75 && bytes[2].toInt() == 3 && bytes[3].toInt() == 4) {
-                        if (!buildCacheDir(cacheKey).exists()) {
-                            ByteArrayInputStream(bytes).use {
-                                unzip(it, cacheKey)
+                        if (!buildCacheDir(cacheKey).exists() || isUnzipping) {
+                            synchronized(fileLock) {
+                                if (!buildCacheDir(cacheKey).exists()) {
+                                    isUnzipping = true
+                                    ByteArrayInputStream(bytes).use {
+                                        unzip(it, cacheKey)
+                                        isUnzipping = false
+                                    }
+                                }
                             }
                         }
                         this.decodeFromCacheKey(cacheKey, callback)
-                    }
-                    else {
+                    } else {
                         inflate(bytes)?.let {
                             val videoItem = SVGAVideoEntity(MovieEntity.ADAPTER.decode(it), File(cacheKey), mFrameWidth, mFrameHeight)
                             videoItem.prepare {
@@ -323,36 +329,34 @@ class SVGAParser(context: Context?) {
     }
 
     private fun unzip(inputStream: InputStream, cacheKey: String) {
-        synchronized(fileLock) {
-            val cacheDir = this.buildCacheDir(cacheKey)
-            cacheDir.mkdirs()
-            try {
-                BufferedInputStream(inputStream).use {
-                    ZipInputStream(it).use { zipInputStream ->
-                        while (true) {
-                            val zipItem = zipInputStream.nextEntry ?: break
-                            if (zipItem.name.contains("/")) {
-                                continue
-                            }
-                            val file = File(cacheDir, zipItem.name)
-                            FileOutputStream(file).use { fileOutputStream ->
-                                val buff = ByteArray(2048)
-                                while (true) {
-                                    val readBytes = zipInputStream.read(buff)
-                                    if (readBytes <= 0) {
-                                        break
-                                    }
-                                    fileOutputStream.write(buff, 0, readBytes)
-                                }
-                            }
-                            zipInputStream.closeEntry()
+        val cacheDir = this.buildCacheDir(cacheKey)
+        cacheDir.mkdirs()
+        try {
+            BufferedInputStream(inputStream).use {
+                ZipInputStream(it).use { zipInputStream ->
+                    while (true) {
+                        val zipItem = zipInputStream.nextEntry ?: break
+                        if (zipItem.name.contains("/")) {
+                            continue
                         }
+                        val file = File(cacheDir, zipItem.name)
+                        FileOutputStream(file).use { fileOutputStream ->
+                            val buff = ByteArray(2048)
+                            while (true) {
+                                val readBytes = zipInputStream.read(buff)
+                                if (readBytes <= 0) {
+                                    break
+                                }
+                                fileOutputStream.write(buff, 0, readBytes)
+                            }
+                        }
+                        zipInputStream.closeEntry()
                     }
                 }
-            } catch (e: Exception) {
-                cacheDir.delete()
-                throw e
             }
+        } catch (e: Exception) {
+            cacheDir.delete()
+            throw e
         }
     }
 }
