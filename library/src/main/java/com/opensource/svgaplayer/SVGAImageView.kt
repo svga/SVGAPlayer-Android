@@ -18,9 +18,8 @@ import java.net.URL
 /**
  * Created by PonyCui on 2017/3/29.
  */
-@Suppress("NewApi")
-open class SVGAImageView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0, defStyleRes: Int = 0)
-    : ImageView(context, attrs, defStyleAttr, defStyleRes) {
+open class SVGAImageView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0)
+    : ImageView(context, attrs, defStyleAttr) {
 
     enum class FillMode {
         Backward,
