@@ -336,6 +336,10 @@ class SVGAParser(context: Context?) {
                 ZipInputStream(it).use { zipInputStream ->
                     while (true) {
                         val zipItem = zipInputStream.nextEntry ?: break
+                        if (zipItem.name.contains("../")) {
+                            // 解压路径存在路径穿越问题，直接过滤
+                            continue
+                        }
                         if (zipItem.name.contains("/")) {
                             continue
                         }
