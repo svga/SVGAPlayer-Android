@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.util.Log;
+import android.view.ViewGroup;
 
 import com.opensource.svgaplayer.SVGAImageView;
 import com.opensource.svgaplayer.SVGAParser;
@@ -23,15 +25,18 @@ public class AnimationFromNetworkActivity extends Activity {
         super.onCreate(savedInstanceState);
         animationView = new SVGAImageView(this);
         animationView.setBackgroundColor(Color.GRAY);
-        loadAnimation();
         setContentView(animationView);
+        loadAnimation();
     }
 
     private void loadAnimation() {
         try { // new URL needs try catch.
-            SVGAParser.Companion.shareParser().decodeFromURL(new URL("https://github.com/yyued/SVGA-Samples/blob/master/posche.svga?raw=true"), new SVGAParser.ParseCompletion() {
+            SVGAParser svgaParser = SVGAParser.Companion.shareParser();
+            svgaParser.setFrameSize(100,100);
+            svgaParser.decodeFromURL(new URL("https://github.com/yyued/SVGA-Samples/blob/master/posche.svga?raw=true"), new SVGAParser.ParseCompletion() {
                 @Override
                 public void onComplete(@NotNull SVGAVideoEntity videoItem) {
+                    Log.d("##","## FromNetworkActivity load onComplete");
                     animationView.setVideoItem(videoItem);
                     animationView.startAnimation();
                 }
