@@ -18,6 +18,7 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.util.*
+import kotlin.concurrent.timerTask
 
 /**
  * Created by PonyCui on 16/6/18.
@@ -243,14 +244,30 @@ class SVGAVideoEntity {
     }
 
     private fun setupSoundPool(entity: MovieEntity, completionBlock: () -> Unit) {
+        var calledCompletion = false;
+        val timer = Timer()
+        val timerTask = timerTask {
+            if (!calledCompletion) {
+                completionBlock()
+            }
+            calledCompletion = true
+            cancel();
+            timer.cancel()
+        }
         var soundLoaded = 0
         soundPool = generateSoundPool(entity)
         soundPool?.setOnLoadCompleteListener { _, _, _ ->
             soundLoaded++
             if (soundLoaded >= entity.audios.count()) {
-                completionBlock()
+                timerTask.cancel()
+                timer.cancel()
+                if (!calledCompletion) {
+                    completionBlock()
+                }
+                calledCompletion = true
             }
         }
+        timer.schedule(timerTask, 2000)
     }
 
     private fun generateSoundPool(entity: MovieEntity) = if (Build.VERSION.SDK_INT >= 21) {
