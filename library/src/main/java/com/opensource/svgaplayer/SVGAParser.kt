@@ -13,6 +13,7 @@ import java.net.URL
 import java.security.MessageDigest
 import java.util.concurrent.Executors
 import java.util.concurrent.ThreadPoolExecutor
+import java.util.concurrent.atomic.AtomicInteger
 import java.util.zip.Inflater
 import java.util.zip.ZipInputStream
 
@@ -21,12 +22,18 @@ import java.util.zip.ZipInputStream
  */
 
 private var fileLock: Int = 0
+private var isUnzipping = false
 
 class SVGAParser(context: Context?) {
-    private var mContextRef = WeakReference<Context?>(context)
+    private var mContextRef = WeakReference(context)
+
+    @Volatile
+    private var mFrameWidth: Int = 0
+
+    @Volatile
+    private var mFrameHeight: Int = 0
 
     interface ParseCompletion {
-
         fun onComplete(videoItem: SVGAVideoEntity)
         fun onError()
     }
@@ -80,17 +87,22 @@ class SVGAParser(context: Context?) {
             }
             return cancelBlock
         }
-
     }
 
     var fileDownloader = FileDownloader()
 
     companion object {
-        internal var threadPoolExecutor = Executors.newCachedThreadPool()
+        private val threadNum = AtomicInteger(0)
+        private var mShareParser = SVGAParser(null)
+
+        internal var threadPoolExecutor = Executors.newCachedThreadPool { r ->
+             Thread(r, "SVGAParser-Thread-${threadNum.getAndIncrement()}")
+        }
+
         fun setThreadPoolExecutor(executor: ThreadPoolExecutor) {
             threadPoolExecutor = executor
         }
-        private var mShareParser = SVGAParser(null)
+
         fun shareParser(): SVGAParser {
             return mShareParser
         }
@@ -100,16 +112,22 @@ class SVGAParser(context: Context?) {
         mContextRef = WeakReference<Context?>(context)
     }
 
+    fun setFrameSize(frameWidth: Int, frameHeight: Int) {
+        mFrameWidth = frameWidth
+        mFrameHeight = frameHeight
+    }
+
     fun decodeFromAssets(name: String, callback: ParseCompletion?) {
         if (mContextRef.get() == null) {
             Log.e("SVGAParser", "在配置 SVGAParser context 前, 无法解析 SVGA 文件。")
         }
         try {
-            mContextRef.get()?.assets?.open(name)?.let {
-                this.decodeFromInputStream(it, buildCacheKey("file:///assets/$name"), callback, true)
+            threadPoolExecutor.execute {
+                mContextRef.get()?.assets?.open(name)?.let {
+                    this.decodeFromInputStream(it, buildCacheKey("file:///assets/$name"), callback, true)
+                }
             }
-        }
-        catch (e: java.lang.Exception) {
+        } catch (e: java.lang.Exception) {
             this.invokeErrorCallback(e, callback)
         }
     }
@@ -135,16 +153,21 @@ class SVGAParser(context: Context?) {
             try {
                 readAsBytes(inputStream)?.let { bytes ->
                     if (bytes.size > 4 && bytes[0].toInt() == 80 && bytes[1].toInt() == 75 && bytes[2].toInt() == 3 && bytes[3].toInt() == 4) {
-                        if (!buildCacheDir(cacheKey).exists()) {
-                            ByteArrayInputStream(bytes).use {
-                                unzip(it, cacheKey)
+                        if (!buildCacheDir(cacheKey).exists() || isUnzipping) {
+                            synchronized(fileLock) {
+                                if (!buildCacheDir(cacheKey).exists()) {
+                                    isUnzipping = true
+                                    ByteArrayInputStream(bytes).use {
+                                        unzip(it, cacheKey)
+                                        isUnzipping = false
+                                    }
+                                }
                             }
                         }
                         this.decodeFromCacheKey(cacheKey, callback)
-                    }
-                    else {
+                    } else {
                         inflate(bytes)?.let {
-                            val videoItem = SVGAVideoEntity(MovieEntity.ADAPTER.decode(it), File(cacheKey))
+                            val videoItem = SVGAVideoEntity(MovieEntity.ADAPTER.decode(it), File(cacheKey), mFrameWidth, mFrameHeight)
                             videoItem.prepare {
                                 this.invokeCompleteCallback(videoItem, callback)
                             }
@@ -217,7 +240,7 @@ class SVGAParser(context: Context?) {
             File(cacheDir, "movie.binary").takeIf { it.isFile }?.let { binaryFile ->
                 try {
                     FileInputStream(binaryFile).use {
-                        this.invokeCompleteCallback(SVGAVideoEntity(MovieEntity.ADAPTER.decode(it), cacheDir), callback)
+                        this.invokeCompleteCallback(SVGAVideoEntity(MovieEntity.ADAPTER.decode(it), cacheDir, mFrameWidth, mFrameHeight), callback)
                     }
                 } catch (e: Exception) {
                     cacheDir.delete()
@@ -239,7 +262,7 @@ class SVGAParser(context: Context?) {
                             }
                             byteArrayOutputStream.toString().let {
                                 JSONObject(it).let {
-                                    this.invokeCompleteCallback(SVGAVideoEntity(it, cacheDir), callback)
+                                    this.invokeCompleteCallback(SVGAVideoEntity(it, cacheDir, mFrameWidth, mFrameHeight), callback)
                                 }
                             }
                         }
@@ -306,36 +329,38 @@ class SVGAParser(context: Context?) {
     }
 
     private fun unzip(inputStream: InputStream, cacheKey: String) {
-        synchronized(fileLock) {
-            val cacheDir = this.buildCacheDir(cacheKey)
-            cacheDir.mkdirs()
-            try {
-                BufferedInputStream(inputStream).use {
-                    ZipInputStream(it).use { zipInputStream ->
-                        while (true) {
-                            val zipItem = zipInputStream.nextEntry ?: break
-                            if (zipItem.name.contains("/")) {
-                                continue
-                            }
-                            val file = File(cacheDir, zipItem.name)
-                            FileOutputStream(file).use { fileOutputStream ->
-                                val buff = ByteArray(2048)
-                                while (true) {
-                                    val readBytes = zipInputStream.read(buff)
-                                    if (readBytes <= 0) {
-                                        break
-                                    }
-                                    fileOutputStream.write(buff, 0, readBytes)
-                                }
-                            }
-                            zipInputStream.closeEntry()
+        val cacheDir = this.buildCacheDir(cacheKey)
+        cacheDir.mkdirs()
+        try {
+            BufferedInputStream(inputStream).use {
+                ZipInputStream(it).use { zipInputStream ->
+                    while (true) {
+                        val zipItem = zipInputStream.nextEntry ?: break
+                        if (zipItem.name.contains("../")) {
+                            // 解压路径存在路径穿越问题，直接过滤
+                            continue
                         }
+                        if (zipItem.name.contains("/")) {
+                            continue
+                        }
+                        val file = File(cacheDir, zipItem.name)
+                        FileOutputStream(file).use { fileOutputStream ->
+                            val buff = ByteArray(2048)
+                            while (true) {
+                                val readBytes = zipInputStream.read(buff)
+                                if (readBytes <= 0) {
+                                    break
+                                }
+                                fileOutputStream.write(buff, 0, readBytes)
+                            }
+                        }
+                        zipInputStream.closeEntry()
                     }
                 }
-            } catch (e: Exception) {
-                cacheDir.delete()
-                throw e
             }
+        } catch (e: Exception) {
+            cacheDir.delete()
+            throw e
         }
     }
 }
