@@ -1,14 +1,8 @@
 package com.opensource.svgaplayer.utils.log
 
-/****
- * Project： SVGAPlayer-Android
- * Author：yangshun@yy.com
- * YY：909041099
- * Created：2020/4/15 11:24
- * Description：
- *
- *
- ****/
+/**
+ * log 外部接管接口
+ **/
 interface ILogger {
     fun verbose(tag: String, msg: String)
     fun info(tag: String, msg: String)

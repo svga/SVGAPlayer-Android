@@ -2,15 +2,9 @@ package com.opensource.svgaplayer.utils.log
 
 import android.util.Log
 
-/****
- * Project： SVGAPlayer-Android
- * Author：yangshun@yy.com
- * YY：909041099
- * Created：2020/4/15 11:29
- * Description：
- *
- *
- ****/
+/**
+ * 内部默认 ILogger 接口实现
+ */
 class DefaultLogCat : ILogger {
     override fun verbose(tag: String, msg: String) {
         Log.v(tag, msg)

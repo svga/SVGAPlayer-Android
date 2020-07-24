@@ -1,28 +1,22 @@
 package com.opensource.svgaplayer.utils.log
 
-/****
- * Project： SVGAPlayer-Android
- * Author：yangshun@yy.com
- * YY：909041099
- * Created：2020/4/15 11:28
- * Description：
- * SVGA Global logger config
- *
- ****/
+/**
+ * SVGA logger 配置管理
+ **/
 object SVGALogger {
 
     private var mLogger: ILogger? = null
 
-    /****
-     * inject logger implement
+    /**
+     * log 接管注入
      */
     fun injectSVGALoggerImp(logImp: ILogger): SVGALogger {
         mLogger = logImp
         return this
     }
 
-    /****
-     * set logger switch
+    /**
+     * 是否开启默认 log 输出
      */
     fun setLogEnabled(isEnabled: Boolean): SVGALogger {
         mLogger = if (isEnabled) {
