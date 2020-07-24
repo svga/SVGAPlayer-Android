@@ -5,7 +5,8 @@ package com.opensource.svgaplayer.utils.log
  **/
 object SVGALogger {
 
-    private var mLogger: ILogger? = null
+    private var mLogger: ILogger? = DefaultLogCat()
+    private var isLogEnabled = false
 
     /**
      * log 接管注入
@@ -16,22 +17,24 @@ object SVGALogger {
     }
 
     /**
-     * 是否开启默认 log 输出
+     * 设置是否开启 log
      */
     fun setLogEnabled(isEnabled: Boolean): SVGALogger {
-        mLogger = if (isEnabled) {
-            DefaultLogCat()
-        } else {
-            null
-        }
+        isLogEnabled = isEnabled
         return this
     }
 
+    /**
+     * 获取当前 ILogger 实现类
+     */
     fun getSVGALogger(): ILogger? {
         return mLogger
     }
 
-    fun isOpenLogger(): Boolean {
-        return mLogger != null
+    /**
+     * 是否开启 log
+     */
+    fun isLogEnabled(): Boolean {
+        return isLogEnabled
     }
 }
