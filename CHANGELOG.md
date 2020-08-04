@@ -1,13 +1,45 @@
-# SVGAPlayer-Android CHANGELOG (2020-01-13)
+# SVGAPlayer-Android CHANGELOG (2020-08-04)
+
+
+## [2.5.8](https://github.com/svga/SVGAPlayer-Android/compare/2.5.7...2.5.8) (2020-08-04)
+
+### Features
+
+* Add SVGALogger. ([6ec28d1](https://github.com/svga/SVGAPlayer-Android/commit/6ec28d1))
+
+
+## [2.5.7](https://github.com/svga/SVGAPlayer-Android/compare/2.5.6...2.5.7) (2020-07-21)
+
+### Bug Fixes
+
+* Fix the high failure rate of concurrent parsing of svga files. ([94a8616](https://github.com/svga/SVGAPlayer-Android/commit/94a8616))
+* Correct the use of the default kotlin_module will easily cause some compilation conflicts. ([c786376](https://github.com/svga/SVGAPlayer-Android/commit/c786376))
+* Correct zipper down path crossing problem. ([4a44db6](https://github.com/svga/SVGAPlayer-Android/commit/4a44db6))
+
+
+## [2.5.6](https://github.com/svga/SVGAPlayer-Android/compare/2.5.5...2.5.6) (2020-07-17)
+
+### Bug Fixes
+
+* Correct app crashes on API level below 21 caused by constructor. ([06d8ad4](https://github.com/svga/SVGAPlayer-Android/commit/06d8ad4))
+
+
+## [2.5.5](https://github.com/svga/SVGAPlayer-Android/compare/2.5.3...2.5.5) (2020-07-13)
+
+### Bug Fixes
+
+* Fix the problem that the audio file name is too short and the svga file analysis fails. ([71d2b87](https://github.com/svga/SVGAPlayer-Android/commit/71d2b87))
+* Fix the memory leak problem of SVGAImageView and SVGAParser. ([7378862](https://github.com/svga/SVGAPlayer-Android/commit/7378862))
+* Correct the memory release problem. ([dfc0edb](https://github.com/svga/SVGAPlayer-Android/commit/dfc0edb))
+
 
 ## [2.5.3](https://github.com/yyued/SVGAPlayer-Android/compare/2.5.2-beta...2.5.3) (2020-01-13)
 
-
 ### Bug Fixes
+
 * Correct touch event. ([0133a0b](https://github.com/yyued/SVGAPlayer-Android/commit/0133a0b))
 * Correct play audio. ([0133a0b](https://github.com/yyued/SVGAPlayer-Android/commit/0133a0b))
 * Issue [#185](https://github.com/yyued/SVGAPlayer-Android/issues/185) drawTextOnBitmap 部分特殊文字会出现IndexOutOfBoundsException【必现】 ([1534cd2](https://github.com/yyued/SVGAPlayer-Android/commit/1534cd2))
-
 
 ### Features
 
