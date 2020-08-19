@@ -191,6 +191,11 @@ val cacheDir = File(context.applicationContext.cacheDir, "http")
 HttpResponseCache.install(cacheDir, 1024 * 1024 * 128)
 ```
 
+### SVGALogger
+Updated the internal log output, which can be managed and controlled through SVGALogger. It is not activated by default. Developers can also implement the ILogger interface to capture and collect logs externally to facilitate troubleshooting
+Set whether the log is enabled through the `setLogEnabled` method
+Inject a custom ILogger implementation class through the `injectSVGALoggerImp` method
+
 ## Features
 
 Here are many feature samples.
