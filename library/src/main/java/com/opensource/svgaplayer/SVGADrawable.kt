@@ -54,7 +54,31 @@ class SVGADrawable(val videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
 
     }
 
-    internal fun clear() {
+    fun resume() {
+        videoItem.audioList.forEach { audio ->
+            audio.playID?.let {
+                videoItem.soundPool?.resume(it)
+            }
+        }
+    }
+
+    fun pause() {
+        videoItem.audioList.forEach { audio ->
+            audio.playID?.let {
+                videoItem.soundPool?.pause(it)
+            }
+        }
+    }
+
+    fun stop() {
+        videoItem.audioList.forEach { audio ->
+            audio.playID?.let {
+                videoItem.soundPool?.stop(it)
+            }
+        }
+    }
+
+    fun clear() {
         videoItem.audioList.forEach { audio ->
             audio.playID?.let {
                 videoItem.soundPool?.stop(it)

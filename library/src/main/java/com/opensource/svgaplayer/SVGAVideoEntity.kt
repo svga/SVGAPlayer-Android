@@ -210,17 +210,23 @@ class SVGAVideoEntity {
         return item
     }
 
+    private fun generateAudioFile(audioCache: File, value: ByteArray): File {
+        audioCache.createNewFile()
+        FileOutputStream(audioCache).write(value)
+        return audioCache
+    }
+
     private fun generateAudioFileMap(entity: MovieEntity): HashMap<String, File> {
         val audiosDataMap = generateAudioMap(entity)
         val audiosFileMap = HashMap<String, File>()
         if (audiosDataMap.count() > 0) {
             audiosDataMap.forEach {
-                val tmpFile = File.createTempFile(it.key + "_tmp", ".mp3")
-                val fos = FileOutputStream(tmpFile)
-                fos.write(it.value)
-                fos.flush()
-                fos.close()
-                audiosFileMap[it.key] = tmpFile
+                val audioCache = File(it.key + ".mp3")
+                audiosFileMap[it.key] =
+                    audioCache.takeIf { file -> file.exists() } ?: generateAudioFile(
+                        audioCache,
+                        it.value
+                    )
             }
         }
         return audiosFileMap
@@ -264,7 +270,7 @@ class SVGAVideoEntity {
         SoundPool(12.coerceAtMost(entity.audios.count()), AudioManager.STREAM_MUSIC, 0)
     }
 
-    internal fun clear() {
+    fun clear() {
         soundPool?.release()
         soundPool = null
         audioList = emptyList()

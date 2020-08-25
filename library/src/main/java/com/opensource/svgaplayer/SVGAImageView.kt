@@ -34,6 +34,7 @@ open class SVGAImageView @JvmOverloads constructor(context: Context, attrs: Attr
 
     var loops = 0
     var clearsAfterStop = true
+    var clearsAfterDetached = true
     var fillMode: FillMode = FillMode.Forward
     var callback: SVGACallback? = null
 
@@ -187,7 +188,7 @@ open class SVGAImageView @JvmOverloads constructor(context: Context, attrs: Attr
         callback?.onFinished()
     }
 
-    private fun clear() {
+    fun clear() {
         getSVGADrawable()?.cleared = true
         getSVGADrawable()?.clear()
         // 清除对 drawable 的引用
@@ -270,7 +271,9 @@ open class SVGAImageView @JvmOverloads constructor(context: Context, attrs: Attr
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
         stopAnimation(true)
-        clear()
+        if (clearsAfterDetached) {
+            clear()
+        }
     }
 
     private class AnimatorListener(view: SVGAImageView) : Animator.AnimatorListener {
