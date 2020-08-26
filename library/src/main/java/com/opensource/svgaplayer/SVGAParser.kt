@@ -10,7 +10,6 @@ import org.json.JSONObject
 import java.io.*
 import java.net.HttpURLConnection
 import java.net.URL
-import java.security.MessageDigest
 import java.util.concurrent.Executors
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.atomic.AtomicInteger
@@ -108,7 +107,7 @@ class SVGAParser(context: Context?) {
         private var mShareParser = SVGAParser(null)
 
         internal var threadPoolExecutor = Executors.newCachedThreadPool { r ->
-             Thread(r, "SVGAParser-Thread-${threadNum.getAndIncrement()}")
+            Thread(r, "SVGAParser-Thread-${threadNum.getAndIncrement()}")
         }
 
         fun setThreadPoolExecutor(executor: ThreadPoolExecutor) {
@@ -178,63 +177,90 @@ class SVGAParser(context: Context?) {
         }
     }
 
+    /**
+     * 读取解析本地缓存的svga文件.
+     */
     fun _decodeFromCacheKey(cacheKey: String, callback: ParseCompletion?) {
-        val svga = SVGACache.buildCacheFile(cacheKey)
+        val svga = SVGACache.buildSvgaFile(cacheKey)
         try {
-            LogUtils.info(TAG, "binary change to entity")
-            FileInputStream(svga).use {
-                LogUtils.info(TAG, "binary change to entity success")
-                this.invokeCompleteCallback(
-                    SVGAVideoEntity(
-                        MovieEntity.ADAPTER.decode(it),
-                        SVGACache.buildCacheDir(cacheKey),
-                        mFrameWidth,
-                        mFrameHeight
-                    ), callback
-                )
+            LogUtils.info(TAG, "cache.binary change to entity")
+            FileInputStream(svga).use { inputStream ->
+                try {
+                    readAsBytes(inputStream)?.let { bytes ->
+                        LogUtils.info(TAG, "cache.inflate start")
+                        inflate(bytes)?.let { inflateBytes ->
+                            LogUtils.info(TAG, "cache.inflate success")
+                            val videoItem = SVGAVideoEntity(
+                                    MovieEntity.ADAPTER.decode(inflateBytes),
+                                    File(cacheKey),
+                                    mFrameWidth,
+                                    mFrameHeight
+                            )
+                            videoItem.prepare {
+                                LogUtils.info(TAG, "cache.prepare success")
+                                this.invokeCompleteCallback(videoItem, callback)
+                            }
+                        } ?: doError("cache.inflate(bytes) cause exception", callback)
+                    } ?: doError("cache.readAsBytes(inputStream) cause exception", callback)
+                } catch (e: Exception) {
+                    this.invokeErrorCallback(e, callback)
+                } finally {
+                    inputStream.close()
+                }
             }
         } catch (e: Exception) {
-            LogUtils.error(TAG, "binary change to entity fail", e)
-            SVGACache.buildCacheDir(cacheKey).delete()
-            svga.delete()
+            LogUtils.error(TAG, "cache.binary change to entity fail", e)
+            svga.takeIf { it.exists() }?.delete()
             this.invokeErrorCallback(e, callback)
         }
     }
 
+    fun doError(error: String, callback: ParseCompletion?) {
+        LogUtils.info(TAG, error)
+        this.invokeErrorCallback(
+                Exception(error),
+                callback
+        )
+    }
+
+    /**
+     * 读取解析来自URL的svga文件.并缓存成本地文件
+     */
     fun _decodeFromInputStream(
-        inputStream: InputStream,
-        cacheKey: String,
-        callback: ParseCompletion?
+            inputStream: InputStream,
+            cacheKey: String,
+            callback: ParseCompletion?
     ) {
         threadPoolExecutor.execute {
             try {
+                LogUtils.info(TAG, "Input.binary change to entity")
                 readAsBytes(inputStream)?.let { bytes ->
-                    LogUtils.info(TAG, "decode from input stream, inflate start")
-                    inflate(bytes)?.let { inflateBytes ->
-                        threadPoolExecutor.execute {
-                            SVGACache.buildCacheFile(cacheKey).let { cacheFile ->
-                                cacheFile.takeIf { !it.exists() }?.createNewFile()
-                                FileOutputStream(cacheFile).write(inflateBytes)
-                            }
+                    threadPoolExecutor.execute {
+                        SVGACache.buildSvgaFile(cacheKey).let { cacheFile ->
+                            cacheFile.takeIf { !it.exists() }?.createNewFile()
+                            FileOutputStream(cacheFile).write(bytes)
                         }
+                    }
+                    LogUtils.info(TAG, "Input.inflate start")
+                    inflate(bytes)?.let { inflateBytes ->
+                        LogUtils.info(TAG, "Input.inflate success")
                         val videoItem = SVGAVideoEntity(
-                            MovieEntity.ADAPTER.decode(inflateBytes),
-                            File(cacheKey),
-                            mFrameWidth,
-                            mFrameHeight
+                                MovieEntity.ADAPTER.decode(inflateBytes),
+                                File(cacheKey),
+                                mFrameWidth,
+                                mFrameHeight
                         )
+                        // 里面soundPool如果解析时load同一个svga的声音文件会出现无回调的情况,导致这里的callback不执行,
+                        // 原因暂时未知.目前解决方案是公开imageview,drawable,entity的clear(),然后在播放带声音
+                        // 的svgaimageview处,把解析完的drawable或者entity缓存下来,下次直接播放.用完再调用clear()
+                        // 在ImageView添加clearsAfterDetached,用于控制imageview在onDetach的时候是否要自动调用clear.
+                        // 以暂时缓解需要为RecyclerView缓存drawable或者entity的人士.用完记得调用clear()
                         videoItem.prepare {
-                            LogUtils.info(TAG, "decode from input stream, inflate end")
+                            LogUtils.info(TAG, "Input.prepare success")
                             this.invokeCompleteCallback(videoItem, callback)
                         }
-                    } ?: this.invokeErrorCallback(
-                        Exception("inflate(bytes) cause exception"),
-                        callback
-                    )
-                } ?: this.invokeErrorCallback(
-                    Exception("readAsBytes(inputStream) cause exception"),
-                    callback
-                )
+                    } ?: doError("Input.inflate(bytes) cause exception", callback)
+                } ?: doError("Input.readAsBytes(inputStream) cause exception", callback)
             } catch (e: Exception) {
                 this.invokeErrorCallback(e, callback)
             } finally {
@@ -244,10 +270,10 @@ class SVGAParser(context: Context?) {
     }
 
     fun decodeFromInputStream(
-        inputStream: InputStream,
-        cacheKey: String,
-        callback: ParseCompletion?,
-        closeInputStream: Boolean = false
+            inputStream: InputStream,
+            cacheKey: String,
+            callback: ParseCompletion?,
+            closeInputStream: Boolean = false
     ) {
         if (mContext == null) {
             LogUtils.error(TAG, "在配置 SVGAParser context 前, 无法解析 SVGA 文件。")
@@ -277,10 +303,10 @@ class SVGAParser(context: Context?) {
                         LogUtils.info(TAG, "decode from input stream, inflate start")
                         inflate(bytes)?.let {
                             val videoItem = SVGAVideoEntity(
-                                MovieEntity.ADAPTER.decode(it),
-                                File(cacheKey),
-                                mFrameWidth,
-                                mFrameHeight
+                                    MovieEntity.ADAPTER.decode(it),
+                                    File(cacheKey),
+                                    mFrameWidth,
+                                    mFrameHeight
                             )
                             videoItem.prepare {
                                 LogUtils.info(TAG, "decode from input stream, inflate end")
@@ -288,13 +314,13 @@ class SVGAParser(context: Context?) {
                             }
 
                         } ?: this.invokeErrorCallback(
-                            Exception("inflate(bytes) cause exception"),
-                            callback
+                                Exception("inflate(bytes) cause exception"),
+                                callback
                         )
                     }
                 } ?: this.invokeErrorCallback(
-                    Exception("readAsBytes(inputStream) cause exception"),
-                    callback
+                        Exception("readAsBytes(inputStream) cause exception"),
+                        callback
                 )
             } catch (e: java.lang.Exception) {
                 this.invokeErrorCallback(e, callback)

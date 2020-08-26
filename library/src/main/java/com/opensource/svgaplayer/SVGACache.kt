@@ -27,6 +27,12 @@ object SVGACache {
         this.type = type
     }
 
+//    fun clearCache(context: Context?){
+//        context ?: return
+//        cacheDir = "${context.cacheDir.absolutePath}/svga/"
+//        File(cacheDir).takeIf { it.exists() }?.delete()
+//    }
+
     fun isInitialized(): Boolean {
         return "/" != cacheDir
     }
@@ -34,8 +40,8 @@ object SVGACache {
     fun isDefaultCache(): Boolean = type == Type.DEFAULT
 
     fun isCached(cacheKey: String): Boolean {
-        return (if (isDefaultCache()) buildCacheDir(cacheKey) else buildCacheFile(
-            cacheKey
+        return (if (isDefaultCache()) buildCacheDir(cacheKey) else buildSvgaFile(
+                cacheKey
         )).exists()
     }
 
@@ -56,8 +62,12 @@ object SVGACache {
         return File("$cacheDir$cacheKey/")
     }
 
-    fun buildCacheFile(cacheKey: String): File {
+    fun buildSvgaFile(cacheKey: String): File {
         return File("$cacheDir$cacheKey.svga")
+    }
+
+    fun buildAudioFile(audio: String): File {
+        return File("$cacheDir$audio.mp3")
     }
 
 }

@@ -200,12 +200,12 @@ class SVGAVideoEntity {
             // 除数不能为 0
             return item
         }
-        audiosFileMap[audio.audioKey]?.let {
-            val fis = FileInputStream(it)
-            val length = fis.available().toDouble()
-            val offset = ((startTime / totalTime) * length).toLong()
-            item.soundID = soundPool?.load(fis.fd, offset, length.toLong(), 1)
-            fis.close()
+        audiosFileMap[audio.audioKey]?.let { file ->
+            FileInputStream(file).use {
+                val length = it.available().toDouble()
+                val offset = ((startTime / totalTime) * length).toLong()
+                item.soundID = soundPool?.load(it.fd, offset, length.toLong(), 1)
+            }
         }
         return item
     }
@@ -221,7 +221,7 @@ class SVGAVideoEntity {
         val audiosFileMap = HashMap<String, File>()
         if (audiosDataMap.count() > 0) {
             audiosDataMap.forEach {
-                val audioCache = File(it.key + ".mp3")
+                val audioCache = SVGACache.buildAudioFile(it.key)
                 audiosFileMap[it.key] =
                     audioCache.takeIf { file -> file.exists() } ?: generateAudioFile(
                         audioCache,
