@@ -5,8 +5,9 @@ import android.graphics.Matrix
 import android.graphics.Path
 import android.graphics.RectF
 import com.opensource.svgaplayer.proto.ShapeEntity
+import org.json.JSONArray
 import org.json.JSONObject
-import java.util.HashMap
+import java.util.*
 
 /**
  * Created by cuiminghui on 2017/2/22.
@@ -139,12 +140,24 @@ internal class SVGAVideoShapeEntity {
             val styles = Styles()
             it.optJSONArray("fill")?.let {
                 if (it.length() == 4) {
-                    styles.fill = Color.argb((it.optDouble(3) * 255).toInt(), (it.optDouble(0) * 255).toInt(), (it.optDouble(1) * 255).toInt(), (it.optDouble(2) * 255).toInt())
+                    val mulValue = checkValueRange(it)
+                    styles.fill = Color.argb(
+                            (it.optDouble(3) * mulValue).toInt(),
+                            (it.optDouble(0) * mulValue).toInt(),
+                            (it.optDouble(1) * mulValue).toInt(),
+                            (it.optDouble(2) * mulValue).toInt()
+                    )
                 }
             }
             it.optJSONArray("stroke")?.let {
                 if (it.length() == 4) {
-                    styles.stroke = Color.argb((it.optDouble(3) * 255).toInt(), (it.optDouble(0) * 255).toInt(), (it.optDouble(1) * 255).toInt(), (it.optDouble(2) * 255).toInt())
+                    val mulValue = checkValueRange(it)
+                    styles.stroke = Color.argb(
+                            (it.optDouble(3) * mulValue).toInt(),
+                            (it.optDouble(0) * mulValue).toInt(),
+                            (it.optDouble(1) * mulValue).toInt(),
+                            (it.optDouble(2) * mulValue).toInt()
+                    )
                 }
             }
             styles.strokeWidth = it.optDouble("strokeWidth", 0.0).toFloat()
@@ -161,14 +174,41 @@ internal class SVGAVideoShapeEntity {
         }
     }
 
+    // 检查色域范围是否是 0-1
+    private fun checkValueRange(obj: JSONArray): Float {
+        return if (
+                obj.optDouble(3) <= 1 &&
+                obj.optDouble(0) <= 1 &&
+                obj.optDouble(1) <= 1 &&
+                obj.optDouble(2) <= 1
+        ) {
+            255f
+        } else {
+            1f
+        }
+    }
+
     private fun parseStyles(obj: ShapeEntity) {
         obj.styles?.let {
             val styles = Styles()
             it.fill?.let {
-                styles.fill = Color.argb(((it.a ?: 0.0f) * 255).toInt(), ((it.r ?: 0.0f) * 255).toInt(), ((it.g ?: 0.0f) * 255).toInt(), ((it.b ?: 0.0f) * 255).toInt())
+                val mulValue = checkValueRange(it)
+                styles.fill = Color.argb(
+                        ((it.a ?: 0f) * mulValue).toInt(),
+                        ((it.r ?: 0f) * mulValue).toInt(),
+                        ((it.g ?: 0f) * mulValue).toInt(),
+                        ((it.b ?: 0f) * mulValue).toInt()
+                )
             }
             it.stroke?.let {
-                styles.stroke = Color.argb(((it.a ?: 0.0f) * 255).toInt(), ((it.r ?: 0.0f) * 255).toInt(), ((it.g ?: 0.0f) * 255).toInt(), ((it.b ?: 0.0f) * 255).toInt())
+                val mulValue = checkValueRange(it)
+                styles.stroke = Color.argb(
+                        ((it.a ?: 0f) * mulValue).toInt(),
+                        ((it.r ?: 0f) * mulValue).toInt(),
+                        ((it.g ?: 0f) * mulValue).toInt(),
+                        ((it.b ?: 0f) * mulValue).toInt()
+                )
+
             }
             styles.strokeWidth = it.strokeWidth ?: 0.0f
             it.lineCap?.let {
@@ -191,6 +231,20 @@ internal class SVGAVideoShapeEntity {
             it.lineDashII?.let { styles.lineDash[1] = it }
             it.lineDashIII?.let { styles.lineDash[2] = it }
             this.styles = styles
+        }
+    }
+
+    // 检查色域范围是否是 0-1
+    private fun checkValueRange(color: ShapeEntity.ShapeStyle.RGBAColor): Float {
+        return if (
+                (color.a ?: 0f) <= 1 &&
+                (color.r ?: 0f) <= 1 &&
+                (color.g ?: 0f) <= 1 &&
+                (color.b ?: 0f) <= 1
+        ) {
+            255f
+        } else {
+            1f
         }
     }
 
@@ -252,8 +306,7 @@ internal class SVGAVideoShapeEntity {
             (this.args?.get("d") as? String)?.let {
                 SVGAPathEntity(it).buildPath(sharedPath)
             }
-        }
-        else if (this.type == Type.ellipse) {
+        } else if (this.type == Type.ellipse) {
             val xv = this.args?.get("x") as? Number ?: return
             val yv = this.args?.get("y") as? Number ?: return
             val rxv = this.args?.get("radiusX") as? Number ?: return
@@ -263,8 +316,7 @@ internal class SVGAVideoShapeEntity {
             val rx = rxv.toFloat()
             val ry = ryv.toFloat()
             sharedPath.addOval(RectF(x - rx, y - ry, x + rx, y + ry), Path.Direction.CW)
-        }
-        else if (this.type == Type.rect) {
+        } else if (this.type == Type.rect) {
             val xv = this.args?.get("x") as? Number ?: return
             val yv = this.args?.get("y") as? Number ?: return
             val wv = this.args?.get("width") as? Number ?: return

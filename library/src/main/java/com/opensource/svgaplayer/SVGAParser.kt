@@ -380,7 +380,7 @@ class SVGAParser(context: Context?) {
             return
         }
         try {
-            val cacheDir = File(mContext?.cacheDir?.absolutePath + "/" + cacheKey + "/")
+            val cacheDir = SVGACache.buildCacheDir(cacheKey)
             File(cacheDir, "movie.binary").takeIf { it.isFile }?.let { binaryFile ->
                 try {
                     LogUtils.info(TAG, "binary change to entity")
