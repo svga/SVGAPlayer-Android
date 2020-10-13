@@ -2,6 +2,7 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-android'
 
+
 android {
     compileSdkVersion 28
     defaultConfig {
@@ -30,6 +31,7 @@ android {
         exclude 'META-INF/MANIFEST.MF'
     }
 }
+
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')

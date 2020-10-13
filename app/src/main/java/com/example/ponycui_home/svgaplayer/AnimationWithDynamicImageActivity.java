@@ -19,7 +19,6 @@ import java.net.URL;
 public class AnimationWithDynamicImageActivity extends Activity {
 
     SVGAImageView animationView = null;
-    SVGAParser parser = new SVGAParser(this);
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -32,6 +31,7 @@ public class AnimationWithDynamicImageActivity extends Activity {
 
     private void loadAnimation() {
         try { // new URL needs try catch.
+            SVGAParser parser = new SVGAParser(this);
             parser.decodeFromURL(new URL("https://github.com/yyued/SVGA-Samples/blob/master/kingset.svga?raw=true"), new SVGAParser.ParseCompletion() {
                 @Override
                 public void onComplete(@NotNull SVGAVideoEntity videoItem) {
