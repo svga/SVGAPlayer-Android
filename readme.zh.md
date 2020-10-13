@@ -176,6 +176,11 @@ val cacheDir = File(context.applicationContext.cacheDir, "http")
 HttpResponseCache.install(cacheDir, 1024 * 1024 * 128)
 ```
 
+### SVGALogger
+更新了内部 log 输出，可通过 SVGALogger 去管理和控制，默认是未启用 log 输出，开发者们也可以实现 ILogger 接口，做到外部捕获收集 log，方便排查问题
+通过 `setLogEnabled` 方法设置日志是否开启
+通过 `injectSVGALoggerImp` 方法注入自定义 ILogger 实现类
+
 ## 功能示例
 
 * [使用位图替换指定元素。](https://github.com/yyued/SVGAPlayer-Android/wiki/Dynamic-Image)

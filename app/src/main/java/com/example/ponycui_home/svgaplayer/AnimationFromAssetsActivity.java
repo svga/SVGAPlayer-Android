@@ -58,17 +58,22 @@ public class AnimationFromAssetsActivity extends Activity {
 
     private String randomSample() {
         if (samples.size() == 0) {
-            samples.add("gradientBorder.svga");
-            samples.add("Goddess.svga");
-            samples.add("Rocket.svga");
-            samples.add("angel.svga");
+            samples.add("750x80.svga");
             samples.add("alarm.svga");
-            samples.add("EmptyState.svga");
-            samples.add("heartbeat.svga");
-            samples.add("posche.svga");
-            samples.add("rose_2.0.0.svga");
+            samples.add("angel.svga");
             samples.add("Castle.svga");
+            samples.add("EmptyState.svga");
+            samples.add("Goddess.svga");
+            samples.add("gradientBorder.svga");
+            samples.add("heartbeat.svga");
+            samples.add("matteBitmap.svga");
+            samples.add("matteBitmap_1.x.svga");
+            samples.add("matteRect.svga");
             samples.add("MerryChristmas.svga");
+            samples.add("posche.svga");
+            samples.add("Rocket.svga");
+            samples.add("rose.svga");
+            samples.add("rose_2.0.0.svga");
         }
         return samples.get((int) Math.floor(Math.random() * samples.size()));
     }

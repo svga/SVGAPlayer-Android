@@ -12,6 +12,7 @@ import android.view.View
 import android.view.animation.LinearInterpolator
 import android.widget.ImageView
 import com.opensource.svgaplayer.utils.SVGARange
+import com.opensource.svgaplayer.utils.log.LogUtils
 import java.lang.ref.WeakReference
 import java.net.URL
 
@@ -20,6 +21,8 @@ import java.net.URL
  */
 open class SVGAImageView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0)
     : ImageView(context, attrs, defStyleAttr) {
+
+    private val TAG = "SVGAImageView"
 
     enum class FillMode {
         Backward,
@@ -31,6 +34,7 @@ open class SVGAImageView @JvmOverloads constructor(context: Context, attrs: Attr
 
     var loops = 0
     var clearsAfterStop = true
+    var clearsAfterDetached = true
     var fillMode: FillMode = FillMode.Forward
     var callback: SVGACallback? = null
 
@@ -110,6 +114,7 @@ open class SVGAImageView @JvmOverloads constructor(context: Context, attrs: Attr
     }
 
     private fun play(range: SVGARange?, reverse: Boolean) {
+        LogUtils.info(TAG, "================ start animation ================")
         val drawable = getSVGADrawable() ?: return
         setupDrawable()
         mStartFrame = Math.max(0, range?.location ?: 0)
@@ -150,8 +155,9 @@ open class SVGAImageView @JvmOverloads constructor(context: Context, attrs: Attr
             if (scale == 0.0) {
                 field.setFloat(animatorClass, 1.0f)
                 scale = 1.0
-                Log.e("SVGAPlayer", "The animation duration scale has been reset to 1.0x," +
-                        " because you closed it on developer options.")
+                LogUtils.info(TAG,
+                        "The animation duration scale has been reset to" +
+                                " 1.0x, because you closed it on developer options.")
             }
         } catch (ignore: Exception) {
         }
@@ -182,7 +188,7 @@ open class SVGAImageView @JvmOverloads constructor(context: Context, attrs: Attr
         callback?.onFinished()
     }
 
-    private fun clear() {
+    fun clear() {
         getSVGADrawable()?.cleared = true
         getSVGADrawable()?.clear()
         // 清除对 drawable 的引用
@@ -265,7 +271,9 @@ open class SVGAImageView @JvmOverloads constructor(context: Context, attrs: Attr
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
         stopAnimation(true)
-        clear()
+        if (clearsAfterDetached) {
+            clear()
+        }
     }
 
     private class AnimatorListener(view: SVGAImageView) : Animator.AnimatorListener {
