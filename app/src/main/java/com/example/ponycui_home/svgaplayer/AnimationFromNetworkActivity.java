@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 
 import com.opensource.svgaplayer.SVGAImageView;
 import com.opensource.svgaplayer.SVGAParser;
+import com.opensource.svgaplayer.SVGASoundManager;
 import com.opensource.svgaplayer.SVGAVideoEntity;
 
 import org.jetbrains.annotations.NotNull;
@@ -23,10 +24,20 @@ public class AnimationFromNetworkActivity extends Activity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        SVGASoundManager.get().init();
+
         animationView = new SVGAImageView(this);
         animationView.setBackgroundColor(Color.GRAY);
         setContentView(animationView);
         loadAnimation();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        SVGASoundManager.get().release();
     }
 
     private void loadAnimation() {

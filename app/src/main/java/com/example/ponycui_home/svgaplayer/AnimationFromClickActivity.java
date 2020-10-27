@@ -11,6 +11,7 @@ import com.opensource.svgaplayer.SVGADrawable;
 import com.opensource.svgaplayer.SVGADynamicEntity;
 import com.opensource.svgaplayer.SVGAImageView;
 import com.opensource.svgaplayer.SVGAParser;
+import com.opensource.svgaplayer.SVGASoundManager;
 import com.opensource.svgaplayer.SVGAVideoEntity;
 
 import org.jetbrains.annotations.NotNull;
@@ -27,6 +28,9 @@ public class AnimationFromClickActivity extends Activity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        SVGASoundManager.get().init();
+
         animationView = new SVGAImageView(this);
         animationView.setOnAnimKeyClickListener(new SVGAClickAreaListener() {
             @Override
@@ -37,6 +41,13 @@ public class AnimationFromClickActivity extends Activity {
         animationView.setBackgroundColor(Color.WHITE);
         loadAnimation();
         setContentView(animationView);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        SVGASoundManager.get().release();
     }
 
     private void loadAnimation() {
