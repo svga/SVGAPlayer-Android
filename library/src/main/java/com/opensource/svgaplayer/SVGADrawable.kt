@@ -57,8 +57,11 @@ class SVGADrawable(val videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
     fun resume() {
         videoItem.audioList.forEach { audio ->
             audio.playID?.let {
-//                videoItem.soundPool?.resume(it)
-                SVGASoundManager.get().resume(it)
+                if (SVGASoundManager.get().isInit){
+                    SVGASoundManager.get().resume(it)
+                }else{
+                    videoItem.soundPool?.resume(it)
+                }
             }
         }
     }
@@ -66,8 +69,11 @@ class SVGADrawable(val videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
     fun pause() {
         videoItem.audioList.forEach { audio ->
             audio.playID?.let {
-//                videoItem.soundPool?.pause(it)
-                SVGASoundManager.get().pause(it)
+                if (SVGASoundManager.get().isInit){
+                    SVGASoundManager.get().pause(it)
+                }else{
+                    videoItem.soundPool?.pause(it)
+                }
             }
         }
     }
@@ -75,8 +81,11 @@ class SVGADrawable(val videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
     fun stop() {
         videoItem.audioList.forEach { audio ->
             audio.playID?.let {
-//                videoItem.soundPool?.stop(it)
-                SVGASoundManager.get().stop(it)
+                if (SVGASoundManager.get().isInit){
+                    videoItem.soundPool?.stop(it)
+                }else{
+                    SVGASoundManager.get().stop(it)
+                }
             }
         }
     }
@@ -84,8 +93,11 @@ class SVGADrawable(val videoItem: SVGAVideoEntity, val dynamicItem: SVGADynamicE
     fun clear() {
         videoItem.audioList.forEach { audio ->
             audio.playID?.let {
-//                videoItem.soundPool?.stop(it)
-                SVGASoundManager.get().stop(it)
+                if (SVGASoundManager.get().isInit){
+                    SVGASoundManager.get().stop(it)
+                }else{
+                    videoItem.soundPool?.stop(it)
+                }
             }
             audio.playID = null
         }

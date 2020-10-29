@@ -16,6 +16,8 @@ import java.util.Map;
  * Description : svga音频加载管理类
  * 将SoundPool抽取到单例里边，规避load资源之后不回调onLoadComplete的问题。
  *
+ * 需要对SVGASoundManager进行初始化
+ *
  * 相关文章：Android SoundPool崩溃问题研究
  * https://zhuanlan.zhihu.com/p/29985198
  */
@@ -77,6 +79,23 @@ public class SVGASoundManager {
         soundPool = null;
     }
 
+    /**
+     * 是否初始化
+     * 如果没有初始化，就使用原来SvgaPlayer库的音频加载逻辑。
+     * @return -
+     */
+    public boolean isInit(){
+        return soundPool != null;
+    }
+
+    private boolean checkInit(){
+        boolean isInit = isInit();
+        if (!isInit){
+            Log.e(TAG, "soundPool is null, you need call init() !!!");
+        }
+        return isInit;
+    }
+
     private SoundPool getSoundPool(){
         if (Build.VERSION.SDK_INT >= 21){
             AudioAttributes attributes = new AudioAttributes.Builder()
@@ -96,10 +115,7 @@ public class SVGASoundManager {
                     long offset,
                     long length,
                     int priority){
-        if (soundPool == null) {
-            Log.e(TAG, "soundPool is null, you need call init() !!!");
-            return -1;
-        }
+        if (!checkInit()) return -1;
 
         int soundId = soundPool.load(fd, offset, length, priority);
 
@@ -113,10 +129,7 @@ public class SVGASoundManager {
     }
 
     public void unload(int soundId){
-        if (soundPool == null) {
-            Log.e(TAG, "soundPool is null, you need call init() !!!");
-            return;
-        }
+        if (!checkInit()) return;
 
         Log.i(TAG, "unload soundId=" + soundId);
 
@@ -130,10 +143,7 @@ public class SVGASoundManager {
                      int priority,
                      int loop,
                      float rate){
-        if (soundPool == null) {
-            Log.e(TAG, "soundPool is null, you need call init() !!!");
-            return -1;
-        }
+        if (!checkInit()) return -1;
 
         Log.d(TAG, "play soundId=" + soundId);
 
@@ -141,10 +151,7 @@ public class SVGASoundManager {
     }
 
     public void stop(int soundId){
-        if (soundPool == null) {
-            Log.e(TAG, "soundPool is null, you need call init() !!!");
-            return;
-        }
+        if (!checkInit()) return;
 
         Log.d(TAG, "stop soundId=" + soundId);
 
@@ -152,10 +159,7 @@ public class SVGASoundManager {
     }
 
     public void resume(int soundId){
-        if (soundPool == null) {
-            Log.e(TAG, "soundPool is null, you need call init() !!!");
-            return;
-        }
+        if (!checkInit()) return;
 
         Log.d(TAG, "stop soundId=" + soundId);
 
@@ -163,10 +167,7 @@ public class SVGASoundManager {
     }
 
     public void pause(int soundId){
-        if (soundPool == null) {
-            Log.e(TAG, "soundPool is null, you need call init() !!!");
-            return;
-        }
+        if (!checkInit()) return;
 
         Log.d(TAG, "pause soundId=" + soundId);
 
