@@ -207,7 +207,7 @@ class SVGAVideoEntity {
             FileInputStream(file).use {
                 val length = it.available().toDouble()
                 val offset = ((startTime / totalTime) * length).toLong()
-                if (SVGASoundManager.get().isInit){
+                if (SVGASoundManager.get().isInit()){
                     item.soundID = SVGASoundManager.get().load(soundCallback,
                             it.fd,
                             offset,
@@ -262,11 +262,13 @@ class SVGAVideoEntity {
     private fun setupSoundPool(entity: MovieEntity, completionBlock: () -> Unit) {
         var soundLoaded = 0
 
-        if (SVGASoundManager.get().isInit){
-            soundCallback = SVGASoundManager.CompleteCallBack {
-                soundLoaded++
-                if (soundLoaded >= entity.audios.count()) {
-                    completionBlock()
+        if (SVGASoundManager.get().isInit()){
+            soundCallback = object : SVGASoundManager.CompleteCallBack {
+                override fun onComplete() {
+                    soundLoaded++
+                    if (soundLoaded >= entity.audios.count()) {
+                        completionBlock()
+                    }
                 }
             }
         }else{
@@ -292,7 +294,7 @@ class SVGAVideoEntity {
     }
 
     fun clear() {
-        if (SVGASoundManager.get().isInit){
+        if (SVGASoundManager.get().isInit()){
             this.audioList.forEach {
                 it.soundID?.let { id -> SVGASoundManager.get().unload(id) }
             }

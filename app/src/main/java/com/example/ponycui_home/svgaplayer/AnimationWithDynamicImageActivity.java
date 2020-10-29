@@ -25,7 +25,7 @@ public class AnimationWithDynamicImageActivity extends Activity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        SVGASoundManager.get().init();
+        SVGASoundManager.Companion.get().init();
 
         animationView = new SVGAImageView(this);
         animationView.setBackgroundColor(Color.GRAY);
@@ -37,7 +37,7 @@ public class AnimationWithDynamicImageActivity extends Activity {
     protected void onDestroy() {
         super.onDestroy();
 
-        SVGASoundManager.get().release();
+        SVGASoundManager.Companion.get().release();
     }
 
     private void loadAnimation() {

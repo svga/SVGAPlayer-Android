@@ -25,7 +25,7 @@ public class AnimationFromAssetsActivity extends Activity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        SVGASoundManager.get().init();
+        SVGASoundManager.Companion.get().init();
 
         animationView = new SVGAImageView(this);
         animationView.setBackgroundColor(Color.BLACK);
@@ -43,7 +43,7 @@ public class AnimationFromAssetsActivity extends Activity {
     protected void onDestroy() {
         super.onDestroy();
 
-        SVGASoundManager.get().release();
+        SVGASoundManager.Companion.get().release();
     }
 
     private void loadAnimation() {
