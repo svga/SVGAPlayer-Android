@@ -85,6 +85,7 @@ internal class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVG
                 }
             }
         }
+        releaseFrameSprites(sprites)
     }
 
     private fun isMatteBegin(spriteIndex: Int, sprites: List<SVGADrawerSprite>): Boolean {
@@ -101,7 +102,7 @@ internal class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVG
                 svgaDrawerSprite.matteKey?.let {
                     if (it.length > 0) {
                         sprites.get(index - 1)?.let { lastSprite ->
-                            if (lastSprite.matteKey == null || lastSprite.matteKey.length == 0) {
+                            if (lastSprite.matteKey.isNullOrEmpty()) {
                                 boolArray[index] = true
                             } else {
                                 if (lastSprite.matteKey != svgaDrawerSprite.matteKey) {
@@ -135,7 +136,7 @@ internal class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVG
                             boolArray[index] = true
                         } else {
                             sprites.get(index + 1)?.let { nextSprite ->
-                                if (nextSprite.matteKey == null || nextSprite.matteKey.length == 0) {
+                                if (nextSprite.matteKey.isNullOrEmpty()) {
                                     boolArray[index] = true
                                 } else {
                                     if (nextSprite.matteKey != svgaDrawerSprite.matteKey) {
@@ -188,7 +189,7 @@ internal class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVG
         val imageKey = sprite.imageKey ?: return
         val isHidden = dynamicItem.dynamicHidden[imageKey] == true
         if (isHidden) { return }
-        val bitmapKey = imageKey.replace(".matte", "")
+        val bitmapKey = if (imageKey.endsWith(".matte")) imageKey.substring(0, imageKey.length - 6) else imageKey
         val drawingBitmap = (dynamicItem.dynamicImage[bitmapKey] ?: videoItem.imageMap[bitmapKey]) ?: return
         val frameMatrix = shareFrameMatrix(sprite.frameEntity.transform)
         val paint = this.sharedValues.sharedPaint()
