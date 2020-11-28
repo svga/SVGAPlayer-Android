@@ -23,7 +23,7 @@ object SVGACache {
         if (isInitialized()) return
         context ?: return
         cacheDir = "${context.cacheDir.absolutePath}/svga/"
-        File(cacheDir).takeIf { !it.exists() }?.mkdir()
+        File(cacheDir).takeIf { !it.exists() }?.mkdirs()
         this.type = type
     }
 
