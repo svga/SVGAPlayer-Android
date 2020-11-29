@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.http.HttpResponseCache
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import com.opensource.svgaplayer.proto.MovieEntity
 import com.opensource.svgaplayer.utils.log.LogUtils
 import org.json.JSONObject
@@ -237,8 +238,13 @@ class SVGAParser(context: Context?) {
                 readAsBytes(inputStream)?.let { bytes ->
                     threadPoolExecutor.execute {
                         SVGACache.buildSvgaFile(cacheKey).let { cacheFile ->
-                            cacheFile.takeIf { !it.exists() }?.createNewFile()
-                            FileOutputStream(cacheFile).write(bytes)
+                            try {
+                                cacheFile.takeIf { !it.exists() }?.createNewFile()
+                                FileOutputStream(cacheFile).write(bytes)
+                            } catch (e: Exception) {
+                                LogUtils.error(TAG, "create cache file fail.", e)
+                                cacheFile.delete()
+                            }
                         }
                     }
                     LogUtils.info(TAG, "Input.inflate start")
