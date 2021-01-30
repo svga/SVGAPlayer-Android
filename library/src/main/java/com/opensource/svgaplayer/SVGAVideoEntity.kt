@@ -45,6 +45,9 @@ class SVGAVideoEntity {
     private var mFrameHeight = 0
     private var mFrameWidth = 0
 
+    private var timer: Timer? = null
+    private var timerTask: TimerTask? = null
+
     constructor(json: JSONObject, cacheDir: File) : this(json, cacheDir, 0, 0)
 
     constructor(json: JSONObject, cacheDir: File, frameWidth: Int, frameHeight: Int) {
@@ -251,29 +254,29 @@ class SVGAVideoEntity {
 
     private fun setupSoundPool(entity: MovieEntity, completionBlock: () -> Unit) {
         var calledCompletion = false;
-        val timer = Timer()
-        val timerTask = timerTask {
+        timer = Timer()
+        timerTask = timerTask {
             if (!calledCompletion) {
                 completionBlock()
             }
             calledCompletion = true
             cancel();
-            timer.cancel()
+            timer?.cancel()
         }
         var soundLoaded = 0
         soundPool = generateSoundPool(entity)
         soundPool?.setOnLoadCompleteListener { _, _, _ ->
             soundLoaded++
             if (soundLoaded >= entity.audios.count()) {
-                timerTask.cancel()
-                timer.cancel()
+                timerTask?.cancel()
+                timer?.cancel()
                 if (!calledCompletion) {
                     completionBlock()
                 }
                 calledCompletion = true
             }
         }
-        timer.schedule(timerTask, 2000)
+        timer?.schedule(timerTask, 2000)
     }
 
     private fun generateSoundPool(entity: MovieEntity) = if (Build.VERSION.SDK_INT >= 21) {
@@ -293,6 +296,8 @@ class SVGAVideoEntity {
         audioList = emptyList()
         spriteList = emptyList()
         imageMap.clear()
+        timerTask?.cancel()
+        timer?.cancel()
     }
 }
 
