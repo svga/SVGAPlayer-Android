@@ -244,8 +244,6 @@ internal class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVG
                     val drawRect = Rect(0, 0, drawingBitmap.width, drawingBitmap.height)
                     val textCanvas = Canvas(textBitmap)
                     drawingTextPaint.isAntiAlias = true
-                    drawingTextPaint.setStyle(Paint.Style.FILL);
-                    drawingTextPaint.setTextAlign(Paint.Align.CENTER);
                     val fontMetrics = drawingTextPaint.getFontMetrics();
                     val top = fontMetrics.top
                     val bottom = fontMetrics.bottom

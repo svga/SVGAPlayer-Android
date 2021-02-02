@@ -210,6 +210,7 @@ open class SVGAImageView @JvmOverloads constructor(context: Context, attrs: Attr
         mAnimator?.cancel()
         mAnimator?.removeAllListeners()
         mAnimator?.removeAllUpdateListeners()
+        getSVGADrawable()?.stop()
         getSVGADrawable()?.cleared = clear
     }
 
