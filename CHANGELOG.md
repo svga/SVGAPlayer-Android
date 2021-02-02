@@ -1,6 +1,45 @@
 # SVGAPlayer-Android CHANGELOG (2020-08-04)
 
 
+## [2.5.14](https://github.com/svga/SVGAPlayer-Android/compare/2.5.13...2.5.14) (2020-10-08)
+
+### Bug Fixes
+
+* fix: Avoid repeated creation of SVGADrawerSprite causing memory thrash. ([7877a37](https://github.com/svga/SVGAPlayer-Android/commit/7877a37))
+* fix: Solve targetSdkVersion=29 animation cannot be played. ([dd525cf](https://github.com/svga/SVGAPlayer-Android/commit/dd525cf))
+* fix: Creating a cache file may cause a crash. ([e0dd50b](https://github.com/svga/SVGAPlayer-Android/commit/e0dd50b))
+
+
+## [2.5.13](https://github.com/svga/SVGAPlayer-Android/compare/2.5.12...2.5.13) (2020-10-08)
+
+### Bug Fixes
+
+* fix: Matter area calculation error. ([e9b81b4](https://github.com/svga/SVGAPlayer-Android/commit/e9b81b4))
+
+
+## [2.5.12](https://github.com/svga/SVGAPlayer-Android/compare/2.5.11...2.5.12) (2020-09-23)
+
+### Bug Fixes
+
+* fix: AnimationWithDynamicImageActivity launch failed. ([2ad4490](https://github.com/svga/SVGAPlayer-Android/commit/2ad4490))
+* fix: Unable to parse svga of assets directory. ([4446d4a](https://github.com/svga/SVGAPlayer-Android/commit/4446d4a))
+* fix: rgba calculation error. ([4e3cc8e](https://github.com/svga/SVGAPlayer-Android/commit/4e3cc8e))
+
+
+## [2.5.10](https://github.com/svga/SVGAPlayer-Android/compare/2.5.9...2.5.10) (2020-09-01)
+
+### Features
+
+* feat: Create SVGACache to manage local cache files. ([84fcf55](https://github.com/svga/SVGAPlayer-Android/commit/84fcf55))([b843ee3](https://github.com/svga/SVGAPlayer-Android/commit/b843ee3))
+
+
+## [2.5.9](https://github.com/svga/SVGAPlayer-Android/compare/2.5.8...2.5.9) (2020-08-21)
+
+### Bug Fixes
+
+* fix: context.mainLooper is easy to throw null pointer exception. ([8c6ee7f](https://github.com/svga/SVGAPlayer-Android/commit/8c6ee7f))
+
+
 ## [2.5.8](https://github.com/svga/SVGAPlayer-Android/compare/2.5.7...2.5.8) (2020-08-04)
 
 ### Features
