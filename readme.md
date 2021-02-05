@@ -104,6 +104,12 @@ Defaults to `true`.
 
 Clears canvas after animation stop.
 
+#### clearsAfterDetached: Boolean
+
+Defaults to `true`.
+
+Clears canvas after SVGAImageView detached.
+
 #### fillMode: String
 
 Defaults to `Forward`. Could be `Forward`, `Backward`.
