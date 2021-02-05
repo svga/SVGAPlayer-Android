@@ -1,7 +1,7 @@
-# SVGAPlayer-Android CHANGELOG (2020-08-04)
+# SVGAPlayer-Android CHANGELOG (2021-02-05)
 
 
-## [2.5.14](https://github.com/svga/SVGAPlayer-Android/compare/2.5.13...2.5.14) (2020-10-08)
+## [2.5.14](https://github.com/svga/SVGAPlayer-Android/compare/2.5.13...2.5.14) (2020-11-29)
 
 ### Bug Fixes
 
