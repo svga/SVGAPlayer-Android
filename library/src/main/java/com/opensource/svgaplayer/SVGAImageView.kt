@@ -259,7 +259,7 @@ open class SVGAImageView @JvmOverloads constructor(context: Context, attrs: Attr
         if (event?.action != MotionEvent.ACTION_DOWN) {
             return super.onTouchEvent(event)
         }
-        val drawable = getSVGADrawable() ?: return false
+        val drawable = getSVGADrawable() ?: return super.onTouchEvent(event)
         for ((key, value) in drawable.dynamicItem.mClickMap) {
             if (event.x >= value[0] && event.x <= value[2] && event.y >= value[1] && event.y <= value[3]) {
                 mItemClickAreaListener?.let {
