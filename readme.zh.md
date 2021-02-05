@@ -89,6 +89,9 @@ SVGAPlayer 可以从本地 `assets` 目录，或者远端服务器上加载动�
 #### clearsAfterStop: Boolean
 默认为 `true`，当动画播放完成后，是否清空画布。
 
+#### clearsAfterStop: Boolean
+默认为 `true`，当 SVGAImageView 触发 onDetachedFromWindow 方法时，是否清空画布。
+
 #### fillMode: String
 
 默认为 `Forward`，可以是 `Forward`、 `Backward`。

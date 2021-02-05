@@ -58,6 +58,7 @@ open class SVGAImageView @JvmOverloads constructor(context: Context, attrs: Attr
         val typedArray = context.theme.obtainStyledAttributes(attrs, R.styleable.SVGAImageView, 0, 0)
         loops = typedArray.getInt(R.styleable.SVGAImageView_loopCount, 0)
         clearsAfterStop = typedArray.getBoolean(R.styleable.SVGAImageView_clearsAfterStop, true)
+        clearsAfterDetached = typedArray.getBoolean(R.styleable.SVGAImageView_clearsAfterDetached, true)
         mAntiAlias = typedArray.getBoolean(R.styleable.SVGAImageView_antiAlias, true)
         mAutoPlay = typedArray.getBoolean(R.styleable.SVGAImageView_autoPlay, true)
         typedArray.getString(R.styleable.SVGAImageView_fillMode)?.let {
@@ -258,7 +259,7 @@ open class SVGAImageView @JvmOverloads constructor(context: Context, attrs: Attr
         if (event?.action != MotionEvent.ACTION_DOWN) {
             return super.onTouchEvent(event)
         }
-        val drawable = getSVGADrawable() ?: return false
+        val drawable = getSVGADrawable() ?: return super.onTouchEvent(event)
         for ((key, value) in drawable.dynamicItem.mClickMap) {
             if (event.x >= value[0] && event.x <= value[2] && event.y >= value[1] && event.y <= value[3]) {
                 mItemClickAreaListener?.let {
