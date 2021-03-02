@@ -14,6 +14,15 @@ object SVGACache {
 
     private var type: Type = Type.DEFAULT
     private var cacheDir: String = "/"
+        get() {
+            if (field != "/") {
+                val dir = File(field)
+                if (!dir.exists()) {
+                    dir.mkdirs()
+                }
+            }
+            return field
+        }
 
     fun onCreate(context: Context?) {
         onCreate(context, Type.DEFAULT)
