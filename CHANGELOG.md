@@ -1,4 +1,18 @@
-# SVGAPlayer-Android CHANGELOG (2021-02-05)
+# SVGAPlayer-Android CHANGELOG (2021-03-02)
+
+
+## [2.5.15](https://github.com/svga/SVGAPlayer-Android/compare/2.5.14...2.5.15) (2021-03-02)
+
+### Features
+
+* feat: Add clearAfterDetched to the custom xml attribute.([a8ff86f2](https://github.com/svga/SVGAPlayer-Android/commit/a8ff86f2))
+
+### Bug Fixes
+
+* fix: When stopAnimation is called to stop playback, the audio does not stop.([9d51bb9e](https://github.com/svga/SVGAPlayer-Android/commit/9d51bb9e))
+* fix: Some properties of external custom TextAlign will be modified internally.([a0fd7f8f](https://github.com/svga/SVGAPlayer-Android/commit/a0fd7f8f))
+* fix: Click event delivery.([461b63c6](https://github.com/svga/SVGAPlayer-Android/commit/461b63c6))
+* fix: After clearing the cache, it will cause java.lang.Error: java.io.IOException.([f37d604c](https://github.com/svga/SVGAPlayer-Android/commit/f37d604c))
 
 
 ## [2.5.14](https://github.com/svga/SVGAPlayer-Android/compare/2.5.13...2.5.14) (2020-11-29)
