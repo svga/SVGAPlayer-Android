@@ -2,8 +2,15 @@
 
 [简体中文](./readme.zh.md)
 
-[![Backers on Open Collective](https://opencollective.com/SVGAPlayer-Android/backers/badge.svg)](#backers)
-[![Sponsors on Open Collective](https://opencollective.com/SVGAPlayer-Android/sponsors/badge.svg)](#sponsors) 
+## 支持本项目
+
+SVGA 是 PonyCui 在 2016 年于欢聚时代开发的一个跨平台动画库，至 2021 年，已帮助数百个 APP 高效、稳定实现动画播放。但长期以来，各 Player 的 issue 跟进并不及时，现在各个仓库的维护均由开发者们自愿进行，这不利于 SVGA 生态发展。
+
+在此，作者呼吁，如果 SVGA 为您提供了便利与帮助，诚恳建议您通过以下方式支持作者、贡献者持续为该项目发电。
+
+1. 轻点 GitHub Star，让更多人看到该项目。
+2. 通过 [爱发电](https://afdian.net/@ponycui?tab=home) 月度捐赠的方式支持作者持续维护该仓库。
+3. 如果您需要更深度的技术支持服务，也可以通过上述爱发电平台，成为银牌、金牌会员，作者将为您提供单独的顾问服务。
 
 ## Introduce
 
