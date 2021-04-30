@@ -196,6 +196,16 @@ internal class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVG
         paint.isAntiAlias = videoItem.antiAlias
         paint.isFilterBitmap = videoItem.antiAlias
         paint.alpha = (sprite.frameEntity.alpha * 255).toInt()
+
+        val drawImage = {
+            val matrix = Matrix()
+            matrix.postScale((sprite.frameEntity.layout.width / drawingBitmap.width).toFloat(), (sprite.frameEntity.layout.height / drawingBitmap.height).toFloat())
+            matrix.postConcat(frameMatrix)
+
+            if (!drawingBitmap.isRecycled) {
+                canvas.drawBitmap(drawingBitmap, matrix, paint)
+            }
+        }
         if (sprite.frameEntity.maskPath != null) {
             val maskPath = sprite.frameEntity.maskPath ?: return
             canvas.save()
@@ -203,17 +213,11 @@ internal class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVG
             maskPath.buildPath(path)
             path.transform(frameMatrix)
             canvas.clipPath(path)
-            frameMatrix.preScale((sprite.frameEntity.layout.width / drawingBitmap.width).toFloat(), (sprite.frameEntity.layout.height / drawingBitmap.height).toFloat())
-            if (!drawingBitmap.isRecycled) {
-                canvas.drawBitmap(drawingBitmap, frameMatrix, paint)
-            }
+            drawImage()
             canvas.restore()
         }
         else {
-            frameMatrix.preScale((sprite.frameEntity.layout.width / drawingBitmap.width).toFloat(), (sprite.frameEntity.layout.height / drawingBitmap.height).toFloat())
-            if (!drawingBitmap.isRecycled) {
-                canvas.drawBitmap(drawingBitmap, frameMatrix, paint)
-            }
+            drawImage()
         }
         dynamicItem.dynamicIClickArea.let {
             it.get(imageKey)?.let { listener ->
