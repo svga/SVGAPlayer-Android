@@ -229,7 +229,7 @@ internal class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVG
                         , (drawingBitmap.height * matrixArray[4] + matrixArray[5]).toInt())
             }
         }
-        drawTextOnBitmap(canvas, drawingBitmap, sprite, frameMatrix)
+        drawTextOnBitmap(canvas, videoItem.imageMap[bitmapKey] ?: drawingBitmap, sprite, frameMatrix)
     }
 
     private fun drawTextOnBitmap(canvas: Canvas, drawingBitmap: Bitmap, sprite: SVGADrawerSprite, frameMatrix: Matrix) {
