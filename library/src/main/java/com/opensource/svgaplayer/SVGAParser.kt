@@ -4,7 +4,6 @@ import android.content.Context
 import android.net.http.HttpResponseCache
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import com.opensource.svgaplayer.proto.MovieEntity
 import com.opensource.svgaplayer.utils.log.LogUtils
 import org.json.JSONObject
@@ -46,7 +45,11 @@ class SVGAParser(context: Context?) {
 
         var noCache = false
 
-        open fun resume(url: URL, complete: (inputStream: InputStream) -> Unit, failure: (e: Exception) -> Unit): () -> Unit {
+        open fun resume(
+            url: URL,
+            complete: (inputStream: InputStream) -> Unit,
+            failure: (e: Exception) -> Unit
+        ): () -> Unit {
             var cancelled = false
             val cancelBlock = {
                 cancelled = true
@@ -55,8 +58,14 @@ class SVGAParser(context: Context?) {
                 try {
                     LogUtils.info(TAG, "================ svga file download start ================")
                     if (HttpResponseCache.getInstalled() == null && !noCache) {
-                        LogUtils.error(TAG, "SVGAParser can not handle cache before install HttpResponseCache. see https://github.com/yyued/SVGAPlayer-Android#cache")
-                        LogUtils.error(TAG, "在配置 HttpResponseCache 前 SVGAParser 无法缓存. 查看 https://github.com/yyued/SVGAPlayer-Android#cache ")
+                        LogUtils.error(
+                            TAG,
+                            "SVGAParser can not handle cache before install HttpResponseCache. see https://github.com/yyued/SVGAPlayer-Android#cache"
+                        )
+                        LogUtils.error(
+                            TAG,
+                            "在配置 HttpResponseCache 前 SVGAParser 无法缓存. 查看 https://github.com/yyued/SVGAPlayer-Android#cache "
+                        )
                     }
                     (url.openConnection() as? HttpURLConnection)?.let {
                         it.connectTimeout = 20 * 1000
@@ -68,7 +77,10 @@ class SVGAParser(context: Context?) {
                                 var count: Int
                                 while (true) {
                                     if (cancelled) {
-                                        LogUtils.warn(TAG, "================ svga file download canceled ================")
+                                        LogUtils.warn(
+                                            TAG,
+                                            "================ svga file download canceled ================"
+                                        )
                                         break
                                     }
                                     count = inputStream.read(buffer, 0, 4096)
@@ -78,11 +90,17 @@ class SVGAParser(context: Context?) {
                                     outputStream.write(buffer, 0, count)
                                 }
                                 if (cancelled) {
-                                    LogUtils.warn(TAG, "================ svga file download canceled ================")
+                                    LogUtils.warn(
+                                        TAG,
+                                        "================ svga file download canceled ================"
+                                    )
                                     return@execute
                                 }
                                 ByteArrayInputStream(outputStream.toByteArray()).use {
-                                    LogUtils.info(TAG, "================ svga file download complete ================")
+                                    LogUtils.info(
+                                        TAG,
+                                        "================ svga file download complete ================"
+                                    )
                                     complete(it)
                                 }
                             }
@@ -135,15 +153,20 @@ class SVGAParser(context: Context?) {
             LogUtils.error(TAG, "在配置 SVGAParser context 前, 无法解析 SVGA 文件。")
             return
         }
-        try {
-            LogUtils.info(TAG, "================ decode from assets ================")
-            threadPoolExecutor.execute {
+        LogUtils.info(TAG, "================ decode from assets ================")
+        threadPoolExecutor.execute {
+            try {
                 mContext?.assets?.open(name)?.let {
-                    this.decodeFromInputStream(it, SVGACache.buildCacheKey("file:///assets/$name"), callback, true)
+                    this.decodeFromInputStream(
+                        it,
+                        SVGACache.buildCacheKey("file:///assets/$name"),
+                        callback,
+                        true
+                    )
                 }
+            } catch (e: java.lang.Exception) {
+                this.invokeErrorCallback(e, callback)
             }
-        } catch (e: java.lang.Exception) {
-            this.invokeErrorCallback(e, callback)
         }
     }
 
@@ -192,10 +215,10 @@ class SVGAParser(context: Context?) {
                         inflate(bytes)?.let { inflateBytes ->
                             LogUtils.info(TAG, "cache.inflate success")
                             val videoItem = SVGAVideoEntity(
-                                    MovieEntity.ADAPTER.decode(inflateBytes),
-                                    File(cacheKey),
-                                    mFrameWidth,
-                                    mFrameHeight
+                                MovieEntity.ADAPTER.decode(inflateBytes),
+                                File(cacheKey),
+                                mFrameWidth,
+                                mFrameHeight
                             )
                             videoItem.prepare {
                                 LogUtils.info(TAG, "cache.prepare success")
@@ -219,8 +242,8 @@ class SVGAParser(context: Context?) {
     fun doError(error: String, callback: ParseCompletion?) {
         LogUtils.info(TAG, error)
         this.invokeErrorCallback(
-                Exception(error),
-                callback
+            Exception(error),
+            callback
         )
     }
 
@@ -228,9 +251,9 @@ class SVGAParser(context: Context?) {
      * 读取解析来自URL的svga文件.并缓存成本地文件
      */
     fun _decodeFromInputStream(
-            inputStream: InputStream,
-            cacheKey: String,
-            callback: ParseCompletion?
+        inputStream: InputStream,
+        cacheKey: String,
+        callback: ParseCompletion?
     ) {
         threadPoolExecutor.execute {
             try {
@@ -251,10 +274,10 @@ class SVGAParser(context: Context?) {
                     inflate(bytes)?.let { inflateBytes ->
                         LogUtils.info(TAG, "Input.inflate success")
                         val videoItem = SVGAVideoEntity(
-                                MovieEntity.ADAPTER.decode(inflateBytes),
-                                File(cacheKey),
-                                mFrameWidth,
-                                mFrameHeight
+                            MovieEntity.ADAPTER.decode(inflateBytes),
+                            File(cacheKey),
+                            mFrameWidth,
+                            mFrameHeight
                         )
                         // 里面soundPool如果解析时load同一个svga的声音文件会出现无回调的情况,导致这里的callback不执行,
                         // 原因暂时未知.目前解决方案是公开imageview,drawable,entity的clear(),然后在播放带声音
@@ -276,10 +299,10 @@ class SVGAParser(context: Context?) {
     }
 
     fun decodeFromInputStream(
-            inputStream: InputStream,
-            cacheKey: String,
-            callback: ParseCompletion?,
-            closeInputStream: Boolean = false
+        inputStream: InputStream,
+        cacheKey: String,
+        callback: ParseCompletion?,
+        closeInputStream: Boolean = false
     ) {
         if (mContext == null) {
             LogUtils.error(TAG, "在配置 SVGAParser context 前, 无法解析 SVGA 文件。")
@@ -309,10 +332,10 @@ class SVGAParser(context: Context?) {
                         LogUtils.info(TAG, "decode from input stream, inflate start")
                         inflate(bytes)?.let {
                             val videoItem = SVGAVideoEntity(
-                                    MovieEntity.ADAPTER.decode(it),
-                                    File(cacheKey),
-                                    mFrameWidth,
-                                    mFrameHeight
+                                MovieEntity.ADAPTER.decode(it),
+                                File(cacheKey),
+                                mFrameWidth,
+                                mFrameHeight
                             )
                             videoItem.prepare {
                                 LogUtils.info(TAG, "decode from input stream, inflate end")
@@ -320,13 +343,13 @@ class SVGAParser(context: Context?) {
                             }
 
                         } ?: this.invokeErrorCallback(
-                                Exception("inflate(bytes) cause exception"),
-                                callback
+                            Exception("inflate(bytes) cause exception"),
+                            callback
                         )
                     }
                 } ?: this.invokeErrorCallback(
-                        Exception("readAsBytes(inputStream) cause exception"),
-                        callback
+                    Exception("readAsBytes(inputStream) cause exception"),
+                    callback
                 )
             } catch (e: java.lang.Exception) {
                 this.invokeErrorCallback(e, callback)
@@ -341,7 +364,10 @@ class SVGAParser(context: Context?) {
     /**
      * @deprecated from 2.4.0
      */
-    @Deprecated("This method has been deprecated from 2.4.0.", ReplaceWith("this.decodeFromAssets(assetsName, callback)"))
+    @Deprecated(
+        "This method has been deprecated from 2.4.0.",
+        ReplaceWith("this.decodeFromAssets(assetsName, callback)")
+    )
     fun parse(assetsName: String, callback: ParseCompletion?) {
         this.decodeFromAssets(assetsName, callback)
     }
@@ -349,7 +375,10 @@ class SVGAParser(context: Context?) {
     /**
      * @deprecated from 2.4.0
      */
-    @Deprecated("This method has been deprecated from 2.4.0.", ReplaceWith("this.decodeFromURL(url, callback)"))
+    @Deprecated(
+        "This method has been deprecated from 2.4.0.",
+        ReplaceWith("this.decodeFromURL(url, callback)")
+    )
     fun parse(url: URL, callback: ParseCompletion?) {
         this.decodeFromURL(url, callback)
     }
@@ -357,8 +386,16 @@ class SVGAParser(context: Context?) {
     /**
      * @deprecated from 2.4.0
      */
-    @Deprecated("This method has been deprecated from 2.4.0.", ReplaceWith("this.decodeFromInputStream(inputStream, cacheKey, callback, closeInputStream)"))
-    fun parse(inputStream: InputStream, cacheKey: String, callback: ParseCompletion?, closeInputStream: Boolean = false) {
+    @Deprecated(
+        "This method has been deprecated from 2.4.0.",
+        ReplaceWith("this.decodeFromInputStream(inputStream, cacheKey, callback, closeInputStream)")
+    )
+    fun parse(
+        inputStream: InputStream,
+        cacheKey: String,
+        callback: ParseCompletion?,
+        closeInputStream: Boolean = false
+    ) {
         this.decodeFromInputStream(inputStream, cacheKey, callback, closeInputStream)
     }
 
@@ -392,7 +429,14 @@ class SVGAParser(context: Context?) {
                     LogUtils.info(TAG, "binary change to entity")
                     FileInputStream(binaryFile).use {
                         LogUtils.info(TAG, "binary change to entity success")
-                        this.invokeCompleteCallback(SVGAVideoEntity(MovieEntity.ADAPTER.decode(it), cacheDir, mFrameWidth, mFrameHeight), callback)
+                        this.invokeCompleteCallback(
+                            SVGAVideoEntity(
+                                MovieEntity.ADAPTER.decode(it),
+                                cacheDir,
+                                mFrameWidth,
+                                mFrameHeight
+                            ), callback
+                        )
                     }
                 } catch (e: Exception) {
                     LogUtils.error(TAG, "binary change to entity fail", e)
@@ -417,7 +461,14 @@ class SVGAParser(context: Context?) {
                             byteArrayOutputStream.toString().let {
                                 JSONObject(it).let {
                                     LogUtils.info(TAG, "spec change to entity success")
-                                    this.invokeCompleteCallback(SVGAVideoEntity(it, cacheDir, mFrameWidth, mFrameHeight), callback)
+                                    this.invokeCompleteCallback(
+                                        SVGAVideoEntity(
+                                            it,
+                                            cacheDir,
+                                            mFrameWidth,
+                                            mFrameHeight
+                                        ), callback
+                                    )
                                 }
                             }
                         }
@@ -494,7 +545,7 @@ class SVGAParser(context: Context?) {
                                 fileOutputStream.write(buff, 0, readBytes)
                             }
                         }
-                        LogUtils.error(TAG, "================ unzip complete ================")
+                        LogUtils.info(TAG, "================ unzip complete ================")
                         zipInputStream.closeEntry()
                     }
                 }
