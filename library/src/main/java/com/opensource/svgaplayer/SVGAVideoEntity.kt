@@ -187,6 +187,15 @@ class SVGAVideoEntity {
         }
         setupSoundPool(entity, completionBlock)
         val audiosFileMap = generateAudioFileMap(entity)
+        /**
+         * repair audio error it not  callback
+         audiosFileMap.size==0  soundPool?.load will not go
+         setOnLoadCompleteListener will not run
+         completionBlock  not  run  cannot callback
+         */
+        if(audiosFileMap.size==0){
+            run(completionBlock)
+        }
         this.audioList = entity.audios.map { audio ->
             return@map createSvgaAudioEntity(audio, audiosFileMap)
         }
