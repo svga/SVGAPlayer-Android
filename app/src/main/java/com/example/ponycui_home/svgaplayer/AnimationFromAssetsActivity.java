@@ -37,7 +37,9 @@ public class AnimationFromAssetsActivity extends Activity {
 
     private void loadAnimation() {
         SVGAParser svgaParser = SVGAParser.Companion.shareParser();
-        String name = this.randomSample();
+//        String name = this.randomSample();
+        //asset jojo_audio.svga  cannot callback
+        String name = "jojo_audio.svga";
         Log.d("SVGA", "## name " + name);
         svgaParser.setFrameSize(100, 100);
         svgaParser.decodeFromAssets(name, new SVGAParser.ParseCompletion() {
