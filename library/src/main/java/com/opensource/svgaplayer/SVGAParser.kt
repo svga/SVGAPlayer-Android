@@ -285,7 +285,7 @@ class SVGAParser(context: Context?) {
             cacheKey: String,
             callback: ParseCompletion?,
             closeInputStream: Boolean = false,
-            playCallback: PlayCallback?
+            playCallback: PlayCallback?=null
     ) {
         if (mContext == null) {
             LogUtils.error(TAG, "在配置 SVGAParser context 前, 无法解析 SVGA 文件。")
