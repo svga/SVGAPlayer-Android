@@ -21,6 +21,7 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.util.*
+import kotlin.collections.ArrayList
 
 /**
  * Created by PonyCui on 16/6/18.
@@ -47,6 +48,8 @@ class SVGAVideoEntity {
     private var mCacheDir: File
     private var mFrameHeight = 0
     private var mFrameWidth = 0
+    private var mPlayCallback: SVGAParser.PlayCallback?=null
+    private lateinit var mCallback: () -> Unit
 
     constructor(json: JSONObject, cacheDir: File) : this(json, cacheDir, 0, 0)
 
@@ -102,12 +105,14 @@ class SVGAVideoEntity {
         frames = movieParams.frames ?: 0
     }
 
-    internal fun prepare(callback: () -> Unit) {
+    internal fun prepare(callback: () -> Unit,playCallback: SVGAParser.PlayCallback?) {
+        mCallback=callback
+        mPlayCallback=playCallback
         if (movieItem == null) {
-            callback()
+            mCallback()
         } else {
             setupAudios(movieItem!!) {
-                callback()
+                mCallback()
             }
         }
     }
@@ -195,6 +200,7 @@ class SVGAVideoEntity {
         //如果audiosFileMap为空 soundPool?.load 不会走 导致 setOnLoadCompleteListener 不会回调 导致外层prepare不回调卡住
         if(audiosFileMap.size==0 ){
             run(completionBlock)
+            return
         }
         this.audioList = entity.audios.map { audio ->
             return@map createSvgaAudioEntity(audio, audiosFileMap)
@@ -209,7 +215,18 @@ class SVGAVideoEntity {
             // 除数不能为 0
             return item
         }
+        //直接回调文件,后续播放都不走
+        mPlayCallback?.let {
+            val fileList:MutableList<File> =ArrayList()
+            audiosFileMap.forEach{entity->
+                fileList.add(entity.value)
+            }
+            it.onPlay(fileList)
+            mCallback()
+            return item
+        }
         audiosFileMap[audio.audioKey]?.let { file ->
+
             FileInputStream(file).use {
                 val length = it.available().toDouble()
                 val offset = ((startTime / totalTime) * length).toLong()

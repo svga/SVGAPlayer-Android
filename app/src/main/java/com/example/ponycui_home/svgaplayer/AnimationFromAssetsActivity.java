@@ -9,11 +9,14 @@ import android.view.View;
 
 import com.opensource.svgaplayer.SVGAImageView;
 import com.opensource.svgaplayer.SVGAParser;
+import com.opensource.svgaplayer.SVGASoundManager;
 import com.opensource.svgaplayer.SVGAVideoEntity;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
 public class AnimationFromAssetsActivity extends Activity {
 
@@ -31,6 +34,7 @@ public class AnimationFromAssetsActivity extends Activity {
                 animationView.stepToFrame(currentIndex++, false);
             }
         });
+        SVGASoundManager.Companion.get().init();
         loadAnimation();
         setContentView(animationView);
     }
@@ -39,21 +43,23 @@ public class AnimationFromAssetsActivity extends Activity {
         SVGAParser svgaParser = SVGAParser.Companion.shareParser();
 //        String name = this.randomSample();
         //asset jojo_audio.svga  cannot callback
-        String name = "jojo_audio.svga";
+        String name = "mp3_to_long.svga";
         Log.d("SVGA", "## name " + name);
         svgaParser.setFrameSize(100, 100);
         svgaParser.decodeFromAssets(name, new SVGAParser.ParseCompletion() {
             @Override
             public void onComplete(@NotNull SVGAVideoEntity videoItem) {
+                Log.e("zzzz", "onComplete: ");
                 animationView.setVideoItem(videoItem);
                 animationView.stepToFrame(0, true);
             }
 
             @Override
             public void onError() {
-
+                Log.e("zzzz", "onComplete: ");
             }
-        });
+
+        }, null);
     }
 
     private ArrayList<String> samples = new ArrayList();
