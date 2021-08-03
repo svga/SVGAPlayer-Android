@@ -71,7 +71,6 @@ class SVGASoundManager private constructor(){
         if (completeCallBackMap.isNotEmpty()){
             completeCallBackMap.clear()
         }
-        soundPool?.release()
     }
 
     /**

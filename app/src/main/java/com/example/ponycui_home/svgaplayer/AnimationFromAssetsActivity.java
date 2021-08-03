@@ -11,6 +11,7 @@ import com.opensource.svgaplayer.SVGAImageView;
 import com.opensource.svgaplayer.SVGAParser;
 import com.opensource.svgaplayer.SVGASoundManager;
 import com.opensource.svgaplayer.SVGAVideoEntity;
+import com.opensource.svgaplayer.utils.log.SVGALogger;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -34,6 +35,7 @@ public class AnimationFromAssetsActivity extends Activity {
                 animationView.stepToFrame(currentIndex++, false);
             }
         });
+        SVGALogger.INSTANCE.setLogEnabled(true);
         SVGASoundManager.Companion.get().init();
         loadAnimation();
         setContentView(animationView);
