@@ -5,7 +5,6 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
-import android.view.ViewGroup;
 
 import com.opensource.svgaplayer.SVGAImageView;
 import com.opensource.svgaplayer.SVGAParser;
@@ -44,7 +43,9 @@ public class AnimationFromNetworkActivity extends Activity {
                 public void onError() {
 
                 }
-            });
+
+
+            },null);
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }

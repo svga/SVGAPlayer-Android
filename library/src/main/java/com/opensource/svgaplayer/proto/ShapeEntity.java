@@ -1392,7 +1392,7 @@ public final class ShapeEntity extends Message<ShapeEntity, ShapeEntity.Builder>
             case 4: {
               try {
                 builder.lineCap(LineCap.ADAPTER.decode(reader));
-              } catch (ProtoAdapter.EnumConstantNotFoundException e) {
+              } catch (EnumConstantNotFoundException e) {
                 builder.addUnknownField(tag, FieldEncoding.VARINT, (long) e.value);
               }
               break;
@@ -1400,7 +1400,7 @@ public final class ShapeEntity extends Message<ShapeEntity, ShapeEntity.Builder>
             case 5: {
               try {
                 builder.lineJoin(LineJoin.ADAPTER.decode(reader));
-              } catch (ProtoAdapter.EnumConstantNotFoundException e) {
+              } catch (EnumConstantNotFoundException e) {
                 builder.addUnknownField(tag, FieldEncoding.VARINT, (long) e.value);
               }
               break;
@@ -1467,7 +1467,7 @@ public final class ShapeEntity extends Message<ShapeEntity, ShapeEntity.Builder>
           case 1: {
             try {
               builder.type(ShapeType.ADAPTER.decode(reader));
-            } catch (ProtoAdapter.EnumConstantNotFoundException e) {
+            } catch (EnumConstantNotFoundException e) {
               builder.addUnknownField(tag, FieldEncoding.VARINT, (long) e.value);
             }
             break;

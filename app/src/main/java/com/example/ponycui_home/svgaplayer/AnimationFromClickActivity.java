@@ -53,7 +53,7 @@ public class AnimationFromClickActivity extends Activity {
             public void onError() {
 
             }
-        });
+        },null);
     }
 
 }

@@ -13,6 +13,7 @@ import com.opensource.svgaplayer.SVGAVideoEntity;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -41,11 +42,12 @@ public class AnimationWithDynamicImageActivity extends Activity {
                     animationView.setImageDrawable(drawable);
                     animationView.startAnimation();
                 }
+
                 @Override
                 public void onError() {
 
                 }
-            });
+            }, null);
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
