@@ -38,7 +38,14 @@ internal object LogUtils {
         if (!SVGALogger.isLogEnabled()) {
             return
         }
-        SVGALogger.getSVGALogger()?.error(tag, msg)
+        SVGALogger.getSVGALogger()?.error(tag, msg, null)
+    }
+
+    fun error(tag: String, error: Throwable) {
+        if (!SVGALogger.isLogEnabled()) {
+            return
+        }
+        SVGALogger.getSVGALogger()?.error(tag, error.message, error)
     }
 
     fun error(tag: String = TAG, msg: String, error: Throwable) {
@@ -46,12 +53,5 @@ internal object LogUtils {
             return
         }
         SVGALogger.getSVGALogger()?.error(tag, msg, error)
-    }
-
-    fun error(tag: String, error: Throwable) {
-        if (!SVGALogger.isLogEnabled()) {
-            return
-        }
-        SVGALogger.getSVGALogger()?.error(tag, error)
     }
 }

@@ -8,7 +8,5 @@ interface ILogger {
     fun info(tag: String, msg: String)
     fun debug(tag: String, msg: String)
     fun warn(tag: String, msg: String)
-    fun error(tag: String, msg: String)
-    fun error(tag: String, error: Throwable)
-    fun error(tag: String, msg: String, error: Throwable)
+    fun error(tag: String, msg: String?, error: Throwable?)
 }
