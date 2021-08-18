@@ -63,6 +63,7 @@ class SVGAParser(context: Context?) {
                     (url.openConnection() as? HttpURLConnection)?.let {
                         it.connectTimeout = 20 * 1000
                         it.requestMethod = "GET"
+                        it.setRequestProperty("Connection", "close")
                         it.connect()
                         it.inputStream.use { inputStream ->
                             ByteArrayOutputStream().use { outputStream ->
