@@ -86,19 +86,22 @@ SVGAPlayer 可以从本地 `assets` 目录，或者远端服务器上加载动�
 #### loopCount: Int
 默认为 `0`，设置动画的循环次数，0 表示无限循环。
 
-#### clearsAfterStop: Boolean
-默认为 `true`，当动画播放完成后，是否清空画布。
+#### ~~clearsAfterStop: Boolean~~
+默认为 `true`，当动画播放完成后，是否清空画布，以及 SVGAVideoEntity 内部数据。
+不再推荐使用，开发者可以通过 clearAfterDetached 控制资源释放，或者手动通过 SVGAVideoEntity#clear 控制资源释放
 
 #### clearsAfterDetached: Boolean
-默认为 `true`，当 SVGAImageView 触发 onDetachedFromWindow 方法时，是否清空画布。
+默认为 `false`，当 SVGAImageView 触发 onDetachedFromWindow 方法时，是否清空画布。
 
 #### fillMode: String
 
-默认为 `Forward`，可以是 `Forward`、 `Backward`。
+默认为 `Forward`，可以是 `Forward`、 `Backward`、 `Clear`。
 
 `Forward` 表示动画结束后，将停留在最后一帧。
 
 `Backward` 表示动画结束后，将停留在第一帧。
+
+`Clear` 表示动画播放完后，清空所有画布内容，但仅仅是画布，不涉及 SVGAVideoEntity 内部数据。
 
 ### 使用代码
 

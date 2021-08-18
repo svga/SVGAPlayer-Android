@@ -99,25 +99,24 @@ Defaults to `0`.
 
 How many times should animation loops. `0` means Infinity Loop.
 
-#### clearsAfterStop: Boolean
+#### ~~clearsAfterStop: Boolean~~
 
-Defaults to `true`.
-
-Clears canvas after animation stop.
+Defaults to `true`.When the animation is finished, whether to clear the canvas and the internal data of SVGAVideoEntity.
+It is no longer recommended. Developers can control resource release through clearAfterDetached, or manually control resource release through SVGAVideoEntity#clear
 
 #### clearsAfterDetached: Boolean
 
-Defaults to `true`.
-
-Clears canvas after SVGAImageView detached.
+Defaults to `false`.Clears canvas and the internal data of SVGAVideoEntity after SVGAImageView detached.
 
 #### fillMode: String
 
-Defaults to `Forward`. Could be `Forward`, `Backward`.
+Defaults to `Forward`. Could be `Forward`, `Backward`, `Clear`.
 
 `Forward` means animation will pause on last frame after finished.
 
 `Backward` means animation will pause on first frame after finished.
+
+'Clear' after the animation is played, all the canvas content is cleared, but it is only the canvas and does not involve the internal data of SVGAVideoEntity.
 
 ### Using code
 
