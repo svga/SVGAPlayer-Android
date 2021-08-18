@@ -6,7 +6,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
 import android.util.AttributeSet
-import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.animation.LinearInterpolator
@@ -19,22 +18,32 @@ import java.net.URL
 /**
  * Created by PonyCui on 2017/3/29.
  */
-open class SVGAImageView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0)
-    : ImageView(context, attrs, defStyleAttr) {
+open class SVGAImageView @JvmOverloads constructor(
+        context: Context,
+        attrs: AttributeSet? = null,
+        defStyleAttr: Int = 0
+) : ImageView(context, attrs, defStyleAttr) {
 
     private val TAG = "SVGAImageView"
 
     enum class FillMode {
         Backward,
         Forward,
+        Clear,
     }
 
     var isAnimating = false
         private set
 
     var loops = 0
-    var clearsAfterStop = true
-    var clearsAfterDetached = true
+
+    @Deprecated(
+            "It is recommended to use clearAfterDetached, or manually call to SVGAVideoEntity#clear." +
+                    "If you just consider cleaning up the canvas after playing, you can use FillMode#Clear.",
+            level = DeprecationLevel.WARNING
+    )
+    var clearsAfterStop = false
+    var clearsAfterDetached = false
     var fillMode: FillMode = FillMode.Forward
     var callback: SVGACallback? = null
 
@@ -57,15 +66,21 @@ open class SVGAImageView @JvmOverloads constructor(context: Context, attrs: Attr
     private fun loadAttrs(attrs: AttributeSet) {
         val typedArray = context.theme.obtainStyledAttributes(attrs, R.styleable.SVGAImageView, 0, 0)
         loops = typedArray.getInt(R.styleable.SVGAImageView_loopCount, 0)
-        clearsAfterStop = typedArray.getBoolean(R.styleable.SVGAImageView_clearsAfterStop, true)
-        clearsAfterDetached = typedArray.getBoolean(R.styleable.SVGAImageView_clearsAfterDetached, true)
+        clearsAfterStop = typedArray.getBoolean(R.styleable.SVGAImageView_clearsAfterStop, false)
+        clearsAfterDetached = typedArray.getBoolean(R.styleable.SVGAImageView_clearsAfterDetached, false)
         mAntiAlias = typedArray.getBoolean(R.styleable.SVGAImageView_antiAlias, true)
         mAutoPlay = typedArray.getBoolean(R.styleable.SVGAImageView_autoPlay, true)
         typedArray.getString(R.styleable.SVGAImageView_fillMode)?.let {
-            if (it == "0") {
-                fillMode = FillMode.Backward
-            } else if (it == "1") {
-                fillMode = FillMode.Forward
+            when (it) {
+                "0" -> {
+                    fillMode = FillMode.Backward
+                }
+                "1" -> {
+                    fillMode = FillMode.Forward
+                }
+                "2" -> {
+                    fillMode = FillMode.Clear
+                }
             }
         }
         typedArray.getString(R.styleable.SVGAImageView_source)?.let {
@@ -178,15 +193,18 @@ open class SVGAImageView @JvmOverloads constructor(context: Context, attrs: Attr
         isAnimating = false
         stopAnimation()
         val drawable = getSVGADrawable()
-        if (!clearsAfterStop && drawable != null) {
-            if (fillMode == FillMode.Backward) {
-                drawable.currentFrame = mStartFrame
-            } else if (fillMode == FillMode.Forward) {
-                drawable.currentFrame = mEndFrame
+        if (drawable != null) {
+            when (fillMode) {
+                FillMode.Backward -> {
+                    drawable.currentFrame = mStartFrame
+                }
+                FillMode.Forward -> {
+                    drawable.currentFrame = mEndFrame
+                }
+                FillMode.Clear -> {
+                    drawable.cleared = true
+                }
             }
-        }
-        if (clearsAfterStop && (animation as ValueAnimator).repeatCount <= 0) {
-            clear()
         }
         callback?.onFinished()
     }
@@ -274,7 +292,7 @@ open class SVGAImageView @JvmOverloads constructor(context: Context, attrs: Attr
 
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
-        stopAnimation(true)
+        stopAnimation(clearsAfterDetached)
         if (clearsAfterDetached) {
             clear()
         }

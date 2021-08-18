@@ -10,6 +10,7 @@
         <attr name="fillMode" format="enum">
             <enum name="Backward" value="0" />
             <enum name="Forward" value="1" />
+            <enum name="Clear" value="2"/>
         </attr>
     </declare-styleable>
 </resources>
