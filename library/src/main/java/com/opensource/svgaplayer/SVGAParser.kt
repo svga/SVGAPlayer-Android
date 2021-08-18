@@ -154,7 +154,7 @@ class SVGAParser(context: Context?) {
                             playCallback
                     )
                 }
-            } catch (e: java.lang.Exception) {
+            } catch (e: Exception) {
                 this.invokeErrorCallback(e, callback)
             }
         }
@@ -501,6 +501,7 @@ class SVGAParser(context: Context?) {
                             continue
                         }
                         val file = File(cacheDir, zipItem.name)
+                        ensureUnzipSafety(file, cacheDir.absolutePath)
                         FileOutputStream(file).use { fileOutputStream ->
                             val buff = ByteArray(2048)
                             while (true) {
@@ -519,8 +520,18 @@ class SVGAParser(context: Context?) {
         } catch (e: Exception) {
             LogUtils.error(TAG, "================ unzip error ================")
             LogUtils.error(TAG, "error", e)
+            SVGACache.clearDir(cacheDir.absolutePath)
             cacheDir.delete()
             throw e
+        }
+    }
+
+    // 检查 zip 路径穿透
+    private fun ensureUnzipSafety(outputFile: File, dstDirPath: String) {
+        val dstDirCanonicalPath = File(dstDirPath).canonicalPath
+        val outputFileCanonicalPath = outputFile.canonicalPath
+        if (!outputFileCanonicalPath.startsWith(dstDirCanonicalPath)) {
+            throw IOException("Found Zip Path Traversal Vulnerability with $dstDirCanonicalPath")
         }
     }
 }

@@ -56,7 +56,7 @@ object SVGACache {
     }
 
     // 清除目录下的所有文件
-    private fun clearDir(path: String) {
+    internal fun clearDir(path: String) {
         try {
             val dir = File(path)
             dir.takeIf { it.exists() }?.let { parentDir ->
