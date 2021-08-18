@@ -132,18 +132,24 @@ SVGAParser.shareParser().init(this);
 
 ```kotlin
 parser = new SVGAParser(this);
-parser.decodeFromAssets("posche.svga", new SVGAParser.ParseCompletion() {
-    
-});
+// 第三个为可缺省参数，默认为 null，如果设置该方法，则内部不在处理音频的解析以及播放，会通过 PlayCallback 把音频 File 实例回传给开发者，有开发者自行控制音频的播放与停止。
+parser.decodeFromAssets("posche.svga", object : SVGAParser.ParseCompletion {
+    // ...
+}, object : SVGAParser.PlayCallback {
+    // The default is null, can not be set
+})
 ```
 
 #### 创建一个 `SVGAParser` 实例，加载远端服务器中的动画。
 
 ```kotlin
 parser = new SVGAParser(this);
+// 第三个为可缺省参数，默认为 null，如果设置该方法，则内部不在处理音频的解析以及播放，会通过 PlayCallback 把音频 File 实例回传给开发者，有开发者自行控制音频的播放与停止。
 parser.decodeFromURL(new URL("https://github.com/yyued/SVGA-Samples/blob/master/posche.svga?raw=true"), new SVGAParser.ParseCompletion() {
-    
-});
+    // ...
+}, object : SVGAParser.PlayCallback {
+    // The default is null, can not be set
+})
 ```
 
 #### 创建一个 `SVGADrawable` 实例，并赋值给 `SVGAImageView`，然后播放动画。
@@ -183,6 +189,11 @@ HttpResponseCache.install(cacheDir, 1024 * 1024 * 128)
 更新了内部 log 输出，可通过 SVGALogger 去管理和控制，默认是未启用 log 输出，开发者们也可以实现 ILogger 接口，做到外部捕获收集 log，方便排查问题
 通过 `setLogEnabled` 方法设置日志是否开启
 通过 `injectSVGALoggerImp` 方法注入自定义 ILogger 实现类
+
+### SVGASoundManager
+新增 SVGASoundManager 控制 SVGA 音频，需要手动调用 init 方法进行初始化，否则按照默认的音频加载逻辑。
+另外通过 SVGASoundManager#setVolume 可控制 SVGA 播放时的音量大小，范围值在 [0f, 1f]，默认控制所有 SVGA 播放时的音量，
+而且该方法可设置第二个可缺省参数：SVGAVideoEntity，表示仅控制当前 SVGA 的音量大小，其他 SVGA 的音量保持不变。
 
 ## 功能示例
 
