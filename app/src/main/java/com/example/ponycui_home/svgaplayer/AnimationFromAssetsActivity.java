@@ -36,7 +36,7 @@ public class AnimationFromAssetsActivity extends Activity {
             }
         });
         SVGALogger.INSTANCE.setLogEnabled(true);
-        SVGASoundManager.Companion.get().init();
+        SVGASoundManager.INSTANCE.init();
         loadAnimation();
         setContentView(animationView);
     }

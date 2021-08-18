@@ -99,25 +99,24 @@ Defaults to `0`.
 
 How many times should animation loops. `0` means Infinity Loop.
 
-#### clearsAfterStop: Boolean
+#### ~~clearsAfterStop: Boolean~~
 
-Defaults to `true`.
-
-Clears canvas after animation stop.
+Defaults to `true`.When the animation is finished, whether to clear the canvas and the internal data of SVGAVideoEntity.
+It is no longer recommended. Developers can control resource release through clearAfterDetached, or manually control resource release through SVGAVideoEntity#clear
 
 #### clearsAfterDetached: Boolean
 
-Defaults to `true`.
-
-Clears canvas after SVGAImageView detached.
+Defaults to `false`.Clears canvas and the internal data of SVGAVideoEntity after SVGAImageView detached.
 
 #### fillMode: String
 
-Defaults to `Forward`. Could be `Forward`, `Backward`.
+Defaults to `Forward`. Could be `Forward`, `Backward`, `Clear`.
 
 `Forward` means animation will pause on last frame after finished.
 
 `Backward` means animation will pause on first frame after finished.
+
+'Clear' after the animation is played, all the canvas content is cleared, but it is only the canvas and does not involve the internal data of SVGAVideoEntity.
 
 ### Using code
 
@@ -151,18 +150,24 @@ You can also create `SVGAParser` instance by yourself.
 
 ```kotlin
 parser = new SVGAParser(this);
-parser.decodeFromAssets("posche.svga", new SVGAParser.ParseCompletion() {
+// The third parameter is a default parameter, which is null by default. If this method is set, the audio parsing and playback will not be processed internally. The audio File instance will be sent back to the developer through PlayCallback, and the developer will control the audio playback and playback. stop
+parser.decodeFromAssets("posche.svga", object : SVGAParser.ParseCompletion {
     // ...
-});
+}, object : SVGAParser.PlayCallback {
+    // The default is null, can not be set
+})
 ```
 
 #### Create a `SVGAParser` instance, parse from remote server like this.
 
 ```kotlin
 parser = new SVGAParser(this);
+// The third parameter is a default parameter, which is null by default. If this method is set, the audio parsing and playback will not be processed internally. The audio File instance will be sent back to the developer through PlayCallback, and the developer will control the audio playback and playback. stop
 parser.decodeFromURL(new URL("https://github.com/yyued/SVGA-Samples/blob/master/posche.svga?raw=true"), new SVGAParser.ParseCompletion() {
-    
-});
+    // ...
+}, object : SVGAParser.PlayCallback {
+    // The default is null, can not be set
+})
 ```
 
 #### Create a `SVGADrawable` instance then set to `SVGAImageView`, play it as you want.
@@ -202,6 +207,11 @@ HttpResponseCache.install(cacheDir, 1024 * 1024 * 128)
 Updated the internal log output, which can be managed and controlled through SVGALogger. It is not activated by default. Developers can also implement the ILogger interface to capture and collect logs externally to facilitate troubleshooting
 Set whether the log is enabled through the `setLogEnabled` method
 Inject a custom ILogger implementation class through the `injectSVGALoggerImp` method
+
+### SVGASoundManager
+Added SVGASoundManager to control SVGA audio, you need to manually call the init method to initialize, otherwise follow the default audio loading logic.
+In addition, through SVGASoundManager#setVolume, you can control the volume of SVGA playback. The range is [0f, 1f]. By default, the volume of all SVGA playbacks is controlled.
+And this method can set a second default parameter: SVGAVideoEntity, which means that only the current SVGA volume is controlled, and the volume of other SVGAs remains unchanged.
 
 ## Features
 

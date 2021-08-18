@@ -22,15 +22,7 @@ class DefaultLogCat : ILogger {
         Log.w(tag, msg)
     }
 
-    override fun error(tag: String, msg: String) {
-        Log.e(tag, msg)
-    }
-
-    override fun error(tag: String, error: Throwable) {
-        Log.e(tag, "", error)
-    }
-
-    override fun error(tag: String, msg: String, error: Throwable) {
+    override fun error(tag: String, msg: String?, error: Throwable?) {
         Log.e(tag, msg, error)
     }
 }

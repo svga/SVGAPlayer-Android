@@ -1,5 +1,20 @@
 # SVGAPlayer-Android CHANGELOG (2021-03-02)
 
+## [2.6.0](2021-08-18)
+
+## Features
+
+* feat(SVGASoundManager): Added SVGASoundManager to control SVGA audio, you need to manually call the init method to initialize, otherwise follow the default audio loading logic.
+* feat(SVGAParser): SVGAParser#decodeFromAssets and SVGAParser#decodeFromURL add a parameter, which can be null. It is used to send the audio file back to the developer. The developer can control the audio playback by himself. If this parameter is set, the audio part will not be processed internally.
+* feat(SVGAParser): Add aliases to the log section to facilitate developers to troubleshoot problems
+* feat(SVGACache): Open cache cleaning method: SVGACache#clearCache().
+
+### Bug Fixes
+
+* refactor(ILogger): Remove redundant api.
+* fix(SoundPool): Added SVGASoundManager to solve the problem that the internal SoundPool does not load audio occasionally.
+* fix(SVGAParser): Zip Path Traversal Vulnerability.
+* fix(SVGAParser): link reuse problem.
 
 ## [2.5.15](https://github.com/svga/SVGAPlayer-Android/compare/2.5.14...2.5.15) (2021-03-02)
 
