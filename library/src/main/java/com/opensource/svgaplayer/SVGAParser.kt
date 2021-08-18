@@ -4,7 +4,6 @@ import android.content.Context
 import android.net.http.HttpResponseCache
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import com.opensource.svgaplayer.proto.MovieEntity
 import com.opensource.svgaplayer.utils.log.LogUtils
 import org.json.JSONObject
@@ -20,7 +19,6 @@ import java.util.zip.ZipInputStream
 /**
  * Created by PonyCui 16/6/18.
  */
-
 private var fileLock: Int = 0
 private var isUnzipping = false
 
@@ -134,21 +132,32 @@ class SVGAParser(context: Context?) {
         mFrameHeight = frameHeight
     }
 
-    fun decodeFromAssets(name: String, callback: ParseCompletion?,playCallback: PlayCallback?=null) {
+    fun decodeFromAssets(
+            name: String,
+            callback: ParseCompletion?,
+            playCallback: PlayCallback? = null
+    ) {
         if (mContext == null) {
             LogUtils.error(TAG, "在配置 SVGAParser context 前, 无法解析 SVGA 文件。")
             return
         }
-        try {
-            LogUtils.info(TAG, "================ decode from assets ================")
-            threadPoolExecutor.execute {
+        LogUtils.info(TAG, "================ decode from assets ================")
+        threadPoolExecutor.execute {
+            try {
                 mContext?.assets?.open(name)?.let {
-                    this.decodeFromInputStream(it, SVGACache.buildCacheKey("file:///assets/$name"), callback, true,playCallback)
+                    this.decodeFromInputStream(
+                            it,
+                            SVGACache.buildCacheKey("file:///assets/$name"),
+                            callback,
+                            true,
+                            playCallback
+                    )
                 }
+            } catch (e: java.lang.Exception) {
+                this.invokeErrorCallback(e, callback)
             }
-        } catch (e: java.lang.Exception) {
-            this.invokeErrorCallback(e, callback)
         }
+
     }
 
     fun decodeFromURL(url: URL, callback: ParseCompletion?,playCallback: PlayCallback?=null): (() -> Unit)? {
@@ -234,8 +243,8 @@ class SVGAParser(context: Context?) {
     fun _decodeFromInputStream(
             inputStream: InputStream,
             cacheKey: String,
-            callback: ParseCompletion?
-    ,playCallback: PlayCallback?
+            callback: ParseCompletion?,
+            playCallback: PlayCallback?
     ) {
         threadPoolExecutor.execute {
             try {
@@ -269,7 +278,7 @@ class SVGAParser(context: Context?) {
                         videoItem.prepare({
                             LogUtils.info(TAG, "cache.prepare success")
                             this.invokeCompleteCallback(videoItem, callback)
-                        },playCallback)
+                        }, playCallback)
                     } ?: doError("Input.inflate(bytes) cause exception", callback)
                 } ?: doError("Input.readAsBytes(inputStream) cause exception", callback)
             } catch (e: Exception) {
