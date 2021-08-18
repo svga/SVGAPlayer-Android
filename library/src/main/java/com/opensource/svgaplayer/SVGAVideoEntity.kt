@@ -43,7 +43,7 @@ class SVGAVideoEntity {
     internal var spriteList: List<SVGAVideoSpriteEntity> = emptyList()
     internal var audioList: List<SVGAAudioEntity> = emptyList()
     internal var soundPool: SoundPool? = null
-    private var soundCallback: SVGASoundManager.CompleteCallBack? = null
+    private var soundCallback: SVGASoundManager.SVGASoundCallBack? = null
     internal var imageMap = HashMap<String, Bitmap>()
     private var mCacheDir: File
     private var mFrameHeight = 0
@@ -286,8 +286,12 @@ class SVGAVideoEntity {
 
     private fun setupSoundPool(entity: MovieEntity, completionBlock: () -> Unit) {
         var soundLoaded = 0
-        if (SVGASoundManager.get().isInit()) {
-            soundCallback = object : SVGASoundManager.CompleteCallBack {
+        if (SVGASoundManager.isInit()) {
+            soundCallback = object : SVGASoundManager.SVGASoundCallBack {
+                override fun onVolumeChange(value: Float) {
+                    SVGASoundManager.setVolume(value, this@SVGAVideoEntity)
+                }
+
                 override fun onComplete() {
                     soundLoaded++
                     if (soundLoaded >= entity.audios.count()) {

@@ -29,20 +29,22 @@ object SVGASoundManager {
 
     private var soundPool: SoundPool? = null
 
-    private val completeCallBackMap: MutableMap<Int, CompleteCallBack> = mutableMapOf()
-
-    private object SingletonHolder{
-        val holder = SVGASoundManager()
-    }
-
-    companion object{
-        fun get() = SingletonHolder.holder
-    }
+    private val soundCallBackMap: MutableMap<Int, SVGASoundCallBack> = mutableMapOf()
 
     /**
-     * 音频加载完成回调
+     * 音量设置，范围在 [0, 1] 之间
      */
-    interface CompleteCallBack {
+    private var volume: Float = 1f
+
+    /**
+     * 音频回调
+     */
+    internal interface SVGASoundCallBack {
+
+        // 音量发生变化
+        fun onVolumeChange(value: Float)
+
+        // 音频加载完成
         fun onComplete()
     }
 
@@ -59,8 +61,8 @@ object SVGASoundManager {
         soundPool?.setOnLoadCompleteListener { _, soundId, status ->
             LogUtils.debug(TAG, "SoundPool onLoadComplete soundId=$soundId status=$status")
             if (status == 0) { //加载该声音成功
-                if (completeCallBackMap.containsKey(soundId)) {
-                    completeCallBackMap[soundId]?.onComplete()
+                if (soundCallBackMap.containsKey(soundId)) {
+                    soundCallBackMap[soundId]?.onComplete()
                 }
             }
         }
@@ -68,8 +70,42 @@ object SVGASoundManager {
 
     fun release() {
         LogUtils.debug(TAG, "**************** release ****************")
-        if (completeCallBackMap.isNotEmpty()){
-            completeCallBackMap.clear()
+        if (soundCallBackMap.isNotEmpty()) {
+            soundCallBackMap.clear()
+        }
+    }
+
+    /**
+     * 根据当前播放实体，设置音量
+     *
+     * @param volume 范围在 [0, 1]
+     * @param entity 根据需要控制对应 entity 音量大小，若为空则控制所有正在播放的音频音量
+     */
+    fun setVolume(volume: Float, entity: SVGAVideoEntity? = null) {
+        if (!checkInit()) {
+            return
+        }
+
+        if (volume < 0f || volume > 1f) {
+            LogUtils.error(TAG, "The volume level is in the range of 0 to 1 ")
+            return
+        }
+
+        if (entity == null) {
+            this.volume = volume
+            val iterator = soundCallBackMap.entries.iterator()
+            while (iterator.hasNext()) {
+                val e = iterator.next()
+                e.value.onVolumeChange(volume)
+            }
+            return
+        }
+
+        val soundPool = soundPool ?: return
+
+        entity.audioList.forEach { audio ->
+            val streamId = audio.playID ?: return
+            soundPool.setVolume(streamId, volume, volume)
         }
     }
 
@@ -101,19 +137,19 @@ object SVGASoundManager {
         SoundPool(maxStreams, AudioManager.STREAM_MUSIC, 0)
     }
 
-    fun load(callBack: CompleteCallBack?,
-             fd: FileDescriptor?,
-             offset: Long,
-             length: Long,
-             priority: Int): Int {
+    internal fun load(callBack: SVGASoundCallBack?,
+                      fd: FileDescriptor?,
+                      offset: Long,
+                      length: Long,
+                      priority: Int): Int {
         if (!checkInit()) return -1
 
         val soundId = soundPool!!.load(fd, offset, length, priority)
 
         LogUtils.debug(TAG, "load soundId=$soundId callBack=$callBack")
 
-        if (callBack != null && !completeCallBackMap.containsKey(soundId)) {
-            completeCallBackMap[soundId] = callBack
+        if (callBack != null && !soundCallBackMap.containsKey(soundId)) {
+            soundCallBackMap[soundId] = callBack
         }
         return soundId
     }
@@ -125,19 +161,14 @@ object SVGASoundManager {
 
         soundPool!!.unload(soundId)
 
-        completeCallBackMap.remove(soundId)
+        soundCallBackMap.remove(soundId)
     }
 
-    fun play(soundId: Int,
-             leftVolume: Float,
-             rightVolume: Float,
-             priority: Int,
-             loop: Int,
-             rate: Float): Int {
+    internal fun play(soundId: Int): Int {
         if (!checkInit()) return -1
 
         LogUtils.debug(TAG, "play soundId=$soundId")
-        return soundPool!!.play(soundId, leftVolume, rightVolume, priority, loop, rate)
+        return soundPool!!.play(soundId, volume, volume, 1, 0, 1.0f)
     }
 
     internal fun stop(soundId: Int) {
