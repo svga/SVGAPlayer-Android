@@ -242,7 +242,7 @@ open class SVGAImageView @JvmOverloads constructor(
             setImageDrawable(null)
         } else {
             val drawable = SVGADrawable(videoItem, dynamicItem ?: SVGADynamicEntity())
-            drawable.cleared = clearsAfterStop
+            drawable.cleared = true
             setImageDrawable(drawable)
         }
     }
