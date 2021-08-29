@@ -87,7 +87,7 @@ SVGAPlayer 可以从本地 `assets` 目录，或者远端服务器上加载动�
 默认为 `0`，设置动画的循环次数，0 表示无限循环。
 
 #### ~~clearsAfterStop: Boolean~~
-默认为 `true`，当动画播放完成后，是否清空画布，以及 SVGAVideoEntity 内部数据。
+默认为 `false`，当动画播放完成后，是否清空画布，以及 SVGAVideoEntity 内部数据。
 不再推荐使用，开发者可以通过 clearAfterDetached 控制资源释放，或者手动通过 SVGAVideoEntity#clear 控制资源释放
 
 #### clearsAfterDetached: Boolean
@@ -189,14 +189,45 @@ HttpResponseCache.install(cacheDir, 1024 * 1024 * 128)
 ```
 
 ### SVGALogger
-更新了内部 log 输出，可通过 SVGALogger 去管理和控制，默认是未启用 log 输出，开发者们也可以实现 ILogger 接口，做到外部捕获收集 log，方便排查问题
-通过 `setLogEnabled` 方法设置日志是否开启
-通过 `injectSVGALoggerImp` 方法注入自定义 ILogger 实现类
+更新了内部 log 输出，可通过 SVGALogger 去管理和控制，默认是未启用 log 输出，开发者们也可以实现 ILogger 接口，做到外部捕获收集 log，方便排查问题。
+通过 `setLogEnabled` 方法设置日志是否开启。
+通过 `injectSVGALoggerImp` 方法注入自定义 ILogger 实现类。
+
+```kotlin
+
+// 默认情况下，SVGA 内部不会输出任何 log，所以需要手动设置为 true
+SVGALogger.setLogEnabled(true)
+
+// 如果希望收集 SVGA 内部输出的日志，则可通过下面方式获取
+SVGALogger.injectSVGALoggerImp(object: ILogger {
+// 实现相关接口进行接收 log
+})
+```
 
 ### SVGASoundManager
 新增 SVGASoundManager 控制 SVGA 音频，需要手动调用 init 方法进行初始化，否则按照默认的音频加载逻辑。
 另外通过 SVGASoundManager#setVolume 可控制 SVGA 播放时的音量大小，范围值在 [0f, 1f]，默认控制所有 SVGA 播放时的音量，
 而且该方法可设置第二个可缺省参数：SVGAVideoEntity，表示仅控制当前 SVGA 的音量大小，其他 SVGA 的音量保持不变。
+
+```kotlin
+// 初始化音频管理器，方便管理音频播放
+// 如果没有初始化，则默认按照原有方式加载音频
+SVGASoundManager.init()
+
+// 释放音频资源
+SVGASoundManager.release()
+
+/**
+* 设置音量大小，entity 默认为空
+* 当 entity 为空，则控制所有通过 SVGASoundManager 加载的音频音量大小，即包括当前正在播放的音频以及后续加载的音频
+* 当 entity 不为空，则仅控制该实例的 SVGA 音频音量大小，其他则不受影响
+* 
+* @param volume 取值范围为 [0f, 1f]
+* @param entity 即 SVGAParser 回调回来的实例
+*/
+SVGASoundManager.setVolume(volume, entity)
+```
+
 
 ## 功能示例
 

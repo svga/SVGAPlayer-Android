@@ -1,20 +1,30 @@
 # SVGAPlayer-Android CHANGELOG (2021-03-02)
 
-## [2.6.0](2021-08-18)
-
-## Features
-
-* feat(SVGASoundManager): Added SVGASoundManager to control SVGA audio, you need to manually call the init method to initialize, otherwise follow the default audio loading logic.
-* feat(SVGAParser): SVGAParser#decodeFromAssets and SVGAParser#decodeFromURL add a parameter, which can be null. It is used to send the audio file back to the developer. The developer can control the audio playback by himself. If this parameter is set, the audio part will not be processed internally.
-* feat(SVGAParser): Add aliases to the log section to facilitate developers to troubleshoot problems
-* feat(SVGACache): Open cache cleaning method: SVGACache#clearCache().
+## [2.6.1] (2021-08-30)
 
 ### Bug Fixes
 
-* refactor(ILogger): Remove redundant api.
-* fix(SoundPool): Added SVGASoundManager to solve the problem that the internal SoundPool does not load audio occasionally.
-* fix(SVGAParser): Zip Path Traversal Vulnerability.
-* fix(SVGAParser): link reuse problem.
+* fix(SVGAImageView): SVGAImageView sets autoPlay to false, the sound will still be played automatically.
+* fix(SVGAParser): When the type of SVGACache is set to Type.FILE, the zip compressed svga cannot be displayed.
+* fix(SVGACanvasDrawer): When svga is drawn, the repeated setting of alpha and color causes the screen to display abnormally.
+
+
+## [2.6.0](https://github.com/svga/SVGAPlayer-Android/compare/2.5.15...2.6.0) (2021-08-18)
+
+## Features
+
+* feat(SVGASoundManager): Added SVGASoundManager to control SVGA audio, you need to manually call the init method to initialize, otherwise follow the default audio loading logic.([f29563e](https://github.com/svga/SVGAPlayer-Android/commit/f29563e))
+* feat(SVGASoundManager): SVGA volume control. ([010b19c](https://github.com/svga/SVGAPlayer-Android/commit/010b19c))
+* feat(SVGAParser): SVGAParser#decodeFromAssets and SVGAParser#decodeFromURL add a parameter, which can be null. It is used to send the audio file back to the developer. The developer can control the audio playback by himself. If this parameter is set, the audio part will not be processed internally.([8437fd7](https://github.com/svga/SVGAPlayer-Android/commit/8437fd7))
+* feat(SVGAParser): Add aliases to the log section to facilitate developers to troubleshoot problems([977059e](https://github.com/svga/SVGAPlayer-Android/commit/977059e))
+* feat(SVGACache): Open cache cleaning method: SVGACache#clearCache().([a8d926e](https://github.com/svga/SVGAPlayer-Android/commit/a8d926e))
+
+### Bug Fixes
+
+* refactor(ILogger): Remove redundant api.([3f4ef1a](https://github.com/svga/SVGAPlayer-Android/commit/3f4ef1a))
+* fix(SVGAParser): Zip Path Traversal Vulnerability.([000aa61](https://github.com/svga/SVGAPlayer-Android/commit/000aa61))
+* fix(SVGAParser): link reuse problem.([b01174e](https://github.com/svga/SVGAPlayer-Android/commit/b01174e))
+
 
 ## [2.5.15](https://github.com/svga/SVGAPlayer-Android/compare/2.5.14...2.5.15) (2021-03-02)
 

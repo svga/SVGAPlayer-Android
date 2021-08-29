@@ -101,7 +101,7 @@ How many times should animation loops. `0` means Infinity Loop.
 
 #### ~~clearsAfterStop: Boolean~~
 
-Defaults to `true`.When the animation is finished, whether to clear the canvas and the internal data of SVGAVideoEntity.
+Defaults to `false`.When the animation is finished, whether to clear the canvas and the internal data of SVGAVideoEntity.
 It is no longer recommended. Developers can control resource release through clearAfterDetached, or manually control resource release through SVGAVideoEntity#clear
 
 #### clearsAfterDetached: Boolean
@@ -116,7 +116,7 @@ Defaults to `Forward`. Could be `Forward`, `Backward`, `Clear`.
 
 `Backward` means animation will pause on first frame after finished.
 
-'Clear' after the animation is played, all the canvas content is cleared, but it is only the canvas and does not involve the internal data of SVGAVideoEntity.
+`Clear` after the animation is played, all the canvas content is cleared, but it is only the canvas and does not involve the internal data of SVGAVideoEntity.
 
 ### Using code
 
@@ -208,10 +208,41 @@ Updated the internal log output, which can be managed and controlled through SVG
 Set whether the log is enabled through the `setLogEnabled` method
 Inject a custom ILogger implementation class through the `injectSVGALoggerImp` method
 
+
+```kotlin
+
+// By default, SVGA will not output any log, so you need to manually set it to true
+SVGALogger.setLogEnabled(true)
+
+// If you want to collect the output log of SVGA, you can obtain it in the following way
+SVGALogger.injectSVGALoggerImp(object: ILogger {
+// Implement related interfaces to receive log
+})
+```
+
 ### SVGASoundManager
 Added SVGASoundManager to control SVGA audio, you need to manually call the init method to initialize, otherwise follow the default audio loading logic.
 In addition, through SVGASoundManager#setVolume, you can control the volume of SVGA playback. The range is [0f, 1f]. By default, the volume of all SVGA playbacks is controlled.
 And this method can set a second default parameter: SVGAVideoEntity, which means that only the current SVGA volume is controlled, and the volume of other SVGAs remains unchanged.
+
+```kotlin
+// Initialize the audio manager for easy management of audio playback
+// If it is not initialized, the audio will be loaded in the original way by default
+SVGASoundManager.init()
+
+// Release audio resources
+SVGASoundManager.release()
+
+/**
+* Set the volume level, entity is null by default
+* When entity is null, it controls the volume of all audio loaded through SVGASoundManager, which includes the currently playing audio and subsequent loaded audio
+* When entity is not null, only the SVGA audio volume of the instance is controlled, and the others are not affected
+* 
+* @param volume The value range is [0f, 1f]
+* @param entity That is, the instance of SVGAParser callback
+*/
+SVGASoundManager.setVolume(volume, entity)
+```
 
 ## Features
 
