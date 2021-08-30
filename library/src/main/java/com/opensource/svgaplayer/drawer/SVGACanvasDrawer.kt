@@ -2,13 +2,13 @@ package com.opensource.svgaplayer.drawer
 
 import android.graphics.*
 import android.os.Build
-import android.text.*
+import android.text.StaticLayout
+import android.text.TextUtils
 import android.widget.ImageView
 import com.opensource.svgaplayer.SVGADynamicEntity
 import com.opensource.svgaplayer.SVGASoundManager
 import com.opensource.svgaplayer.SVGAVideoEntity
 import com.opensource.svgaplayer.entities.SVGAVideoShapeEntity
-import java.lang.Exception
 
 /**
  * Created by cuiminghui on 2017/3/29.
@@ -172,9 +172,9 @@ internal class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVG
             }
             if (audio.endFrame <= frameIndex) {
                 audio.playID?.let {
-                    if (SVGASoundManager.isInit()){
+                    if (SVGASoundManager.isInit()) {
                         SVGASoundManager.stop(it)
-                    }else{
+                    } else {
                         this.videoItem.soundPool?.stop(it)
                     }
                 }
@@ -356,7 +356,10 @@ internal class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVG
                     if (it != 0x00000000) {
                         paint.style = Paint.Style.FILL
                         paint.color = it
-                        paint.alpha = Math.min(255, Math.max(0, (sprite.frameEntity.alpha * 255).toInt()))
+                        val alpha = Math.min(255, Math.max(0, (sprite.frameEntity.alpha * 255).toInt()))
+                        if (alpha != 255) {
+                            paint.alpha = alpha
+                        }
                         if (sprite.frameEntity.maskPath !== null) canvas.save()
                         sprite.frameEntity.maskPath?.let { maskPath ->
                             val path2 = this.sharedValues.sharedPath2()
@@ -370,10 +373,14 @@ internal class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVG
                 }
                 shape.styles?.strokeWidth?.let {
                     if (it > 0) {
+                        paint.alpha = (sprite.frameEntity.alpha * 255).toInt()
                         paint.style = Paint.Style.STROKE
                         shape.styles?.stroke?.let {
                             paint.color = it
-                            paint.alpha = Math.min(255, Math.max(0, (sprite.frameEntity.alpha * 255).toInt()))
+                            val alpha = Math.min(255, Math.max(0, (sprite.frameEntity.alpha * 255).toInt()))
+                            if (alpha != 255) {
+                                paint.alpha = alpha
+                            }
                         }
                         val scale = matrixScale(frameMatrix)
                         shape.styles?.strokeWidth?.let {

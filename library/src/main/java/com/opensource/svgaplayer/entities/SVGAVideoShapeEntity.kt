@@ -135,14 +135,37 @@ internal class SVGAVideoShapeEntity {
         this.args = args
     }
 
+    // 检查色域范围是否是 [0f, 1f]，或者是 [0f, 255f]
+    private fun checkValueRange(obj: JSONArray): Float {
+        return if (
+                obj.optDouble(0) <= 1 &&
+                obj.optDouble(1) <= 1 &&
+                obj.optDouble(2) <= 1
+        ) {
+            255f
+        } else {
+            1f
+        }
+    }
+
+    // 检查 alpha 的范围是否是 [0f, 1f]，或者是 [0f, 255f]
+    private fun checkAlphaValueRange(obj: JSONArray): Float {
+        return if (obj.optDouble(3) <= 1) {
+            255f
+        } else {
+            1f
+        }
+    }
+
     private fun parseStyles(obj: JSONObject) {
         obj.optJSONObject("styles")?.let {
             val styles = Styles()
             it.optJSONArray("fill")?.let {
                 if (it.length() == 4) {
                     val mulValue = checkValueRange(it)
+                    val alphaRangeValue = checkAlphaValueRange(it)
                     styles.fill = Color.argb(
-                            (it.optDouble(3) * mulValue).toInt(),
+                            (it.optDouble(3) * alphaRangeValue).toInt(),
                             (it.optDouble(0) * mulValue).toInt(),
                             (it.optDouble(1) * mulValue).toInt(),
                             (it.optDouble(2) * mulValue).toInt()
@@ -152,8 +175,9 @@ internal class SVGAVideoShapeEntity {
             it.optJSONArray("stroke")?.let {
                 if (it.length() == 4) {
                     val mulValue = checkValueRange(it)
+                    val alphaRangeValue = checkAlphaValueRange(it)
                     styles.stroke = Color.argb(
-                            (it.optDouble(3) * mulValue).toInt(),
+                            (it.optDouble(3) * alphaRangeValue).toInt(),
                             (it.optDouble(0) * mulValue).toInt(),
                             (it.optDouble(1) * mulValue).toInt(),
                             (it.optDouble(2) * mulValue).toInt()
@@ -174,14 +198,22 @@ internal class SVGAVideoShapeEntity {
         }
     }
 
-    // 检查色域范围是否是 0-1
-    private fun checkValueRange(obj: JSONArray): Float {
+    // 检查色域范围是否是 [0f, 1f]，或者是 [0f, 255f]
+    private fun checkValueRange(color: ShapeEntity.ShapeStyle.RGBAColor): Float {
         return if (
-                obj.optDouble(3) <= 1 &&
-                obj.optDouble(0) <= 1 &&
-                obj.optDouble(1) <= 1 &&
-                obj.optDouble(2) <= 1
+                (color.r ?: 0f) <= 1 &&
+                (color.g ?: 0f) <= 1 &&
+                (color.b ?: 0f) <= 1
         ) {
+            255f
+        } else {
+            1f
+        }
+    }
+
+    // 检查 alpha 范围是否是 [0f, 1f]，有可能是 [0f, 255f]
+    private fun checkAlphaValueRange(color: ShapeEntity.ShapeStyle.RGBAColor): Float {
+        return if (color.a <= 1f) {
             255f
         } else {
             1f
@@ -193,8 +225,9 @@ internal class SVGAVideoShapeEntity {
             val styles = Styles()
             it.fill?.let {
                 val mulValue = checkValueRange(it)
+                val alphaRangeValue = checkAlphaValueRange(it)
                 styles.fill = Color.argb(
-                        ((it.a ?: 0f) * mulValue).toInt(),
+                        ((it.a ?: 0f) * alphaRangeValue).toInt(),
                         ((it.r ?: 0f) * mulValue).toInt(),
                         ((it.g ?: 0f) * mulValue).toInt(),
                         ((it.b ?: 0f) * mulValue).toInt()
@@ -202,8 +235,9 @@ internal class SVGAVideoShapeEntity {
             }
             it.stroke?.let {
                 val mulValue = checkValueRange(it)
+                val alphaRangeValue = checkAlphaValueRange(it)
                 styles.stroke = Color.argb(
-                        ((it.a ?: 0f) * mulValue).toInt(),
+                        ((it.a ?: 0f) * alphaRangeValue).toInt(),
                         ((it.r ?: 0f) * mulValue).toInt(),
                         ((it.g ?: 0f) * mulValue).toInt(),
                         ((it.b ?: 0f) * mulValue).toInt()
@@ -231,20 +265,6 @@ internal class SVGAVideoShapeEntity {
             it.lineDashII?.let { styles.lineDash[1] = it }
             it.lineDashIII?.let { styles.lineDash[2] = it }
             this.styles = styles
-        }
-    }
-
-    // 检查色域范围是否是 0-1
-    private fun checkValueRange(color: ShapeEntity.ShapeStyle.RGBAColor): Float {
-        return if (
-                (color.a ?: 0f) <= 1 &&
-                (color.r ?: 0f) <= 1 &&
-                (color.g ?: 0f) <= 1 &&
-                (color.b ?: 0f) <= 1
-        ) {
-            255f
-        } else {
-            1f
         }
     }
 
