@@ -45,6 +45,7 @@ class SVGAVideoEntity {
     internal var soundPool: SoundPool? = null
     private var soundCallback: SVGASoundManager.SVGASoundCallBack? = null
     internal var imageMap = HashMap<String, Bitmap>()
+    private val bitmapsMap = mutableMapOf<String, Bitmap>()//图片文件路径:bitmap
     private var mCacheDir: File
     private var mFrameHeight = 0
     private var mFrameWidth = 0
@@ -146,7 +147,14 @@ class SVGAVideoEntity {
     }
 
     private fun createBitmap(filePath: String): Bitmap? {
-        return SVGABitmapFileDecoder.decodeBitmapFrom(filePath, mFrameWidth, mFrameHeight)
+        // 问题：多个imageKey对应同一张图片时，这里却创建了多个bitmap，解压Rocket.svga查看可知
+        // 这里的bitmapsMap就是为了避免重复创建相同的bitmap
+        if (bitmapsMap.containsKey(filePath)) {
+            return bitmapsMap[filePath]
+        }
+        return SVGABitmapFileDecoder.decodeBitmapFrom(filePath, mFrameWidth, mFrameHeight)?.apply {
+            bitmapsMap[filePath] = this
+        }
     }
 
     private fun parserImages(obj: MovieEntity) {
@@ -341,6 +349,7 @@ class SVGAVideoEntity {
         soundPool = null
         audioList = emptyList()
         spriteList = emptyList()
+        bitmapsMap.clear()
         imageMap.clear()
     }
 }
