@@ -225,14 +225,15 @@ class SVGAParser(context: Context?) {
                             LogUtils.info(TAG, "inflate start")
                             inflate(bytes)?.let {
                                 LogUtils.info(TAG, "inflate complete")
+                                val movieEntity = MovieEntity.ADAPTER.decode(it)
                                 val videoItem = SVGAVideoEntity(
-                                    MovieEntity.ADAPTER.decode(it),
+                                    movieEntity,
                                     File(cacheKey),
                                     mFrameWidth,
                                     mFrameHeight
                                 )
                                 LogUtils.info(TAG, "SVGAVideoEntity prepare start")
-                                videoItem.prepare({
+                                videoItem.prepare(movieEntity, {
                                     LogUtils.info(TAG, "SVGAVideoEntity prepare success")
                                     this.invokeCompleteCallback(videoItem, callback, alias)
                                 },playCallback)
@@ -307,14 +308,15 @@ class SVGAParser(context: Context?) {
                         LogUtils.info(TAG, "inflate start")
                         inflate(bytes)?.let {
                             LogUtils.info(TAG, "inflate complete")
+                            val movieEntity = MovieEntity.ADAPTER.decode(it)
                             val videoItem = SVGAVideoEntity(
-                                    MovieEntity.ADAPTER.decode(it),
+                                    movieEntity,
                                     File(cacheKey),
                                     mFrameWidth,
                                     mFrameHeight
                             )
                             LogUtils.info(TAG, "SVGAVideoEntity prepare start")
-                            videoItem.prepare({
+                            videoItem.prepare(movieEntity, {
                                 LogUtils.info(TAG, "SVGAVideoEntity prepare success")
                                 this.invokeCompleteCallback(videoItem, callback, alias)
                             },playCallback)
