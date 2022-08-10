@@ -1,1 +1,3 @@
 include ':app', ':library'
+include ':ext-glide'
+include ':ext-glide-test'

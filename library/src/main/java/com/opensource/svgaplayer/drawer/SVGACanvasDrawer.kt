@@ -22,9 +22,16 @@ internal class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVG
 
     private var beginIndexList: Array<Boolean>? = null
     private var endIndexList: Array<Boolean>? = null
+    /**
+     * 自己实现Drawable缩放 false 原样绘制
+     * 因为 SVGADrawable 没有实际大小 导致ImageView 缩放失效 因此需要兼容
+     * */
+    var scaleBySelf = true
 
     override fun drawFrame(canvas: Canvas, frameIndex: Int, scaleType: ImageView.ScaleType) {
-        super.drawFrame(canvas, frameIndex, scaleType)
+        if(scaleBySelf){
+            super.drawFrame(canvas, frameIndex, scaleType)
+        }
         playAudio(frameIndex)
         this.pathCache.onSizeChanged(canvas)
         val sprites = requestFrameSprites(frameIndex)
