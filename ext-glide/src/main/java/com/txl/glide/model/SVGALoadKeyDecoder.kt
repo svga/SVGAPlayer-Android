@@ -7,6 +7,7 @@ import com.bumptech.glide.load.Options
 import com.bumptech.glide.load.ResourceDecoder
 import com.bumptech.glide.load.engine.Resource
 import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool
+import com.opensource.svgaplayer.SVGADynamicEntity
 import com.opensource.svgaplayer.SVGASimpleParser
 import com.opensource.svgaplayer.SVGAVideoEntity
 import com.opensource.svgaplayer.drawer.SVGAAnimationDrawable
@@ -19,16 +20,20 @@ import java.io.InputStream
 import java.io.ObjectInputStream
 import java.nio.ByteBuffer
 
-class SVGALoadKeyDecoder(private val context: Context): ResourceDecoder<InputStream, SVGAAnimationDrawable> {
+class SVGALoadKeyDecoder(private val context: Context) :
+    ResourceDecoder<InputStream, SVGAAnimationDrawable> {
 
-    companion object{
-        fun init(context:Context){
+    companion object {
+        fun init(context: Context) {
             Glide.get(context).registry.append(
-                Registry.BUCKET_ANIMATION, InputStream::class.java, SVGAAnimationDrawable::class.java, SVGALoadKeyDecoder(context))
+                Registry.BUCKET_ANIMATION,
+                InputStream::class.java,
+                SVGAAnimationDrawable::class.java,
+                SVGALoadKeyDecoder(context))
         }
     }
 
-    private val  svgaSimpleParser = SVGASimpleParser()
+    private val svgaSimpleParser = SVGASimpleParser()
     override fun handles(source: InputStream, options: Options): Boolean {
         return true
     }
@@ -39,20 +44,23 @@ class SVGALoadKeyDecoder(private val context: Context): ResourceDecoder<InputStr
         height: Int,
         options: Options,
     ): Resource<SVGAAnimationDrawable>? {
-            val fis = source
-            val length = ByteArray(4)
-            fis.read(length)
-            val svgaModelSize = bytesToInt(length)
-            val svgaModelArray = ByteArray(svgaModelSize)
-            fis.read(svgaModelArray)
-            val bis = ByteArrayInputStream(svgaModelArray)
-            val ois = ObjectInputStream(bis)
-            val svgaModel = ois.readObject()
-        var svga: SVGAVideoEntity? = svgaSimpleParser.decodeFromInputStream(inputStream = source)
+        val fis = source
+        val length = ByteArray(4)
+        fis.read(length)
+        val svgaModelSize = bytesToInt(length)
+        val svgaModelArray = ByteArray(svgaModelSize)
+        fis.read(svgaModelArray)
+        val bis = ByteArrayInputStream(svgaModelArray)
+        val ois = ObjectInputStream(bis)
+        val svgaModel = ois.readObject() as SVGAModel
+        val svga: SVGAVideoEntity? = svgaSimpleParser.decodeFromInputStream(inputStream = source)
         bis.close()
         ois.close()
         svga?.let {
-            return SVGADrawableResource(SVGAAnimationDrawable(it))
+            return SVGADrawableResource(SVGAAnimationDrawable(it,
+                repeatCount = svgaModel.repeatCount,
+                repeatMode = svgaModel.repeatMode,
+                dynamicItem =  SVGADynamicEntity()))
         }
         return null
 

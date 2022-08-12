@@ -1,5 +1,6 @@
 package com.opensource.svgaplayer.drawer
 
+import android.animation.Animator
 import android.animation.ValueAnimator
 import android.graphics.Canvas
 import android.graphics.ColorFilter
@@ -13,22 +14,42 @@ import android.widget.ImageView
 import com.opensource.svgaplayer.SVGADynamicEntity
 import com.opensource.svgaplayer.SVGAVideoEntity
 
-class SVGAAnimationDrawable(private val videoItem: SVGAVideoEntity, private val dynamicItem: SVGADynamicEntity = SVGADynamicEntity()): Animatable, Drawable(),
+class SVGAAnimationDrawable(
+    private val videoItem: SVGAVideoEntity,
+    private val repeatCount:Int,
+    private val repeatMode:Int,
+    private val dynamicItem: SVGADynamicEntity): Animatable, Drawable(),
     ValueAnimator.AnimatorUpdateListener {
 
     companion object{
         const val TAG = "SVGAAnimationDrawable"
     }
+    var animatorListener: Animator.AnimatorListener? = null
+        set(value) {
+            mAnimator?.removeListener(field)
+            field = value
+            value?.let {
+                mAnimator?.addListener(it)
+            }
 
-    var loops = 0
+        }
+
     private var mAnimator: ValueAnimator? = null
     private var currentFrame = 0
+    //一共有多少帧
+    private var totalFrame = 0
 
-    private val drawer = SVGACanvasDrawer(videoItem, dynamicItem).apply {
+    private var drawer = SVGACanvasDrawer(videoItem, dynamicItem).apply {
         scaleBySelf = false
     }
 
     var scaleType = ImageView.ScaleType.MATRIX
+
+    fun resetDynamicEntity(dynamicItem: SVGADynamicEntity){
+        drawer = SVGACanvasDrawer(videoItem, dynamicItem).apply {
+            scaleBySelf = false
+        }
+    }
 
     override fun getIntrinsicWidth(): Int {
         return videoItem.videoSize.width.toInt()
@@ -43,11 +64,17 @@ class SVGAAnimationDrawable(private val videoItem: SVGAVideoEntity, private val 
         if(mAnimator == null){
             val startFrame = 0
             val endFrame = videoItem.frames - 1
+            totalFrame = (endFrame - startFrame + 1)
             mAnimator = ValueAnimator.ofInt(startFrame,endFrame)
             mAnimator?.interpolator = LinearInterpolator()
-            mAnimator?.duration = ((endFrame - startFrame + 1) * (1000 / videoItem.FPS) / generateScale()).toLong()
-            mAnimator?.repeatCount = if (loops <= 0) 99999 else loops - 1
+            mAnimator?.duration = (totalFrame * (1000 / videoItem.FPS) / generateScale()).toLong()
+            mAnimator?.repeatCount = repeatCount
+            mAnimator?.repeatMode = repeatMode
             mAnimator?.addUpdateListener(this)
+            animatorListener?.let {
+                mAnimator?.addListener(it)
+            }
+
             mAnimator?.start()
         }else{
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
@@ -117,6 +144,7 @@ class SVGAAnimationDrawable(private val videoItem: SVGAVideoEntity, private val 
 
     override fun onAnimationUpdate(animation: ValueAnimator?) {
         currentFrame = animation?.animatedValue as Int
+//        Log.d(TAG,"onAnimationUpdate currentFrame :  $currentFrame")
         invalidateSelf()
     }
 
