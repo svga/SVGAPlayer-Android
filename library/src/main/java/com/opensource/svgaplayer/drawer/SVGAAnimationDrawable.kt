@@ -14,6 +14,10 @@ import android.widget.ImageView
 import com.opensource.svgaplayer.SVGADynamicEntity
 import com.opensource.svgaplayer.SVGAVideoEntity
 
+/**
+ * 当同一个SVGA图片被加载的时候 如果此时svga动画在运行中他们会共享同样的动画效果
+ *
+ * ***/
 class SVGAAnimationDrawable(
     private val videoItem: SVGAVideoEntity,
     private val repeatCount:Int,
@@ -61,7 +65,7 @@ class SVGAAnimationDrawable(
 
     override fun start() {
         Log.d(TAG,"start")
-        if(mAnimator == null){
+        if(mAnimator == null || mAnimator?.isRunning == false){
             val startFrame = 0
             val endFrame = videoItem.frames - 1
             totalFrame = (endFrame - startFrame + 1)

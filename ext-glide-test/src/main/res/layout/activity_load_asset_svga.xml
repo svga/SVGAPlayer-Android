@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.LoadAssetSvgaActivity">
+
+    <TextView
+        android:id="@+id/tvGlideLode"
+        android:text="@string/glideLoad"
+        style="@style/NormalText"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        />
+    <ImageView
+        android:id="@+id/glideSVGAImg"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvGlideLode"
+        android:layout_marginTop="10dp"
+        android:background="?attr/colorAccent"/>
+    <TextView
+        android:id="@+id/tvSvgaLoad"
+        android:text="@string/svgaLoad"
+        style="@style/NormalText"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/glideSVGAImg"
+        />
+
+    <com.opensource.svgaplayer.SVGAImageView
+        android:id="@+id/SVGAImageView"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvSvgaLoad"
+        android:layout_marginTop="10dp"
+        android:background="?attr/colorAccent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

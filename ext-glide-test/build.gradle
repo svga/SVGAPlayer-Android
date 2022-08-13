@@ -2,7 +2,7 @@ plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
 }
-
+apply plugin: 'kotlin-android-extensions'
 android {
     compileSdkVersion 31
 

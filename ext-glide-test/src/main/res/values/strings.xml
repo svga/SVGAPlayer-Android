@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">ext-glide-test</string>
+    <string name="asset_svga">加载Asset下的svga图片</string>
+    <string name="netsvga">加载网络下的svga图片</string>
+    <string name="glideLoad">Glide加载</string>
+    <string name="svgaLoad">SVGA加载</string>
 </resources>
