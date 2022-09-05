@@ -1,8 +1,11 @@
 package com.txl.glide.model
 
 import android.animation.ValueAnimator
+import android.net.Uri
 import com.opensource.svgaplayer.SVGADynamicEntity
 import java.io.Serializable
+import java.lang.IllegalArgumentException
+import java.lang.RuntimeException
 
 
 /**
@@ -22,6 +25,24 @@ open class SVGAModel(
     val repeatMode: Int = ValueAnimator.RESTART,
     val markCacheKey:String = ""
 ) : ISVGAModel, Serializable {
+
+    init {
+        checkSafe()
+    }
+
+    private fun checkSafe(){
+        val result = when(typeClass){
+            SVGALoadType.String->{
+                path is String
+            }
+            SVGALoadType.Uri->{
+                path is Uri
+            }
+        }
+        if(!result){
+            throw IllegalArgumentException("path typeClass not match please check")
+        }
+    }
 
     override fun hashCode(): Int {
         var result = path.hashCode()

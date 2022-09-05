@@ -12,6 +12,7 @@ import android.util.Log
 import android.view.animation.LinearInterpolator
 import android.widget.ImageView
 import com.opensource.svgaplayer.SVGADynamicEntity
+import com.opensource.svgaplayer.SVGASoundManager
 import com.opensource.svgaplayer.SVGAVideoEntity
 
 /**
@@ -119,6 +120,15 @@ class SVGAAnimationDrawable(
         }else{
             mAnimator?.cancel()
             mAnimator = null
+        }
+        videoItem.audioList.forEach { audio ->
+            audio.playID?.let {
+                if (SVGASoundManager.isInit()){
+                    SVGASoundManager.stop(it)
+                }else{
+                    videoItem.soundPool?.stop(it)
+                }
+            }
         }
     }
 

@@ -61,5 +61,14 @@ class SvgaDemoActivity : AppCompatActivity() {
         findViewById<View>(R.id.tvAddListenerDemo).setOnClickListener {
             startActivity(Intent(this,AddListenerActivity::class.java))
         }
+        findViewById<View>(R.id.tvNormalGlide).setOnClickListener {
+            startActivity(Intent(this,NormalGlideLoadActivity::class.java))
+        }
+        findViewById<View>(R.id.tvPlayAudio).setOnClickListener {
+            startActivity(Intent(this,LoadAudioSvgaActivity::class.java))
+        }
+        findViewById<View>(R.id.tvCompareMemory).setOnClickListener {
+            startActivity(Intent(this,LoadSvgaCompareMemoryActivity::class.java))
+        }
     }
 }

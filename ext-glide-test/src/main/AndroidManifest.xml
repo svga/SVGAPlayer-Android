@@ -23,6 +23,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SVGAPlayerAndroid">
         <activity
+            android:name=".ui.NormalGlideLoadActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.ChangeRepeatCountActivity"
             android:exported="false" />
         <activity
@@ -48,6 +51,8 @@
         </activity>
         <activity android:name=".ui.AddListenerActivity" />
         <activity android:name=".ui.ChangeRepeatModeActivity" />
+        <activity android:name=".ui.LoadAudioSvgaActivity" />
+        <activity android:name=".ui.LoadSvgaCompareMemoryActivity" />
     </application>
 
 </manifest>

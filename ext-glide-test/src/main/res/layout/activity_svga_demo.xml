@@ -49,6 +49,21 @@
                 android:text="添加动画监听"
                 style="@style/NormalText"
                 />
+            <TextView
+                android:id="@+id/tvNormalGlide"
+                android:text="正常加载Glide图片"
+                style="@style/NormalText"
+                />
+            <TextView
+                android:id="@+id/tvPlayAudio"
+                android:text="播放带音频的svga"
+                style="@style/NormalText"
+                />
+            <TextView
+                android:id="@+id/tvCompareMemory"
+                android:text="同一个SVGA 文件内存占用对比"
+                style="@style/NormalText"
+                />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 

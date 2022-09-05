@@ -8,17 +8,28 @@ import java.io.InputStream
 import java.util.zip.Inflater
 
 class SVGASimpleParser {
-    fun decodeFromInputStream(inputStream: InputStream, closeInputStream: Boolean = false):SVGAVideoEntity?{
-        var videoItem:SVGAVideoEntity? = null
-        readAsBytes(inputStream)?.let { bytes->
+    fun decodeFromInputStream(
+        inputStream: InputStream,
+        audioPath: String,
+        frameWidth: Int,
+        frameHeight: Int,
+        closeInputStream: Boolean = false
+    ): SVGAVideoEntity? {
+        val file = File(audioPath)
+        if(!file.exists()){
+            file.takeIf { !it.exists() }?.mkdirs()
+        }
+        var videoItem: SVGAVideoEntity? = null
+        readAsBytes(inputStream)?.let { bytes ->
             inflate(bytes).let {
                 videoItem = SVGAVideoEntity(
                     MovieEntity.ADAPTER.decode(it),
-                    File(""),
-                    0,
-                    0
+                    //这个直接这样给应该不行？
+                    File(audioPath),
+                    frameWidth,
+                    frameHeight
                 )
-                videoItem?.prepare({},null)
+                videoItem?.prepare({}, null)
             }
         }
         return videoItem

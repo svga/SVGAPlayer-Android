@@ -1,14 +1,18 @@
 package com.txl.glide.model
 
 import android.content.Context
+import android.net.Uri
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.Encoder
 import com.bumptech.glide.load.Options
 import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool
+import com.opensource.svgaplayer.SVGACache
+import com.opensource.svgaplayer.SVGAParser
 import com.txl.glide.SVGALoadKey
 import java.io.*
+import java.net.URL
 
-class SVGALoadKeyEncoder( context: Context) : Encoder<SVGALoadKey> {
+class SVGALoadKeyEncoder(private val context: Context) : Encoder<SVGALoadKey> {
 
     companion object {
         fun init(context: Context) {
@@ -38,6 +42,13 @@ class SVGALoadKeyEncoder( context: Context) : Encoder<SVGALoadKey> {
 
     private val byteArrayPool: ArrayPool = Glide.get(context).arrayPool
 
+    /**
+     * 存储 SVGA 数据
+     * 1. 先存储 svgaModel 占用 字节长度 在存储SVGAModel 对象
+     * 2. 存储音频文件路径占用字节长度 在储存 文件缓存路径
+     * 3. 储存svga 文件流
+     *
+     * */
     override fun encode(svgaLoadKey: SVGALoadKey, file: File, options: Options): Boolean {
         val data = svgaLoadKey.inputStream ?: return false
         val buffer = byteArrayPool.get(ArrayPool.STANDARD_BUFFER_SIZE_BYTES,
@@ -56,6 +67,23 @@ class SVGALoadKeyEncoder( context: Context) : Encoder<SVGALoadKey> {
             //记录svgaLoadKey.svgaModel 的数组长度
             os.write(intToBytes(byteArray.size))
             os.write(byteArray)
+            val cacheKey = when (svgaLoadKey.svgaModel.path) {
+                is String -> {
+                    SVGACache.buildCacheKey(svgaLoadKey.svgaModel.path)
+                }
+                is Uri -> {
+                    SVGACache.buildCacheKey(svgaLoadKey.svgaModel.path.toString())
+                }
+                else -> {
+                    svgaLoadKey.svgaModel.path.toString()
+                }
+            }
+//            val audioPath = context.cacheDir.absolutePath+File.separator+cacheKey+File.separator+"audio"+File.separator
+            val audioPath = cacheKey
+            val audioPathArray = audioPath.toByteArray()
+            os.write(intToBytes(audioPathArray.size))
+            os.write(audioPathArray)
+
             while (data.read(buffer).also { read = it } != -1) {
                 os.write(buffer, 0, read)
             }

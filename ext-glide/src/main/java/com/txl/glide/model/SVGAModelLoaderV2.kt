@@ -11,6 +11,7 @@ import com.bumptech.glide.load.model.ModelLoader
 import com.bumptech.glide.load.model.ModelLoader.LoadData
 import com.bumptech.glide.load.model.ModelLoaderFactory
 import com.bumptech.glide.load.model.MultiModelLoaderFactory
+import com.bumptech.glide.signature.ObjectKey
 import com.txl.glide.SVGALoadKey
 import com.txl.glide.model.fetcher.SVGAFetcher
 import java.io.InputStream
@@ -55,8 +56,7 @@ class MultiSVGAModelLoaderV2 constructor(
         return if(loadData == null){
             null
         }else{
-            LoadData(loadData.sourceKey,
-                loadData.alternateKeys,
+            LoadData(ObjectKey(model),
                 SVGAFetcher(model, loadData))
         }
     }

@@ -38,6 +38,7 @@ internal class SVGAFetcher(
     }
 
     override fun getDataSource(): DataSource {
-        return loadData.fetcher.dataSource
+//        return loadData.fetcher.dataSource
+        return DataSource.REMOTE
     }
 }
