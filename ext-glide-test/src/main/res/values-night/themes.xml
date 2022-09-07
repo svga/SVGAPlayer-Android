@@ -6,5 +6,6 @@
         <item name="colorPrimaryDark">@color/purple_700</item>
         <item name="colorAccent">@color/teal_200</item>
         <!-- Customize your theme here. -->
+        <item name="textBackGround">@color/teal_200</item>
     </style>
 </resources>

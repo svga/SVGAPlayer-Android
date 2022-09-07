@@ -20,8 +20,8 @@ class LoadSvgaCompareMemoryActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_load_svga_compare_memory)
-//        loadBySvgaLib()
-        Glide.with(this).load(SVGAModel(imageString, repeatCount = 0)).into(glideSVGAImg)
+        loadBySvgaLib()
+//        Glide.with(this).load(SVGAModel(imageString, repeatCount = 0)).into(glideSVGAImg)
     }
 
     /**

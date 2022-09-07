@@ -115,18 +115,15 @@ class SVGAAnimationDrawable(
 
     override fun stop() {
         Log.d(TAG,"stop")
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            mAnimator?.pause()
-        }else{
-            mAnimator?.cancel()
-            mAnimator = null
-        }
+        mAnimator?.cancel()
+        mAnimator = null
+
         videoItem.audioList.forEach { audio ->
             audio.playID?.let {
                 if (SVGASoundManager.isInit()){
-                    SVGASoundManager.stop(it)
+                    SVGASoundManager.pause(it)
                 }else{
-                    videoItem.soundPool?.stop(it)
+                    videoItem.soundPool?.pause(it)
                 }
             }
         }
@@ -164,6 +161,20 @@ class SVGAAnimationDrawable(
 
     // FIXME: 完成资源回收
     fun recycle(){
+        clear()
+    }
 
+    private fun clear() {
+        videoItem.audioList.forEach { audio ->
+            audio.playID?.let {
+                if (SVGASoundManager.isInit()){
+                    SVGASoundManager.stop(it)
+                }else{
+                    videoItem.soundPool?.stop(it)
+                }
+            }
+            audio.playID = null
+        }
+        videoItem.clear()
     }
 }

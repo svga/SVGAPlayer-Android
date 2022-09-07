@@ -27,6 +27,11 @@ class ReplaceResourceActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_replace_resource)
+        glideLoad()
+        loadBySvgaLib()
+    }
+
+    private fun glideLoad() {
         val dynamicEntity = SVGADynamicEntity()
         val textPaint = TextPaint()
         textPaint.color = Color.WHITE //字体颜色
@@ -35,10 +40,12 @@ class ReplaceResourceActivity : AppCompatActivity() {
 
         textPaint.setShadowLayer(3f, 2f, 2f, -0x1000000) //字体阴影，不需要可以不用设置
 
-        dynamicEntity.setDynamicText("30",
+        dynamicEntity.setDynamicText(
+            "30",
             textPaint,
-            "text_day")
-        Glide.with(this).load(imageString).addListener(object :RequestListener<Drawable>{
+            "text_day"
+        )
+        Glide.with(this).load(imageString).addListener(object : RequestListener<Drawable> {
             override fun onLoadFailed(
                 e: GlideException?,
                 model: Any?,
@@ -55,13 +62,12 @@ class ReplaceResourceActivity : AppCompatActivity() {
                 dataSource: DataSource?,
                 isFirstResource: Boolean,
             ): Boolean {
-                if(resource is SVGAAnimationDrawable){
+                if (resource is SVGAAnimationDrawable) {
                     resource.resetDynamicEntity(dynamicEntity)
                 }
-               return false
+                return false
             }
         }).into(glideSVGAImg)
-        loadBySvgaLib()
     }
 
     /**
