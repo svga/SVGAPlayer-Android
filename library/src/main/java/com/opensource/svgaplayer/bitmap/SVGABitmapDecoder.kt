@@ -31,5 +31,14 @@ internal abstract class SVGABitmapDecoder<T> {
         }
     }
 
+    fun decodeBitmapFrom(data: T, sampleSize:Int): Bitmap? = BitmapFactory.Options().run {
+        // 如果期望的宽高是合法的, 则开启检测尺寸模式
+        inPreferredConfig = Bitmap.Config.RGB_565
+        inJustDecodeBounds = false
+        // Calculate inSampleSize
+        inSampleSize = sampleSize
+        return onDecode(data, this)
+    }
+
     abstract fun onDecode(data: T, ops: BitmapFactory.Options): Bitmap?
 }
