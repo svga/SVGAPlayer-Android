@@ -484,6 +484,8 @@ internal class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVG
         private val shareMattePaint = Paint()
         private var shareMatteCanvas: Canvas? = null
         private var sharedMatteBitmap: Bitmap? = null
+        private var lastSharedWidth = 0
+        private var lastSharedHeight = 0
 
         fun sharedPaint(): Paint {
             sharedPaint.reset()
@@ -520,14 +522,16 @@ internal class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVG
         }
 
         fun shareMatteCanvas(width: Int, height: Int): Canvas {
-            if (shareMatteCanvas == null) {
+            //避免每帧都重建bitmap和canvas
+            if (shareMatteCanvas == null || width != lastSharedWidth || height != lastSharedHeight) {
                 sharedMatteBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ALPHA_8)
-//                shareMatteCanvas = Canvas(sharedMatteBitmap)
+                shareMatteCanvas = Canvas(sharedMatteBitmap!!)
+                lastSharedWidth = width
+                lastSharedHeight = height
+            } else {
+                shareMatteCanvas!!.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
             }
-//            val matteCanvas = shareMatteCanvas as Canvas
-//            matteCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
-//            return matteCanvas
-            return Canvas(sharedMatteBitmap)
+            return shareMatteCanvas!!
         }
     }
 
