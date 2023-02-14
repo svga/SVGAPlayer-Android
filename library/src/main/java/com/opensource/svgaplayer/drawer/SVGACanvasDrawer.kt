@@ -8,6 +8,7 @@ import android.widget.ImageView
 import com.opensource.svgaplayer.SVGADynamicEntity
 import com.opensource.svgaplayer.SVGASoundManager
 import com.opensource.svgaplayer.SVGAVideoEntity
+import com.opensource.svgaplayer.entities.SVGAAudioEntity
 import com.opensource.svgaplayer.entities.SVGAVideoShapeEntity
 
 /**
@@ -159,12 +160,14 @@ internal class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVG
             if (audio.startFrame == frameIndex) {
                 if (SVGASoundManager.isInit()) {
                     audio.soundID?.let { soundID ->
-                        audio.playID = SVGASoundManager.play(soundID)
+                        val playID = SVGASoundManager.play(soundID)
+                        setPlayId(audio,playID)
                     }
                 } else {
                     this.videoItem.soundPool?.let { soundPool ->
                         audio.soundID?.let { soundID ->
-                            audio.playID = soundPool.play(soundID, 1.0f, 1.0f, 1, 0, 1.0f)
+                            val playID = soundPool.play(soundID, 1.0f, 1.0f, 1, 0, 1.0f)
+                            setPlayId(audio,playID)
                         }
                     }
                 }
@@ -556,4 +559,10 @@ internal class SVGACanvasDrawer(videoItem: SVGAVideoEntity, val dynamicItem: SVG
 
     }
 
+    private fun setPlayId(audio: SVGAAudioEntity, playID: Int) {
+        audio.playID?.let {
+            SVGASoundManager.stop(audio.playID!!)
+        }
+        audio.playID = playID
+    }
 }
