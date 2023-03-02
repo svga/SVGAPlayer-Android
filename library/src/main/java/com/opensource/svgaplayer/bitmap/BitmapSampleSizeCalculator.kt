@@ -8,9 +8,19 @@ import android.graphics.BitmapFactory
  */
 internal object BitmapSampleSizeCalculator {
 
+    /**
+     * 根据BitmapFactory.Options 与期望宽高计算采样率
+     * */
     fun calculate(options: BitmapFactory.Options, reqWidth: Int, reqHeight: Int): Int {
         // Raw height and width of image
         val (height: Int, width: Int) = options.run { outHeight to outWidth }
+        return calculate(height, width, reqWidth, reqHeight)
+    }
+
+    /**
+     * 根据预期显示的宽高 与实际宽高计算采样率
+     * */
+    fun calculate(height: Int, width: Int, reqWidth: Int, reqHeight: Int): Int {
         var inSampleSize = 1
 
         if (reqHeight <= 0 || reqWidth <= 0) {

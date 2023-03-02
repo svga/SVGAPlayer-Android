@@ -5,6 +5,7 @@ import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.SoundPool
 import android.os.Build
+import com.opensource.svgaplayer.bitmap.BitmapSampleSizeCalculator
 import com.opensource.svgaplayer.bitmap.SVGABitmapByteArrayDecoder
 import com.opensource.svgaplayer.bitmap.SVGABitmapFileDecoder
 import com.opensource.svgaplayer.entities.SVGAAudioEntity
@@ -48,6 +49,10 @@ class SVGAVideoEntity {
     private var mCacheDir: File
     private var mFrameHeight = 0
     private var mFrameWidth = 0
+    /**
+     * 图片采样率
+     * */
+    private var imageSampleSize = 1
     private var mPlayCallback: SVGAParser.PlayCallback?=null
     private lateinit var mCallback: () -> Unit
 
@@ -60,6 +65,7 @@ class SVGAVideoEntity {
         val movieJsonObject = json.optJSONObject("movie") ?: return
         setupByJson(movieJsonObject)
         try {
+            imageSampleSize = BitmapSampleSizeCalculator.calculate(videoSize.height.toInt(),videoSize.width.toInt(),mFrameWidth,mFrameHeight)
             parserImages(json)
         } catch (e: Exception) {
             e.printStackTrace()
@@ -88,6 +94,7 @@ class SVGAVideoEntity {
         this.movieItem = entity
         entity.params?.let(this::setupByMovie)
         try {
+            imageSampleSize = BitmapSampleSizeCalculator.calculate(videoSize.height.toInt(),videoSize.width.toInt(),mFrameWidth,mFrameHeight)
             parserImages(entity)
         } catch (e: Exception) {
             e.printStackTrace()
@@ -146,7 +153,7 @@ class SVGAVideoEntity {
     }
 
     private fun createBitmap(filePath: String): Bitmap? {
-        return SVGABitmapFileDecoder.decodeBitmapFrom(filePath, mFrameWidth, mFrameHeight)
+        return SVGABitmapFileDecoder.decodeBitmapFrom(filePath, imageSampleSize)
     }
 
     private fun parserImages(obj: MovieEntity) {
@@ -167,7 +174,7 @@ class SVGAVideoEntity {
     }
 
     private fun createBitmap(byteArray: ByteArray, filePath: String): Bitmap? {
-        val bitmap = SVGABitmapByteArrayDecoder.decodeBitmapFrom(byteArray, mFrameWidth, mFrameHeight)
+        val bitmap = SVGABitmapByteArrayDecoder.decodeBitmapFrom(byteArray, imageSampleSize)
         return bitmap ?: createBitmap(filePath)
     }
 
@@ -232,10 +239,10 @@ class SVGAVideoEntity {
                 val offset = ((startTime / totalTime) * length).toLong()
                 if (SVGASoundManager.isInit()) {
                     item.soundID = SVGASoundManager.load(soundCallback,
-                            it.fd,
-                            offset,
-                            length.toLong(),
-                            1)
+                        it.fd,
+                        offset,
+                        length.toLong(),
+                        1)
                 } else {
                     item.soundID = soundPool?.load(it.fd, offset, length.toLong(), 1)
                 }
@@ -257,10 +264,10 @@ class SVGAVideoEntity {
             audiosDataMap.forEach {
                 val audioCache = SVGACache.buildAudioFile(it.key)
                 audiosFileMap[it.key] =
-                        audioCache.takeIf { file -> file.exists() } ?: generateAudioFile(
-                                audioCache,
-                                it.value
-                        )
+                    audioCache.takeIf { file -> file.exists() } ?: generateAudioFile(
+                        audioCache,
+                        it.value
+                    )
             }
         }
         return audiosFileMap
@@ -316,11 +323,11 @@ class SVGAVideoEntity {
         return try {
             if (Build.VERSION.SDK_INT >= 21) {
                 val attributes = AudioAttributes.Builder()
-                        .setUsage(AudioAttributes.USAGE_MEDIA)
-                        .build()
+                    .setUsage(AudioAttributes.USAGE_MEDIA)
+                    .build()
                 SoundPool.Builder().setAudioAttributes(attributes)
-                        .setMaxStreams(12.coerceAtMost(entity.audios.count()))
-                        .build()
+                    .setMaxStreams(12.coerceAtMost(entity.audios.count()))
+                    .build()
             } else {
                 SoundPool(12.coerceAtMost(entity.audios.count()), AudioManager.STREAM_MUSIC, 0)
             }
